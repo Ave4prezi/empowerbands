@@ -3,7 +3,6 @@ from flask import request
 @app.route("/<band_id>")
 def profile(band_id):
     band_id = band_id.strip().upper()
-
     alert_mode = request.args.get("alert") == "yes"
 
     with open(file_name, mode="r", encoding="utf-8") as file:
@@ -31,100 +30,106 @@ def profile(band_id):
                     <title>EmpowerBands Profile</title>
 
                     <style>
-                        body {{
-                            margin: 0;
-                            font-family: Arial, sans-serif;
-                            background: linear-gradient(to bottom, #eaf3ff, #ffffff);
-                        }}
-
-                        .card {
-    max-width: 420px;
-    margin: 20px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+                       body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f8ff;
 }
-                        }}
+
+.card {
+    max-width: 380px;
+    margin: 10px auto;
+    background: white;
+    padding: 14px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
 .logo {
     text-align: center;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .logo img {
-    width: 110px;
-    height: auto;
+    width: 90px;
     display: block;
     margin: 0 auto;
 }
-                        .name {{
-                            text-align: center;
-                            font-size: 28px;
-                            font-weight: bold;
-                            margin-top: 5px
-                        }}
 
-                        .sub {{
-                            text-align: center;
-                            color: #0a58ca;
-                            margin-top: 4px;
-                        }}
+.name {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 4px 0 0 0;
+}
 
-                        .alert-banner {{
-                            margin-top: 15px;
-                            background: red;
-                            color: white;
-                            padding: 15px;
-                            border-radius: 12px;
-                            text-align: center;
-                            font-weight: bold;
-                            font-size: 16px;
-                            animation: flash 1s infinite;
-                        }}
+.sub {
+    text-align: center;
+    color: #0a58ca;
+    margin: 2px 0 8px 0;
+    font-size: 13px;
+}
 
-                        @keyframes flash {{
-                            0% {{opacity: 1;}}
-                            50% {{opacity: 0.4;}}
-                            100% {{opacity: 1;}}
-                        }}
+.alert-banner {
+    margin: 8px 0;
+    background: #d62828;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+}
 
-                        .alert {{
-                            margin-top: 20px;
-                            background: #e0edff;
-                            border-left: 6px solid #0a58ca;
-                            padding: 14px;
-                            border-radius: 12px;
-                            font-size: 18px;
-                            font-weight: bold;
-                        }}
+.alert {
+    margin: 8px 0;
+    background: #e0edff;
+    border-left: 4px solid #0a58ca;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 15px;
+}
 
-                        .section {{
-                            margin-top: 22px;
-                        }}
+.section {
+    margin-top: 10px;
+}
 
-                        .title {{
-                            font-size: 13px;
-                            font-weight: bold;
-                            color: #444;
-                        }}
+.title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #444;
+}
 
-                        .text {{
-                            font-size: 18px;
-                            margin-top: 5px;
-                        }}
+.text {
+    font-size: 15px;
+    margin-top: 2px;
+    line-height: 1.3;
+}
 
-                        .call {{
-                            display: block;
-                            margin-top: 24px;
-                            background: #0a58ca;
-                            color: white;
-                            text-align: center;
-                            padding: 17px;
-                            border-radius: 14px;
-                            text-decoration: none;
-                            font-size: 20px;
-                            font-weight: bold;
-                        }}
+.call {
+    display: block;
+    margin-top: 12px;
+    background: #0a58ca;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.gps {
+    display: block;
+    margin-top: 8px;
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 100%;
+    border: none;
+}
                     </style>
                 </head>
 
@@ -150,12 +155,29 @@ def profile(band_id):
 
                     <a class="call" href="tel:{row[3]}">📞 CALL NOW</a>
 
+                    <button class="gps" onclick="shareLocation()">📍 Share My Location</button>
+
                     <div class="section">
                         <div class="title">MEDICAL NOTES</div>
                         <div class="text">{row[7]}</div>
                     </div>
 
                 </div>
+
+                <script>
+                function shareLocation() {{
+                    if (navigator.geolocation) {{
+                        navigator.geolocation.getCurrentPosition(function(position) {{
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            const link = "https://maps.google.com/?q=" + lat + "," + lon;
+                            window.open(link, "_blank");
+                        }});
+                    }} else {{
+                        alert("Location not supported");
+                    }}
+                }}
+                </script>
 
                 </body>
                 </html>
