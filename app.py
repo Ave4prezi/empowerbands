@@ -34,23 +34,114 @@ if not os.path.exists(file_name):
         ])
 
 # ===============================
-# HOME PAGE
+# HOME PAGE (BLUE THEME)
 # ===============================
 @app.route("/")
 def home():
     return """
-    <h1>EmpowerBands</h1>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>EmpowerBands</title>
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: #f4f8ff;
+                color: #111;
+            }
+            .hero {
+                max-width: 520px;
+                margin: auto;
+                padding: 42px 22px;
+                text-align: center;
+            }
+            .badge {
+                display: inline-block;
+                background: #e0edff;
+                color: #0a58ca;
+                padding: 8px 12px;
+                border-radius: 999px;
+                font-weight: bold;
+                font-size: 13px;
+                margin-bottom: 18px;
+            }
+            h1 {
+                font-size: 36px;
+                margin: 10px 0;
+                color: #0a58ca;
+            }
+            .lead {
+                font-size: 19px;
+                line-height: 1.45;
+                color: #444;
+            }
+            .btn {
+                display: block;
+                margin: 14px auto;
+                padding: 16px;
+                background: #0a58ca;
+                color: white;
+                text-decoration: none;
+                border-radius: 14px;
+                font-size: 18px;
+                font-weight: bold;
+                max-width: 360px;
+            }
+            .btn.secondary {
+                background: #111;
+            }
+            .card {
+                background: white;
+                border-radius: 18px;
+                padding: 20px;
+                margin-top: 26px;
+                text-align: left;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            }
+            .item {
+                margin: 14px 0;
+                font-size: 16px;
+                line-height: 1.4;
+            }
+            .footer {
+                margin-top: 26px;
+                font-size: 13px;
+                color: #666;
+            }
+        </style>
+    </head>
 
-    <p>Smart wearable emergency communication system.</p>
+    <body>
+        <div class="hero">
+            <div class="badge">Emergency Support Wearable</div>
 
-    <p>
-    Tap a band to instantly view a person's emergency profile,
-    instructions, and contact their caregiver in seconds.
-    </p>
+            <h1>EmpowerBands</h1>
 
-    <p><a href="/EB001">View Demo</a></p>
-    <p><a href="/admin">Admin Login</a></p>
+            <p class="lead">
+                Smart wearable bands that help children with visible and invisible disabilities,
+                and elderly individuals with dementia or Alzheimer’s communicate in emergencies.
+            </p>
+
+            <a class="btn" href="/EB001">View Live Demo</a>
+            <a class="btn secondary" href="/admin">Admin Login</a>
+
+            <div class="card">
+                <div class="item">🔵 Tap the band with a phone</div>
+                <div class="item">🔵 Instantly view the person’s support profile</div>
+                <div class="item">🔵 See what to do in an emergency</div>
+                <div class="item">🔵 Call the caregiver with one tap</div>
+            </div>
+
+            <div class="footer">
+                Built for families, caregivers, schools, and support organizations.
+            </div>
+        </div>
+    </body>
+    </html>
     """
+
 # ===============================
 # ADMIN LOGIN
 # ===============================
