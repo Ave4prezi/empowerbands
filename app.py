@@ -1,151 +1,56 @@
-from flask import Flask
-import csv
-import os
-
-app = Flask(__name__)
-
-import os
-file_name = os.path.join(os.getcwd(), "customers.csv")
-
-# ===============================
-# CREATE CSV IF IT DOESN'T EXIST
-# ===============================
-if not os.path.exists(file_name):
-    with open(file_name, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([
-            "BandID", "Name", "Email", "Phone",
-            "AgeGroup", "Condition", "Instructions", "MedicalNotes"
-        ])
-        writer.writerow([
-            "EB001", "Jordan", "parent@email.com", "2565551234",
-            "Child", "Autism – Nonverbal",
-            "Please stay calm. I may not respond verbally, but I understand you. Call my emergency contact immediately.",
-            "No allergies"
-        ])
-
-# ===============================
-# HOME ROUTE
-# ===============================
 @app.route('/')
 def home():
-    return "EmpowerBands Server Running"
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EmpowerBands</title>
+    <style>
+    body {
+        margin:0;
+        font-family: Arial;
+        background:#f2f2f2;
+        text-align:center;
+    }
+    .container {
+        max-width:500px;
+        margin:auto;
+        padding:40px 20px;
+    }
+    h1 {
+        font-size:28px;
+    }
+    p {
+        font-size:18px;
+        color:#555;
+    }
+    .btn {
+        display:block;
+        margin:20px auto;
+        padding:15px;
+        background:red;
+        color:white;
+        text-decoration:none;
+        border-radius:10px;
+        font-size:18px;
+        width:80%;
+    }
+    </style>
+    </head>
 
-# ===============================
-# PROFILE PAGE (MAIN FEATURE)
-# ===============================
-@app.route('/<band_id>')
-def profile(band_id):
-    with open(file_name, mode='r') as file:
-        reader = csv.reader(file)
-        next(reader)
+    <body>
+    <div class="container">
 
-        for row in reader:
-            if row and row[0] == band_id:
+    <h1>EmpowerBands</h1>
 
-                return f"""
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>EmpowerBands</title>
-                <style>
-                body {{
-                    margin:0;
-                    font-family:-apple-system, Arial;
-                    background:#f2f2f2;
-                }}
-                .card {{
-                    max-width:420px;
-                    margin:auto;
-                    background:white;
-                    padding:24px;
-                    min-height:100vh;
-                }}
-                .brand {{
-                    text-align:center;
-                    font-size:14px;
-                    color:#666;
-                    margin-bottom:15px;
-                    font-weight:bold;
-                }}
-                .name {{
-                    text-align:center;
-                    font-size:28px;
-                    font-weight:bold;
-                }}
-                .sub {{
-                    text-align:center;
-                    color:#777;
-                    margin-top:5px;
-                }}
-                .alert {{
-                    margin-top:20px;
-                    background:#ffe5e5;
-                    border-left:5px solid red;
-                    padding:14px;
-                    border-radius:10px;
-                    font-size:18px;
-                    font-weight:bold;
-                }}
-                .section {{
-                    margin-top:20px;
-                }}
-                .title {{
-                    font-size:13px;
-                    font-weight:bold;
-                    color:#444;
-                }}
-                .text {{
-                    font-size:18px;
-                    margin-top:5px;
-                }}
-                .call {{
-                    display:block;
-                    margin-top:25px;
-                    background:red;
-                    color:white;
-                    text-align:center;
-                    padding:16px;
-                    border-radius:12px;
-                    text-decoration:none;
-                    font-size:20px;
-                    font-weight:bold;
-                }}
-                </style>
-                </head>
+    <p>Smart wearable bands that help children with disabilities and elderly individuals communicate in emergencies.</p>
 
-                <body>
-                <div class="card">
+    <a class="btn" href="/EB001">View Demo</a>
 
-                <div class="brand">EMPOWERBANDS</div>
+    <a class="btn" href="/add">Add a Person</a>
 
-                <div class="name">{row[1]}</div>
-                <div class="sub">{row[4]} • ID: {row[0]}</div>
-
-                <div class="alert">⚠️ {row[5]}</div>
-
-                <div class="section">
-                    <div class="title">WHAT TO DO</div>
-                    <div class="text">{row[6]}</div>
-                </div>
-
-                <a class="call" href="tel:{row[3]}">📞 CALL NOW</a>
-
-                <div class="section">
-                    <div class="title">MEDICAL NOTES</div>
-                    <div class="text">{row[7]}</div>
-                </div>
-
-                </div>
-                </body>
-                </html>
-                """
-
-    return "<h1>Band Not Found</h1>"
-
-# ===============================
-# RUN SERVER
-# ===============================
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    </div>
+    </body>
+    </html>
+    """
