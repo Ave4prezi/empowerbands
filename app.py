@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, session
 from twilio.rest import Client
 import csv
 import os
+import time
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
@@ -16,6 +17,8 @@ TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 
 LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 
+last_alert_sent = {}
+
 
 def send_alert_text(name, phone, band_id):
     if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
@@ -28,7 +31,7 @@ def send_alert_text(name, phone, band_id):
         message_body = (
             f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
             f"They may be lost or unable to communicate. "
-            f"View profile: {BASE_URL}/{band_id}?alert=yes"
+            f"Profile: {BASE_URL}/{band_id}?alert=yes"
         )
 
         client.messages.create(
@@ -53,18 +56,116 @@ if not os.path.exists(file_name):
         writer.writerow([
             "EB001", "Jordan", "parent@email.com", "+12565551234",
             "Child", "Autism – Nonverbal",
-            "Please stay calm. I may not respond verbally.",
-            "Call emergency contact immediately."
+            "Please stay calm. I may not respond verbally. Call emergency contact immediately.",
+            "No allergies"
         ])
 
 
 @app.route("/")
 def home():
     return """
-    <h1>EmpowerBands</h1>
-    <p><a href="/EB001">Live Demo</a></p>
-    <p><a href="/EB001?alert=yes">Alert Mode Demo</a></p>
-    <p><a href="/admin">Admin Login</a></p>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>EmpowerBands</title>
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background: #f4f8ff;
+                color: #111;
+            }
+            .hero {
+                max-width: 520px;
+                margin: auto;
+                padding: 42px 22px;
+                text-align: center;
+            }
+            .badge {
+                display: inline-block;
+                background: #e0edff;
+                color: #0a58ca;
+                padding: 8px 12px;
+                border-radius: 999px;
+                font-weight: bold;
+                font-size: 13px;
+                margin-bottom: 18px;
+            }
+            h1 {
+                font-size: 36px;
+                margin: 10px 0;
+                color: #0a58ca;
+            }
+            .lead {
+                font-size: 19px;
+                line-height: 1.45;
+                color: #444;
+            }
+            .btn {
+                display: block;
+                margin: 14px auto;
+                padding: 16px;
+                background: #0a58ca;
+                color: white;
+                text-decoration: none;
+                border-radius: 14px;
+                font-size: 18px;
+                font-weight: bold;
+                max-width: 360px;
+            }
+            .btn.secondary {
+                background: #111;
+            }
+            .card {
+                background: white;
+                border-radius: 18px;
+                padding: 20px;
+                margin-top: 26px;
+                text-align: left;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            }
+            .item {
+                margin: 14px 0;
+                font-size: 16px;
+                line-height: 1.4;
+            }
+            .footer {
+                margin-top: 26px;
+                font-size: 13px;
+                color: #666;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="hero">
+            <div class="badge">Emergency Support Wearable</div>
+
+            <h1>EmpowerBands</h1>
+
+            <p class="lead">
+                Smart wearable bands that help children with visible and invisible disabilities,
+                and elderly individuals with dementia or Alzheimer’s communicate in emergencies.
+            </p>
+
+            <a class="btn" href="/EB001">View Live Demo</a>
+            <a class="btn" href="/EB001?alert=yes">Alert Mode Demo</a>
+            <a class="btn secondary" href="/admin">Admin Login</a>
+
+            <div class="card">
+                <div class="item">🔵 Tap the band with a phone</div>
+                <div class="item">🔵 Instantly view the person’s support profile</div>
+                <div class="item">🔵 Activate emergency alert when needed</div>
+                <div class="item">🔵 Call the caregiver with one tap</div>
+            </div>
+
+            <div class="footer">
+                Built for families, caregivers, schools, and support organizations.
+            </div>
+        </div>
+    </body>
+    </html>
     """
 
 
@@ -111,7 +212,7 @@ def add():
     <h2>Add Profile</h2>
     <p>Use phone format like +12565551234 for texting.</p>
     <form method="POST">
-        ID: <input name="band_id"><br>
+        ID: <input name="band_id" placeholder="EB002"><br>
         Name: <input name="name"><br>
         Email: <input name="email"><br>
         Phone: <input name="phone"><br>
@@ -137,7 +238,12 @@ def profile(band_id):
             if len(row) >= 8 and row[0].strip().upper() == band_id:
 
                 if alert_mode:
-                    send_alert_text(row[1], row[3], row[0])
+                    now = time.time()
+                    last_time = last_alert_sent.get(band_id, 0)
+
+                    if now - last_time > 300:
+                        send_alert_text(row[1], row[3], row[0])
+                        last_alert_sent[band_id] = now
 
                 alert_banner = ""
                 if alert_mode:
@@ -154,12 +260,14 @@ def profile(band_id):
                 <html>
                 <head>
                 <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>EmpowerBands Profile</title>
                 <style>
                 body {{
                     margin:0;
-                    font-family:Arial;
+                    font-family:Arial, sans-serif;
                     background:#eaf3ff;
                 }}
+
                 .card {{
                     max-width:420px;
                     margin:0 auto;
@@ -168,50 +276,99 @@ def profile(band_id):
                     min-height:100vh;
                     display:flex;
                     flex-direction:column;
+                    box-sizing:border-box;
                 }}
+
                 .logo {{
                     text-align:center;
+                    margin-bottom:2px;
                 }}
+
                 .logo img {{
                     width:90px;
+                    height:auto;
+                    display:block;
+                    margin:0 auto;
                 }}
+
                 .name {{
                     text-align:center;
                     font-size:24px;
                     font-weight:bold;
                     margin-top:4px;
                 }}
+
                 .sub {{
                     text-align:center;
                     color:#0a58ca;
                     font-size:13px;
                     margin-bottom:6px;
                 }}
+
                 .alert-banner {{
-                    background:red;
+                    background:#d62828;
                     color:white;
                     padding:10px;
                     border-radius:10px;
                     text-align:center;
                     margin:8px 0;
+                    font-weight:bold;
+                    font-size:14px;
+                    line-height:1.35;
                 }}
+
                 .alert {{
                     background:#e0edff;
                     border-left:4px solid #0a58ca;
                     padding:10px;
                     border-radius:10px;
                     margin:8px 0;
+                    font-size:15px;
+                    font-weight:bold;
                 }}
+
                 .section {{
                     margin-top:10px;
                 }}
+
                 .title {{
                     font-size:12px;
                     font-weight:bold;
+                    color:#444;
+                    margin-bottom:3px;
                 }}
+
                 .text {{
                     font-size:15px;
+                    line-height:1.35;
+                    color:#222;
                 }}
+
+                .alert-btn {{
+                    display:block;
+                    margin-top:12px;
+                    background:#d62828;
+                    color:white;
+                    text-align:center;
+                    padding:12px;
+                    border-radius:10px;
+                    text-decoration:none;
+                    font-weight:bold;
+                    font-size:15px;
+                }}
+
+                .gps {{
+                    margin-top:8px;
+                    background:#111;
+                    color:white;
+                    padding:11px;
+                    border-radius:10px;
+                    border:none;
+                    width:100%;
+                    font-weight:bold;
+                    font-size:15px;
+                }}
+
                 .call {{
                     margin-top:auto;
                     background:#0a58ca;
@@ -221,20 +378,17 @@ def profile(band_id):
                     border-radius:10px;
                     text-decoration:none;
                     font-weight:bold;
+                    font-size:17px;
                 }}
-                .gps {{
-                    margin-top:8px;
-                    background:black;
-                    color:white;
-                    padding:10px;
-                    border-radius:10px;
-                    border:none;
-                    width:100%;
+
+                .notes {{
+                    margin-bottom:12px;
                 }}
                 </style>
                 </head>
 
                 <body>
+
                 <div class="card">
 
                     <div class="logo">
@@ -246,12 +400,19 @@ def profile(band_id):
 
                     {alert_banner}
 
-                    <div class="alert">{row[5]}</div>
+                    <div class="alert">⚠️ {row[5]}</div>
 
                     <div class="section">
                         <div class="title">WHAT TO DO</div>
                         <div class="text">{row[6]}</div>
                     </div>
+
+                    <div class="section notes">
+                        <div class="title">MEDICAL NOTES</div>
+                        <div class="text">{row[7]}</div>
+                    </div>
+
+                    <a class="alert-btn" href="/{row[0]}?alert=yes">🚨 Activate Emergency Alert</a>
 
                     <button class="gps" onclick="shareLocation()">📍 Share Location</button>
 
@@ -261,10 +422,16 @@ def profile(band_id):
 
                 <script>
                 function shareLocation(){{
-                    navigator.geolocation.getCurrentPosition(function(pos){{
-                        let link = "https://maps.google.com/?q=" + pos.coords.latitude + "," + pos.coords.longitude;
-                        window.open(link);
-                    }});
+                    if (navigator.geolocation) {{
+                        navigator.geolocation.getCurrentPosition(function(pos){{
+                            let link = "https://maps.google.com/?q=" + pos.coords.latitude + "," + pos.coords.longitude;
+                            window.open(link, "_blank");
+                        }}, function(){{
+                            alert("Location permission was denied.");
+                        }});
+                    }} else {{
+                        alert("Location is not supported on this device.");
+                    }}
                 }}
                 </script>
 
