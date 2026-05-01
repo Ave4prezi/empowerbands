@@ -1,39 +1,74 @@
 from flask import Flask, request, redirect, session
+from twilio.rest import Client
 import csv
 import os
 
 app = Flask(__name__)
-app.secret_key = "empowerbands-secret"
+app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
-ADMIN_PASSWORD = "empower123"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 file_name = "customers.csv"
 
-# Create CSV if it doesn't exist
+BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.onrender.com")
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+
+LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
+
+
+def send_alert_text(name, phone, band_id):
+    if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
+        print("Twilio not configured.")
+        return
+
+    try:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+        message_body = (
+            f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
+            f"They may be lost or unable to communicate. "
+            f"View profile: {BASE_URL}/{band_id}?alert=yes"
+        )
+
+        client.messages.create(
+            body=message_body,
+            from_=TWILIO_PHONE_NUMBER,
+            to=phone
+        )
+
+        print(f"Alert text sent to {phone}")
+
+    except Exception as e:
+        print(f"Twilio error: {e}")
+
+
 if not os.path.exists(file_name):
     with open(file_name, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow([
-            "BandID","Name","Email","Phone",
-            "AgeGroup","Condition","Instructions","MedicalNotes"
+            "BandID", "Name", "Email", "Phone",
+            "AgeGroup", "Condition", "Instructions", "MedicalNotes"
         ])
         writer.writerow([
-            "EB001","Jordan","parent@email.com","2565551234",
-            "Child","Autism – Nonverbal",
+            "EB001", "Jordan", "parent@email.com", "+12565551234",
+            "Child", "Autism – Nonverbal",
             "Please stay calm. I may not respond verbally.",
             "Call emergency contact immediately."
         ])
 
-# HOME PAGE
+
 @app.route("/")
 def home():
     return """
     <h1>EmpowerBands</h1>
     <p><a href="/EB001">Live Demo</a></p>
+    <p><a href="/EB001?alert=yes">Alert Mode Demo</a></p>
     <p><a href="/admin">Admin Login</a></p>
     """
 
-# ADMIN LOGIN
-@app.route("/admin", methods=["GET","POST"])
+
+@app.route("/admin", methods=["GET", "POST"])
 def admin():
     if request.method == "POST":
         if request.form.get("password") == ADMIN_PASSWORD:
@@ -49,22 +84,22 @@ def admin():
     </form>
     """
 
-# ADD PERSON
-@app.route("/add", methods=["GET","POST"])
+
+@app.route("/add", methods=["GET", "POST"])
 def add():
     if not session.get("logged_in"):
         return redirect("/admin")
 
     if request.method == "POST":
         new_row = [
-            request.form["band_id"].upper(),
-            request.form["name"],
-            request.form["email"],
-            request.form["phone"],
-            request.form["age_group"],
-            request.form["condition"],
-            request.form["instructions"],
-            request.form["medical_notes"]
+            request.form["band_id"].strip().upper(),
+            request.form["name"].strip(),
+            request.form["email"].strip(),
+            request.form["phone"].strip(),
+            request.form["age_group"].strip(),
+            request.form["condition"].strip(),
+            request.form["instructions"].strip(),
+            request.form["medical_notes"].strip()
         ]
 
         with open(file_name, mode="a", newline="", encoding="utf-8") as file:
@@ -74,6 +109,7 @@ def add():
 
     return """
     <h2>Add Profile</h2>
+    <p>Use phone format like +12565551234 for texting.</p>
     <form method="POST">
         ID: <input name="band_id"><br>
         Name: <input name="name"><br>
@@ -87,18 +123,21 @@ def add():
     </form>
     """
 
-# PROFILE PAGE
+
 @app.route("/<band_id>")
 def profile(band_id):
-    band_id = band_id.upper()
+    band_id = band_id.strip().upper()
     alert_mode = request.args.get("alert") == "yes"
 
     with open(file_name, mode="r", encoding="utf-8") as file:
         reader = csv.reader(file)
-        next(reader)
+        next(reader, None)
 
         for row in reader:
-            if len(row) >= 8 and row[0].upper() == band_id:
+            if len(row) >= 8 and row[0].strip().upper() == band_id:
+
+                if alert_mode:
+                    send_alert_text(row[1], row[3], row[0])
 
                 alert_banner = ""
                 if alert_mode:
@@ -121,40 +160,33 @@ def profile(band_id):
                     font-family:Arial;
                     background:#eaf3ff;
                 }}
-
                 .card {{
                     max-width:420px;
                     margin:0 auto;
                     padding:16px;
                     background:white;
-
                     min-height:100vh;
                     display:flex;
                     flex-direction:column;
                 }}
-
                 .logo {{
                     text-align:center;
                 }}
-
                 .logo img {{
                     width:90px;
                 }}
-
                 .name {{
                     text-align:center;
                     font-size:24px;
                     font-weight:bold;
                     margin-top:4px;
                 }}
-
                 .sub {{
                     text-align:center;
                     color:#0a58ca;
                     font-size:13px;
                     margin-bottom:6px;
                 }}
-
                 .alert-banner {{
                     background:red;
                     color:white;
@@ -163,7 +195,6 @@ def profile(band_id):
                     text-align:center;
                     margin:8px 0;
                 }}
-
                 .alert {{
                     background:#e0edff;
                     border-left:4px solid #0a58ca;
@@ -171,20 +202,16 @@ def profile(band_id):
                     border-radius:10px;
                     margin:8px 0;
                 }}
-
                 .section {{
                     margin-top:10px;
                 }}
-
                 .title {{
                     font-size:12px;
                     font-weight:bold;
                 }}
-
                 .text {{
                     font-size:15px;
                 }}
-
                 .call {{
                     margin-top:auto;
                     background:#0a58ca;
@@ -195,7 +222,6 @@ def profile(band_id):
                     text-decoration:none;
                     font-weight:bold;
                 }}
-
                 .gps {{
                     margin-top:8px;
                     background:black;
@@ -209,11 +235,10 @@ def profile(band_id):
                 </head>
 
                 <body>
-
                 <div class="card">
 
                     <div class="logo">
-                        <img src="https://i.imgur.com/dE4kSOz.png">
+                        <img src="{LOGO_URL}">
                     </div>
 
                     <div class="name">{row[1]}</div>
@@ -248,3 +273,7 @@ def profile(band_id):
                 """
 
     return "Band not found"
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=False)
