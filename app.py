@@ -34,32 +34,34 @@ def profile(band_id):
                         body {{
                             margin: 0;
                             font-family: Arial, sans-serif;
-                            background: #f4f8ff;
+                            background: linear-gradient(to bottom, #eaf3ff, #ffffff);
                         }}
 
-                        .card {{
-                            max-width: 430px;
-                            margin: 0 auto;
-                            background: white;
-                            padding: 22px;
-                            min-height: 100vh;
-                            box-sizing: border-box;
+                        .card {
+    max-width: 420px;
+    margin: 20px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
                         }}
+.logo {
+    text-align: center;
+    margin-bottom: 5px;
+}
 
-                        .logo {{
-                            text-align: center;
-                            margin-bottom: 10px;
-                        }}
-
-                        .logo img {{
-                            width: 140px;
-                            max-width: 75%;
-                        }}
-
+.logo img {
+    width: 110px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
                         .name {{
                             text-align: center;
-                            font-size: 30px;
+                            font-size: 28px;
                             font-weight: bold;
+                            margin-top: 5px
                         }}
 
                         .sub {{
