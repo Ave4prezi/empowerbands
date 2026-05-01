@@ -20,7 +20,7 @@ LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 last_alert_sent = {}
 
 
-def send_alert_text(name, phone, band_id):
+def send_alert_text(name, phones, band_id):
     if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
         print("Twilio not configured.")
         return
@@ -34,13 +34,15 @@ def send_alert_text(name, phone, band_id):
             f"Profile: {BASE_URL}/{band_id}?alert=yes"
         )
 
-        client.messages.create(
-            body=message_body,
-            from_=TWILIO_PHONE_NUMBER,
-            to=phone
-        )
+        phone_list = [p.strip() for p in phones.split(",") if p.strip()]
 
-        print(f"Alert text sent to {phone}")
+        for phone in phone_list:
+            client.messages.create(
+                body=message_body,
+                from_=TWILIO_PHONE_NUMBER,
+                to=phone
+            )
+            print(f"Alert text sent to {phone}")
 
     except Exception as e:
         print(f"Twilio error: {e}")
@@ -215,7 +217,7 @@ def add():
         ID: <input name="band_id" placeholder="EB002"><br>
         Name: <input name="name"><br>
         Email: <input name="email"><br>
-        Phone: <input name="phone"><br>
+       Phone(s): <input name="phone" placeholder="+12565551234,+12565559876"><br>
         Age: <input name="age_group"><br>
         Condition: <input name="condition"><br>
         Instructions: <input name="instructions"><br>
