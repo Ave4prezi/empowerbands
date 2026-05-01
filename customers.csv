@@ -1,3 +1,2 @@
-BandID,Name(optional,Phone,age,Medical Condition, Emergency Contact name, Emergency Contact Phone, Location Monitoring
-EB001,
-EB002,
+BandID,Name,Email,Phone,AgeGroup,Condition,Instructions,MedicalNotes
+EB001,Jordan,parent@email.com,2565551234,Child,Autism – Nonverbal,Please stay calm. I may not respond verbally, call emergency contact immediately.,No allergies
