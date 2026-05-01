@@ -40,11 +40,17 @@ if not os.path.exists(file_name):
 def home():
     return """
     <h1>EmpowerBands</h1>
+
     <p>Smart wearable emergency communication system.</p>
+
+    <p>
+    Tap a band to instantly view a person's emergency profile,
+    instructions, and contact their caregiver in seconds.
+    </p>
+
     <p><a href="/EB001">View Demo</a></p>
     <p><a href="/admin">Admin Login</a></p>
     """
-
 # ===============================
 # ADMIN LOGIN
 # ===============================
