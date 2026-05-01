@@ -217,15 +217,110 @@ def profile(band_id):
         for row in reader:
             if len(row) >= 8 and row[0] == band_id:
                 return f"""
-                <h1>{row[1]}</h1>
-                <h3>⚠️ {row[5]}</h3>
-                <p><strong>What to do:</strong> {row[6]}</p>
-                <a href="tel:{row[3]}">CALL</a>
-                <p>{row[7]}</p>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <title>EmpowerBands Profile</title>
+                    <style>
+                        body {{
+                            margin: 0;
+                            font-family: Arial;
+                            background: #f4f8ff;
+                        }}
+                        .card {{
+                            max-width: 420px;
+                            margin: auto;
+                            background: white;
+                            padding: 24px;
+                            min-height: 100vh;
+                        }}
+                        .logo {{
+                            text-align: center;
+                            margin-bottom: 10px;
+                        }}
+                        .logo img {{
+                            width: 80px;
+                        }}
+                        .name {{
+                            text-align: center;
+                            font-size: 28px;
+                            font-weight: bold;
+                        }}
+                        .sub {{
+                            text-align: center;
+                            color: #0a58ca;
+                            margin-top: 5px;
+                        }}
+                        .alert {{
+                            margin-top: 20px;
+                            background: #e0edff;
+                            border-left: 6px solid #0a58ca;
+                            padding: 14px;
+                            border-radius: 10px;
+                            font-size: 18px;
+                            font-weight: bold;
+                        }}
+                        .section {{
+                            margin-top: 20px;
+                        }}
+                        .title {{
+                            font-weight: bold;
+                            font-size: 13px;
+                            color: #444;
+                        }}
+                        .text {{
+                            font-size: 18px;
+                            margin-top: 5px;
+                        }}
+                        .call {{
+                            display: block;
+                            margin-top: 25px;
+                            background: #0a58ca;
+                            color: white;
+                            text-align: center;
+                            padding: 16px;
+                            border-radius: 12px;
+                            text-decoration: none;
+                            font-size: 20px;
+                            font-weight: bold;
+                        }}
+                    </style>
+                </head>
+
+                <body>
+                    <div class="card">
+                    <div style="text-align:center; margin-bottom:10px;">
+    <img src="https://via.placeholder.com/80" style="width:80px;">
+</div>
+
+                        <div class="logo">
+                            <img src="YOUR_LOGO_URL_HERE">
+                        </div>
+
+                        <div class="name">{row[1]}</div>
+                        <div class="sub">{row[4]} • ID: {row[0]}</div>
+
+                        <div class="alert">⚠️ {row[5]}</div>
+
+                        <div class="section">
+                            <div class="title">WHAT TO DO</div>
+                            <div class="text">{row[6]}</div>
+                        </div>
+
+                        <a class="call" href="tel:{row[3]}">📞 CALL NOW</a>
+
+                        <div class="section">
+                            <div class="title">MEDICAL NOTES</div>
+                            <div class="text">{row[7]}</div>
+                        </div>
+
+                    </div>
+                </body>
+                </html>
                 """
 
     return "<h1>Band Not Found</h1>"
-
 # ===============================
 # RUN SERVER
 # ===============================
