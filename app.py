@@ -4,7 +4,8 @@ import os
 
 app = Flask(__name__)
 
-file_name = "customers.csv"
+import os
+file_name = os.path.join(os.getcwd(), "customers.csv")
 
 # ===============================
 # CREATE CSV IF IT DOESN'T EXIST
