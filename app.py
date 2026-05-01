@@ -291,7 +291,7 @@ def profile(band_id):
                 <body>
                     <div class="card">
                     <div style="text-align:center; margin-bottom:10px;">
-    <img src="https://via.placeholder.com/80" style="width:80px;">
+    <img src="https://i.imgur.com/dE4kSOz.png" style="width:120px;">
 </div>
 
                         <div class="logo">
