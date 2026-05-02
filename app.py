@@ -3,6 +3,7 @@ from twilio.rest import Client
 import csv
 import os
 import time
+scan_log_file = "scan_log.csv"
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
