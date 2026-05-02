@@ -231,6 +231,7 @@ def add():
 def profile(band_id):
     band_id = band_id.strip().upper()
     alert_mode = request.args.get("alert") == "yes"
+confirm_alert = request.args.get("confirm_alert") == "yes"
 
     with open(file_name, mode="r", encoding="utf-8") as file:
         reader = csv.reader(file)
@@ -238,6 +239,68 @@ def profile(band_id):
 
         for row in reader:
             if len(row) >= 8 and row[0].strip().upper() == band_id:
+                if confirm_alert:
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Confirm Alert</title>
+    <style>
+    body {{
+        margin:0;
+        font-family:Arial, sans-serif;
+        background:#eaf3ff;
+    }}
+    .card {{
+        max-width:420px;
+        margin:0 auto;
+        padding:22px;
+        background:white;
+        min-height:100vh;
+        box-sizing:border-box;
+        text-align:center;
+    }}
+    .warning {{
+        background:#d62828;
+        color:white;
+        padding:16px;
+        border-radius:12px;
+        font-weight:bold;
+        margin:20px 0;
+    }}
+    .btn {{
+        display:block;
+        margin:12px 0;
+        padding:15px;
+        border-radius:10px;
+        text-decoration:none;
+        font-weight:bold;
+    }}
+    .yes {{
+        background:#d62828;
+        color:white;
+    }}
+    .no {{
+        background:#111;
+        color:white;
+    }}
+    </style>
+    </head>
+    <body>
+        <div class="card">
+            <h2>Confirm Emergency Alert</h2>
+            <div class="warning">
+                This will send an emergency text alert to the caregiver contact(s).
+            </div>
+            <p>Only continue if this person may be lost, confused, or unable to communicate.</p>
+
+            <a class="btn yes" href="/{row[0]}?alert=yes">YES — SEND ALERT</a>
+            <a class="btn no" href="/{row[0]}">Cancel</a>
+        </div>
+    </body>
+    </html>
+    """
 
                 if alert_mode:
                     now = time.time()
@@ -414,8 +477,7 @@ def profile(band_id):
                         <div class="text">{row[7]}</div>
                     </div>
 
-                    <a class="alert-btn" href="/{row[0]}?alert=yes">🚨 Activate Emergency Alert</a>
-
+                    <a class="alert-btn" href="/{row[0]}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
                     <button class="gps" onclick="shareLocation()">📍 Share Location</button>
 
                     <a class="call" href="tel:{row[3]}">📞 CALL NOW</a>
