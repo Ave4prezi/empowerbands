@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from twilio.rest import Client
 import csv
 import os
@@ -6,11 +6,24 @@ import time
 
 app = Flask(__name__)
 
+# 🔹 TAP PAGE
 @app.route("/tap")
 def tap_page():
     return app.send_static_file("band.html")
-app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
+# 🔹 CUSTOMER PAGE
+@app.route("/customer/<band_id>")
+def customer_page(band_id):
+    return f"Emergency info page for band {band_id}"
+
+# 🔹 SCAN ROUTE
+@app.route("/scan/<band_id>")
+def scan_band(band_id):
+    scan_type = request.args.get("type", "tap")
+    return f"Scan logged for band {band_id}. Type: {scan_type}"
+
+# 🔹 SETTINGS
+app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 
 file_name = "customers.csv"
