@@ -19,12 +19,14 @@ def scan_band(band_id):
     scan_type = request.args.get("type", "tap")
     return f"Scan logged for band {band_id}. Type: {scan_type}"
 
+app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
+file_name = "customers.csv"
+scan_log_file = "scan_log.csv"
+
 # 🔹 SETTINGS
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
-
-file_name = "customers.csv"
-scan_log_file = "scan_log.csv"
 
 BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.onrender.com")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
