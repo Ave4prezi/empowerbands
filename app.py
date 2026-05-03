@@ -1,10 +1,14 @@
-from flask import Flask, request, redirect, session
+from flask import Flask
 from twilio.rest import Client
 import csv
 import os
 import time
 
 app = Flask(__name__)
+
+@app.route("/tap")
+def tap_page():
+    return app.send_static_file("band.html")
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
