@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>EmpowerBands</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #050505;
+      color: white;
+      text-align: center;
+      padding: 30px 18px;
+    }
+
+    .card {
+      max-width: 420px;
+      margin: auto;
+      background: #111;
+      border-radius: 22px;
+      padding: 28px;
+      box-shadow: 0 0 30px rgba(150, 70, 255, 0.35);
+      border: 1px solid #2d2d2d;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      font-size: 28px;
+    }
+
+    .tagline {
+      color: #bfbfbf;
+      margin-bottom: 25px;
+    }
+
+    .button {
+      display: block;
+      text-decoration: none;
+      background: #7b2cff;
+      color: white;
+      padding: 16px;
+      border-radius: 14px;
+      margin: 14px 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .button.secondary {
+      background: #222;
+      border: 1px solid #555;
+    }
+
+    .emergency {
+      background: #d90000;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 22px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>EmpowerBands</h1>
+    <p class="tagline">Tap-powered support and emergency access.</p>
+
+    <a class="button emergency" href="/band/001">View Emergency Info</a>
+
+    <a class="button" href="tel:2560000000">Call Emergency Contact</a>
+
+    <a class="button secondary" href="sms:2560000000?body=Someone%20scanned%20your%20EmpowerBand.">
+      Send Text Alert
+    </a>
+
+    <a class="button secondary" href="/scan/001?type=tap">
+      Log This Scan
+    </a>
+
+    <p class="small">Powered by EmpowerBands</p>
+  </div>
+</body>
+</html>
