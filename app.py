@@ -6,17 +6,14 @@ import time
 
 app = Flask(__name__)
 
-# 🔹 TAP PAGE
 @app.route("/tap")
 def tap_page():
     return app.send_static_file("band.html")
 
-# 🔹 CUSTOMER PAGE
 @app.route("/customer/<band_id>")
 def customer_page(band_id):
     return f"Emergency info page for band {band_id}"
 
-# 🔹 SCAN ROUTE
 @app.route("/scan/<band_id>")
 def scan_band(band_id):
     scan_type = request.args.get("type", "tap")
