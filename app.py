@@ -29,34 +29,52 @@ LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 # ===============================
 
 # Create customers file if missing
-if not os.path.exists(file_name):
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            "band_id","name","email","phone","age_group",
-            "condition","instructions","medical_notes","pin"
-        ])
+# ===============================
+# CREATE FILES
+# ===============================
 
-# Always make sure demo band exists
-with open(file_name, "r+", newline="", encoding="utf-8") as f:
-    rows = list(csv.reader(f))
-    existing_ids = [r[0] for r in rows if r]
+demo_row = [
+    "EB001",
+    "Jordan",
+    "email@test.com",
+    "+12565551234,+12565550000",
+    "Child",
+    "Autism – Nonverbal",
+    "Please stay calm. I may not respond verbally. Call my caregiver immediately.",
+    "No allergies",
+    "1234"
+]
 
-    if "EB001" not in existing_ids:
-        writer = csv.writer(f)
-        writer.writerow([
-            "EB001",
-            "Jordan",
-            "email@test.com",
-            "+12565551234,+12565550000",
-            "Child",
-            "Autism – Nonverbal",
-            "Please stay calm. I may not respond verbally. Call my caregiver immediately.",
-            "No allergies",
-            "1234"
-        ])
+header = [
+    "band_id","name","email","phone","age_group",
+    "condition","instructions","medical_notes","pin"
+]
 
-# Create scan log file if missing
+rows = []
+
+if os.path.exists(file_name):
+    with open(file_name, "r", newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+
+# Keep only rows that have the correct 9-column format
+clean_rows = [header]
+demo_exists = False
+
+for row in rows[1:]:
+    if len(row) >= 9:
+        if row[0].strip().upper() == "EB001":
+            clean_rows.append(demo_row)
+            demo_exists = True
+        else:
+            clean_rows.append(row)
+
+if not demo_exists:
+    clean_rows.append(demo_row)
+
+with open(file_name, "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(clean_rows)
+
 if not os.path.exists(scan_log_file):
     with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
