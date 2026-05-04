@@ -232,7 +232,6 @@ def profile(band_id):
                 instructions = row[6]
                 medical_notes = row[7]
                 pin = row[8] if row[8] else "1234"
-
                 entered_pin = request.args.get("pin")
 
                 log_scan(band_id, name, "scan", request.remote_addr)
@@ -247,36 +246,79 @@ def profile(band_id):
 
                 if confirm_alert:
                     return f"""
-                    <h1>Confirm Emergency Alert</h1>
-                    <p>This will send an emergency text alert to the caregiver contact.</p>
-                    <p>Only continue if this person may be lost, confused, or unable to communicate.</p>
+                    <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <style>
+                            body {{
+                                font-family: Arial;
+                                background: #f3f4f6;
+                                text-align: center;
+                                padding: 30px;
+                            }}
+                            .box {{
+                                background: white;
+                                padding: 25px;
+                                border-radius: 12px;
+                                max-width: 400px;
+                                margin: auto;
+                            }}
+                            .btn {{
+                                display: block;
+                                padding: 15px;
+                                margin-top: 15px;
+                                border-radius: 10px;
+                                text-decoration: none;
+                                font-weight: bold;
+                                border: none;
+                                width: 100%;
+                                font-size: 16px;
+                            }}
+                            .alert {{
+                                background: #dc2626;
+                                color: white;
+                            }}
+                            .cancel {{
+                                background: #111827;
+                                color: white;
+                                box-sizing: border-box;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="box">
+                            <h2>Confirm Emergency Alert</h2>
+                            <p>This will send a text alert to the caregiver with your location.</p>
 
-                    <p>
-                        <button onclick="sendAlertWithLocation()">🚨 Send Emergency Alert</button>
-                    </p>
+                            <button class="btn alert" onclick="sendAlertWithLocation()">
+                                🚨 Send Emergency Alert
+                            </button>
 
-                    <p>
-                        <a href="/customer/{band_id}">Cancel</a>
-                    </p>
+                            <a class="btn cancel" href="/customer/{band_id}">
+                                Cancel
+                            </a>
+                        </div>
 
-                    <script>
-                    function sendAlertWithLocation(){{
-                        if (navigator.geolocation) {{
-                            navigator.geolocation.getCurrentPosition(function(pos){{
+                        <script>
+                        function sendAlertWithLocation(){{
+                            if (navigator.geolocation) {{
+                                navigator.geolocation.getCurrentPosition(function(pos){{
+                                    let lat = pos.coords.latitude;
+                                    let lon = pos.coords.longitude;
 
-                                let lat = pos.coords.latitude;
-                                let lon = pos.coords.longitude;
+                                    window.location.href =
+                                        "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
 
-                                window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
-
-                            }}, function(){{
-                                alert("Location permission denied.");
-                            }});
-                        }} else {{
-                            alert("Location not supported.");
+                                }}, function(){{
+                                    window.location.href = "/customer/{band_id}?alert=yes";
+                                }});
+                            }} else {{
+                                window.location.href = "/customer/{band_id}?alert=yes";
+                            }}
                         }}
-                    }}
-                    </script>
+                        </script>
+                    </body>
+                    </html>
                     """
 
                 if entered_pin != pin:
@@ -316,7 +358,6 @@ def profile(band_id):
     <p>This band ID has not been added yet.</p>
     <p><a href="/admin">Admin Login</a></p>
     """
-
 
 @app.route("/alert_with_location")
 def alert_with_location():
