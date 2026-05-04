@@ -24,25 +24,31 @@ LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 # CREATE FILES
 # ===============================
 
+# ===============================
+# CREATE FILES
+# ===============================
+
+# Create customers file if missing
 if not os.path.exists(file_name):
     with open(file_name, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
-            "band_id",
-            "name",
-            "email",
-            "phone",
-            "age_group",
-            "condition",
-            "instructions",
-            "medical_notes",
-            "pin"
+            "band_id","name","email","phone","age_group",
+            "condition","instructions","medical_notes","pin"
         ])
+
+# Always make sure demo band exists
+with open(file_name, "r+", newline="", encoding="utf-8") as f:
+    rows = list(csv.reader(f))
+    existing_ids = [r[0] for r in rows if r]
+
+    if "EB001" not in existing_ids:
+        writer = csv.writer(f)
         writer.writerow([
             "EB001",
             "Jordan",
             "email@test.com",
-            "+12565551234",
+            "+12565551234,+12565550000",
             "Child",
             "Autism – Nonverbal",
             "Please stay calm. I may not respond verbally. Call my caregiver immediately.",
@@ -50,12 +56,11 @@ if not os.path.exists(file_name):
             "1234"
         ])
 
+# Create scan log file if missing
 if not os.path.exists(scan_log_file):
     with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["BandID", "Name", "Time", "Type", "IP"])
-
-
 # ===============================
 # FUNCTIONS
 # ===============================
