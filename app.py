@@ -228,8 +228,32 @@ def profile(band_id):
                     <p>This will send an emergency text alert to the caregiver contact.</p>
                     <p>Only continue if this person may be lost, confused, or unable to communicate.</p>
 
-                    <p><a href="/customer/{band_id}?alert=yes">YES — SEND ALERT</a></p>
-                    <p><a href="/customer/{band_id}">Cancel</a></p>
+                    <p>
+                        <button onclick="sendAlertWithLocation()">🚨 Send Emergency Alert</button>
+                    </p>
+
+                    <p>
+                        <a href="/customer/{band_id}">Cancel</a>
+                    </p>
+
+                    <script>
+                    function sendAlertWithLocation(){{
+                        if (navigator.geolocation) {{
+                            navigator.geolocation.getCurrentPosition(function(pos){{
+
+                                let lat = pos.coords.latitude;
+                                let lon = pos.coords.longitude;
+
+                                window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+
+                            }}, function(){{
+                                alert("Location permission denied.");
+                            }});
+                        }} else {{
+                            alert("Location not supported.");
+                        }}
+                    }}
+                    </script>
                     """
 
                 if entered_pin != pin:
@@ -271,5 +295,43 @@ def profile(band_id):
     """
 
 
+@app.route("/alert_with_location")
+def alert_with_location():
+    band_id = request.args.get("band_id", "").strip().upper()
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+
+    with open(file_name, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+
+        for row in reader:
+            if len(row) >= 9 and row[0].strip().upper() == band_id:
+                name = row[1]
+                phones = row[3]
+                location_link = f"https://maps.google.com/?q={lat},{lon}"
+
+                if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER:
+                    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+                    for phone in phones.split(","):
+                        phone = phone.strip()
+                        if phone:
+                            client.messages.create(
+                                body=f"🚨 EmpowerBands Alert: {name} may need help.\n📍 Location: {location_link}\nProfile: {BASE_URL}/customer/{band_id}",
+                                from_=TWILIO_PHONE_NUMBER,
+                                to=phone
+                            )
+
+                return f"""
+                <h1>✅ Alert Sent</h1>
+                <p>Location and profile were sent to caregiver.</p>
+                <p><a href="/customer/{band_id}">Go Back</a></p>
+                """
+
+    return "<h1>Error sending alert</h1>"
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
