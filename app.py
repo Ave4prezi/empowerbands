@@ -431,7 +431,7 @@ def profile(band_id):
                 pin = row[7] if len(row) > 7 else "1234"
                 entered_pin = request.args.get("pin")
 
-                # ✅ ALERT CONFIRMATION
+                # 🔔 CONFIRM ALERT PAGE
                 if confirm_alert:
                     return f"""
                     <h1>Confirm Emergency Alert</h1>
@@ -455,12 +455,13 @@ def profile(band_id):
 
                     <hr>
                     <p>Authorized personnel only</p>
+
                     <a href="/customer/{band_id}?pin={pin}">
                         Unlock Full Info
                     </a>
                     """
 
-                # 🔴 FULL VIEW
+                # 🔴 FULL INFO (PIN CORRECT)
                 return f"""
                 <h1>Full Emergency Info</h1>
 
@@ -650,7 +651,7 @@ def profile(band_id):
 
                         <div class="spacer"></div>
 
-                        <a class="alert-btn" href="/{row[0]}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
+                        <a class="alert-btn" href="/customer/{row[0]}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
 
                         <button class="gps" onclick="shareLocation()">📍 Share Location</button>
 
