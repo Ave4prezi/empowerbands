@@ -10,6 +10,19 @@ app = Flask(__name__)
 def tap_page():
     return app.send_static_file("band.html")
 
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+    if request.method == "POST":
+        password = request.form.get("password")
+
+        if password == ADMIN_PASSWORD:
+            session["admin"] = True
+            return redirect("/admin/dashboard")
+        else:
+            return "Wrong password"
+
+    return render_template("admin.html")
+
 @app.route("/customer/<band_id>")
 def customer_page(band_id):
     return f"Emergency info page for band {band_id}"
