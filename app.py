@@ -28,11 +28,8 @@ last_alert_sent = {}
 
 if not os.path.exists(file_name):
     with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            "BandID", "Name", "Email", "Phone",
-            "AgeGroup", "Condition", "Instructions", "MedicalNotes"
-        ])
+       writer = csv.writer(f)
+writer.writerow(["band_id", "name", "phone", "emergency_contact", "critical_info", "medical_info", "address", "pin"])
         writer.writerow([
             "EB001",
             "Jordan",
@@ -419,10 +416,9 @@ def add():
 # BAND PROFILE
 # ===============================
 
-@app.route("/<band_id>")
+@app.route("/customer/<band_id>")
 def profile(band_id):
     band_id = band_id.strip().upper()
-    alert_mode = request.args.get("alert") == "yes"
     confirm_alert = request.args.get("confirm_alert") == "yes"
 
     with open(file_name, "r", encoding="utf-8") as f:
@@ -432,100 +428,56 @@ def profile(band_id):
         for row in reader:
             if len(row) >= 8 and row[0].strip().upper() == band_id:
 
+                pin = row[7] if len(row) > 7 else "1234"
+                entered_pin = request.args.get("pin")
+
+                # ✅ ALERT CONFIRMATION
                 if confirm_alert:
                     return f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                        <style>
-                            body {{
-                                margin: 0;
-                                font-family: Arial, sans-serif;
-                                background: #eaf3ff;
-                            }}
+                    <h1>Confirm Emergency Alert</h1>
+                    <p>This will notify the emergency contact.</p>
 
-                            .card {{
-                                max-width: 420px;
-                                margin: 0 auto;
-                                min-height: 100vh;
-                                padding: 24px;
-                                background: white;
-                                box-sizing: border-box;
-                                text-align: center;
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: center;
-                            }}
-
-                            .warning {{
-                                background: #d62828;
-                                color: white;
-                                padding: 16px;
-                                border-radius: 14px;
-                                font-weight: bold;
-                                margin: 18px 0;
-                                line-height: 1.4;
-                            }}
-
-                            .btn {{
-                                display: block;
-                                padding: 15px;
-                                margin: 12px 0;
-                                border-radius: 12px;
-                                text-decoration: none;
-                                font-weight: bold;
-                            }}
-
-                            .yes {{
-                                background: #d62828;
-                                color: white;
-                            }}
-
-                            .no {{
-                                background: #111827;
-                                color: white;
-                            }}
-                        </style>
-                    </head>
-
-                    <body>
-                        <div class="card">
-                            <img src="{LOGO_URL}" style="width:110px; margin:0 auto 12px;">
-
-                            <h2>Confirm Emergency Alert</h2>
-
-                            <div class="warning">
-                                This will send an emergency text alert to caregiver contact(s).
-                            </div>
-
-                            <p>Only continue if this person may be lost, confused, or unable to communicate.</p>
-
-                            <a class="btn yes" href="/{row[0]}?alert=yes">YES — SEND ALERT</a>
-                            <a class="btn no" href="/{row[0]}">Cancel</a>
-                        </div>
-                    </body>
-                    </html>
+                    <a href="/customer/{band_id}?alert=yes">YES — SEND ALERT</a><br><br>
+                    <a href="/customer/{band_id}">Cancel</a>
                     """
 
-                scan_type = "ALERT" if alert_mode else "SCAN"
-                log_scan(row[0], row[1], scan_type, request.remote_addr)
+                # 🟢 PUBLIC VIEW
+                if entered_pin != pin:
+                    return f"""
+                    <h1>Emergency Access</h1>
+                    <p><strong>Name:</strong> {row[1]}</p>
 
-                if alert_mode:
-                    now = time.time()
-                    if now - last_alert_sent.get(band_id, 0) > 300:
-                        send_alert_text(row[1], row[3], row[0])
-                        last_alert_sent[band_id] = now
+                    <a href="tel:{row[3]}">Call Emergency Contact</a><br><br>
 
-                alert_banner = ""
-                if alert_mode:
-                    alert_banner = """
-                    <div class="alert-banner">
-                        🚨 ALERT MODE 🚨<br>
-                        This person may be lost or unable to communicate.<br>
-                        Stay with them and call immediately.
-                    </div>
+                    <a href="/customer/{band_id}?confirm_alert=yes">
+                        Send Emergency Alert
+                    </a>
+
+                    <hr>
+                    <p>Authorized personnel only</p>
+                    <a href="/customer/{band_id}?pin={pin}">
+                        Unlock Full Info
+                    </a>
                     """
+
+                # 🔴 FULL VIEW
+                return f"""
+                <h1>Full Emergency Info</h1>
+
+                <p><strong>Name:</strong> {row[1]}</p>
+                <p><strong>Phone:</strong> {row[2]}</p>
+                <p><strong>Emergency Contact:</strong> {row[3]}</p>
+                <p><strong>Medical Info:</strong> {row[4]}</p>
+
+                <a href="tel:{row[3]}">Call Emergency Contact</a>
+                """
+
+    return f"""
+    <h1>Band Not Found</h1>
+    <p>Band ID: {band_id}</p>
+    """
+
+                
 
                 return f"""
                 <!DOCTYPE html>
