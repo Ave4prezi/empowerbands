@@ -6,9 +6,7 @@ import time
 
 app = Flask(__name__)
 
-@app.route("/tap")
-def tap_page():
-    return app.send_static_file("band.html")
+
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
