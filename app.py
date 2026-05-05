@@ -359,80 +359,106 @@ def profile(band_id):
 
                 if confirm_alert:
                     return f"""
-                    <html>
-                    <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                        <style>
-                            body {{
-                                margin: 0;
-                                font-family: Arial;
-                                background: #f3f4f6;
-                                text-align: center;
-                                padding: 30px;
-                            }}
-                            .box {{
-                                background: white;
-                                padding: 25px;
-                                border-radius: 16px;
-                                max-width: 420px;
-                                margin: auto;
-                                box-shadow: 0 10px 30px rgba(0,0,0,.08);
-                            }}
-                            .btn {{
-                                display: block;
-                                padding: 15px;
-                                margin-top: 15px;
-                                border-radius: 12px;
-                                text-decoration: none;
-                                font-weight: bold;
-                                border: none;
-                                width: 100%;
-                                font-size: 16px;
-                                box-sizing: border-box;
-                            }}
-                            .alert {{
-                                background: #dc2626;
-                                color: white;
-                            }}
-                            .cancel {{
-                                background: #111827;
-                                color: white;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class="box">
-                            <img src="{LOGO_URL}" width="95">
-                            <h2>Confirm Emergency Alert</h2>
-                            <p>This will send a text alert to the caregiver with location if allowed.</p>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body {{
+                font-family: Arial;
+                background: #f3f4f6;
+                text-align: center;
+                padding: 30px;
+            }}
 
-                            <button class="btn alert" onclick="sendAlertWithLocation()">
-                                🚨 Send Emergency Alert
-                            </button>
+            .box {{
+                background: white;
+                padding: 25px;
+                border-radius: 12px;
+                max-width: 420px;
+                margin: auto;
+            }}
 
-                            <a class="btn cancel" href="/customer/{band_id}">
-                                Cancel
-                            </a>
-                        </div>
+            .warning {{
+                background: #fee2e2;
+                color: #991b1b;
+                padding: 12px;
+                border-radius: 10px;
+                font-size: 14px;
+                margin: 15px 0;
+                text-align: left;
+            }}
 
-                        <script>
-                        function sendAlertWithLocation(){{
-                            if (navigator.geolocation) {{
-                                navigator.geolocation.getCurrentPosition(function(pos){{
-                                    let lat = pos.coords.latitude;
-                                    let lon = pos.coords.longitude;
-                                    window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
-                                }}, function(){{
-                                    window.location.href = "/customer/{band_id}?alert=yes";
-                                }});
-                            }} else {{
-                                window.location.href = "/customer/{band_id}?alert=yes";
-                            }}
-                        }}
-                        </script>
-                    </body>
-                    </html>
-                    """
+            .btn {{
+                display: block;
+                padding: 15px;
+                margin-top: 12px;
+                border-radius: 10px;
+                text-decoration: none;
+                font-weight: bold;
+                border: none;
+                width: 100%;
+                font-size: 16px;
+            }}
+
+            .alert {{
+                background: #dc2626;
+                color: white;
+            }}
+
+            .cancel {{
+                background: #111827;
+                color: white;
+            }}
+        </style>
+    </head>
+
+    <body>
+        <div class="box">
+
+            <h2>⚠️ Emergency Alert</h2>
+
+            <p>This will notify the caregiver immediately.</p>
+
+            <div class="warning">
+                <strong>Important:</strong><br>
+                This system does <b>NOT contact 911 or emergency services</b>.<br><br>
+                If this is a life-threatening emergency, please call <b>911 immediately</b>.
+            </div>
+
+            <button class="btn alert" onclick="sendAlertWithLocation()">
+                🚨 Send Alert With Location
+            </button>
+
+            <a class="btn cancel" href="/customer/{band_id}">
+                Cancel
+            </a>
+
+        </div>
+
+        <script>
+        function sendAlertWithLocation(){{
+            if (navigator.geolocation) {{
+                navigator.geolocation.getCurrentPosition(function(pos){{
+
+                    let lat = pos.coords.latitude;
+                    let lon = pos.coords.longitude;
+
+                    window.location.href =
+                        "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+
+                }}, function(){{
+                    // fallback if location denied
+                    window.location.href = "/customer/{band_id}?alert=yes";
+                }});
+            }} else {{
+                window.location.href = "/customer/{band_id}?alert=yes";
+            }}
+        }}
+        </script>
+
+    </body>
+    </html>
+    """
 
                 if entered_pin == pin:
                     return f"""
@@ -642,7 +668,7 @@ def alert_with_location():
                 <p><a href="/customer/{band_id}">Go Back</a></p>
                 """
 
- 
+    return "<h1>Error sending alert</h1>"
 
 
 if __name__ == "__main__":
