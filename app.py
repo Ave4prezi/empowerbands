@@ -235,8 +235,11 @@ def home():
 # Old short link support: /EB001 redirects to /customer/EB001
 @app.route("/<band_id>")
 def old_band_link(band_id):
-    if band_id.lower() in ["admin", "add", "alert_with_location"]:
-        return redirect("/")
+    blocked_routes = ["admin", "add", "alert_with_location", "customer"]
+
+    if band_id.lower() in blocked_routes:
+        return redirect("/admin")
+
     return redirect(f"/customer/{band_id}")
 
 
@@ -629,6 +632,11 @@ def alert_with_location():
                 """
 
     return "<h1>Error sending alert</h1>"
+    @app.route("/<band_id>")
+def old_band_link(band_id):
+    if band_id.lower() in ["admin", "add", "alert_with_location"]:
+        return redirect("/")
+    return redirect(f"/customer/{band_id}")
 
 
 if __name__ == "__main__":
