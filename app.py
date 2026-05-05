@@ -238,11 +238,7 @@ def home():
     </body>
     </html>
     """
-    <h1>EmpowerBands</h1>
-    <p>System is running.</p>
-    <p><a href="/customer/EB001">View Demo Band</a></p>
-    <p><a href="/admin">Admin Login</a></p>
-    """
+   
 
 
 # Old short link support: /EB001 redirects to /customer/EB001
