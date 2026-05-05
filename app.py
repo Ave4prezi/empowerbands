@@ -127,6 +127,11 @@ def home():
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>EmpowerBands</title>
+        <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a58ca">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EmpowerBands">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
         <style>
             body {
                 margin: 0;
@@ -669,6 +674,24 @@ def alert_with_location():
                 """
 
     return "<h1>Error sending alert</h1>"
+
+    @app.route("/manifest.json")
+def manifest():
+    return {
+        "name": "EmpowerBands",
+        "short_name": "EmpowerBands",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#ffffff",
+        "theme_color": "#0a58ca",
+        "icons": [
+            {
+                "src": LOGO_URL,
+                "sizes": "192x192",
+                "type": "image/png"
+            }
+        ]
+    }
 
 
 if __name__ == "__main__":
