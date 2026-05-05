@@ -354,282 +354,94 @@ def profile(band_id):
 
                 log_scan(band_id, name, "scan", request.remote_addr)
 
-    if alert_mode:
-        success = send_alert_text(name, phone, band_id)
+                if alert_mode:
+                    success = send_alert_text(name, phone, band_id)
 
-        if success:
-            return f"""
-        <h1>✅ Alert Sent</h1>
-        <p>Emergency contact(s) have been notified.</p>
-        <p><a href="/customer/{band_id}">Go Back</a></p>
-        """
-        else:
-            return f"""
-        <h1>❌ Alert Failed</h1>
-        <p>There was a problem sending the alert.</p>
-        <p><a href="/customer/{band_id}">Go Back</a></p>
-        """
+                    if success:
+                        return f"""
+                        <h1>✅ Alert Sent</h1>
+                        <p>Emergency contact(s) have been notified.</p>
+                        <p><a href="/customer/{band_id}">Go Back</a></p>
+                        """
+                    else:
+                        return f"""
+                        <h1>❌ Alert Failed</h1>
+                        <p>There was a problem sending the alert.</p>
+                        <p><a href="/customer/{band_id}">Go Back</a></p>
+                        """
 
-     if confirm_alert:
-            return f"""
-            <html>
-            <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body {{
-                font-family: Arial;
-                background: #f3f4f6;
-                text-align: center;
-                padding: 30px;
-            }}
-
-            .box {{
-                background: white;
-                padding: 25px;
-                border-radius: 12px;
-                max-width: 420px;
-                margin: auto;
-            }}
-
-            .warning {{
-                background: #fee2e2;
-                color: #991b1b;
-                padding: 12px;
-                border-radius: 10px;
-                font-size: 14px;
-                margin: 15px 0;
-                text-align: left;
-            }}
-
-            .btn {{
-                display: block;
-                padding: 15px;
-                margin-top: 12px;
-                border-radius: 10px;
-                text-decoration: none;
-                font-weight: bold;
-                border: none;
-                width: 100%;
-                font-size: 16px;
-            }}
-
-            .alert {{
-                background: #dc2626;
-                color: white;
-            }}
-
-            .cancel {{
-                background: #111827;
-                color: white;
-            }}
-        </style>
-    </head>
-
-    <body>
-        <div class="box">
-
-            <h2>⚠️ Emergency Alert</h2>
-
-            <p>This will notify the designated emergency contact(s) on file.</p>
-
-            <div class="warning">
-                <strong>Important:</strong><br>
-                This system does <b>NOT contact 911 or emergency services</b>.<br><br>
-                If this is a life-threatening emergency, please call <b>911 immediately</b>.
-            </div>
-
-            <button class="btn alert" onclick="sendAlertWithLocation()">
-                🚨 Send Alert With Location
-            </button>
-
-            <a class="btn cancel" href="/customer/{band_id}">
-                Cancel
-            </a>
-
-        </div>
-
-        <script>
-        function sendAlertWithLocation(){{
-            if (navigator.geolocation) {{
-                navigator.geolocation.getCurrentPosition(function(pos){{
-
-                    let lat = pos.coords.latitude;
-                    let lon = pos.coords.longitude;
-
-                    window.location.href =
-                        "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
-
-                }}, function(){{
-                    // fallback if location denied
-                    window.location.href = "/customer/{band_id}?alert=yes";
-                }});
-            }} else {{
-                window.location.href = "/customer/{band_id}?alert=yes";
-            }}
-        }}
-        </script>
-
-    </body>
-    </html>
-    """
-
-                if entered_pin == pin:
+                if confirm_alert:
                     return f"""
                     <html>
                     <head>
                         <meta name="viewport" content="width=device-width, initial-scale=1">
-                        <style>
-                            body {{ margin:0; font-family:Arial; background:#f3f4f6; }}
-                            .container {{ max-width:430px; margin:auto; padding:20px; }}
-                            .card {{ background:white; border-radius:18px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.08); }}
-                            .header {{ text-align:center; }}
-                            .logo {{ width:90px; }}
-                            h1 {{ font-size:24px; margin:12px 0 4px; color:#111827; }}
-                            .sub {{ color:#0a58ca; font-weight:bold; }}
-                            .warning {{ background:#fee2e2; color:#991b1b; padding:12px; border-radius:12px; margin-top:18px; font-weight:bold; }}
-                            .section {{ margin-top:18px; }}
-                            .label {{ font-size:12px; font-weight:bold; color:#6b7280; text-transform:uppercase; }}
-                            .value {{ font-size:16px; margin-top:5px; color:#111827; line-height:1.4; }}
-                            .btn {{ display:block; padding:15px; border-radius:12px; text-align:center; text-decoration:none; font-weight:bold; margin-top:12px; }}
-                            .call {{ background:#0a58ca; color:white; }}
-                            .back {{ background:#111827; color:white; }}
-                        </style>
                     </head>
+                    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
+                        <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
+                            <h2>⚠️ Emergency Alert</h2>
+                            <p>This will notify the designated emergency contact(s) on file.</p>
 
-                    <body>
-                        <div class="container">
-                            <div class="card">
-                                <div class="header">
-                                    <img class="logo" src="{LOGO_URL}">
-                                    <h1>Full Emergency Info</h1>
-                                    <div class="sub">{name} • ID: {band_id}</div>
-                                </div>
-
-                                <div class="warning">
-                                    Authorized access only. Use this information to assist safely.
-                                </div>
-
-                                <div class="section">
-                                    <div class="label">Name</div>
-                                    <div class="value">{name}</div>
-                                </div>
-
-                                <div class="section">
-                                    <div class="label">Email</div>
-                                    <div class="value">{email}</div>
-                                </div>
-
-                                <div class="section">
-                                    <div class="label">Emergency Contact</div>
-                                    <div class="value">{phone}</div>
-                                </div>
-
-                                <div class="section">
-                                    <div class="label">Age Group</div>
-                                    <div class="value">{age_group}</div>
-                                </div>
-
-                                <div class="section">
-                                    <div class="label">Condition</div>
-                                    <div class="value">{condition}</div>
-                                </div>
-
-                                <div class="section">
-                                    <div class="label">Instructions</div>
-                                    <div class="value">{instructions}</div>
-                                </div>
-
-                                <div class="section">
-                                    <div class="label">Medical Notes</div>
-                                    <div class="value">{medical_notes}</div>
-                                </div>
-
-                                <a class="btn call" href="tel:{phone.split(',')[0].strip()}">📞 Call Emergency Contact</a>
-                                <a class="btn back" href="/customer/{band_id}">Back to Public View</a>
+                            <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
+                                <strong>Important:</strong><br>
+                                This system does <b>NOT contact 911 or emergency services</b>.<br><br>
+                                If this is a life-threatening emergency, please call <b>911 immediately</b>.
                             </div>
+
+                            <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
+                                🚨 Send Alert With Location
+                            </button>
+
+                            <a href="/customer/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+                                Cancel
+                            </a>
                         </div>
+
+                        <script>
+                        function sendAlertWithLocation(){{
+                            if (navigator.geolocation) {{
+                                navigator.geolocation.getCurrentPosition(function(pos){{
+                                    let lat = pos.coords.latitude;
+                                    let lon = pos.coords.longitude;
+                                    window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+                                }}, function(){{
+                                    window.location.href = "/customer/{band_id}?alert=yes";
+                                }});
+                            }} else {{
+                                window.location.href = "/customer/{band_id}?alert=yes";
+                            }}
+                        }}
+                        </script>
                     </body>
                     </html>
                     """
 
+                if entered_pin == pin:
+                    return f"""
+                    <h1>Full Emergency Info</h1>
+                    <p><strong>Name:</strong> {name}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Emergency Contact:</strong> {phone}</p>
+                    <p><strong>Age Group:</strong> {age_group}</p>
+                    <p><strong>Condition:</strong> {condition}</p>
+                    <p><strong>Instructions:</strong> {instructions}</p>
+                    <p><strong>Medical Notes:</strong> {medical_notes}</p>
+                    <p><a href="tel:{phone.split(',')[0].strip()}">📞 Call Emergency Contact</a></p>
+                    <p><a href="/customer/{band_id}">Back to Public View</a></p>
+                    """
+
                 return f"""
-                <html>
-                <head>
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                    <style>
-                        body {{ margin:0; font-family:Arial; background:#f3f4f6; }}
-                        .container {{ max-width:420px; margin:auto; padding:20px; }}
-                        .header {{ text-align:center; margin-top:10px; }}
-                        .name {{ font-size:30px; font-weight:bold; margin-top:8px; }}
-                        .sub {{ color:#0a58ca; font-size:16px; margin-top:4px; }}
-                        .badge {{ background:#dbeafe; padding:15px; border-radius:14px; margin-top:22px; font-weight:bold; font-size:18px; border-left:6px solid #0a58ca; }}
-                        .section {{ margin-top:22px; }}
-                        .title {{ font-weight:bold; color:#4b5563; margin-bottom:8px; font-size:14px; }}
-                        .text {{ font-size:17px; line-height:1.45; color:#111827; }}
-                        .btn {{ display:block; width:100%; padding:17px; border-radius:14px; text-align:center; text-decoration:none; font-weight:bold; margin-top:14px; border:none; font-size:17px; box-sizing:border-box; }}
-                        .alert {{ background:#dc2626; color:white; }}
-                        .gps {{ background:#111827; color:white; }}
-                        .unlock {{ margin-top:22px; background:white; padding:16px; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); }}
-                        input {{ width:100%; padding:13px; border-radius:10px; border:1px solid #ccc; margin-top:8px; box-sizing:border-box; font-size:16px; }}
-                        .unlock-btn {{ margin-top:10px; width:100%; padding:13px; border-radius:10px; border:none; background:#0a58ca; color:white; font-weight:bold; font-size:16px; }}
-                    </style>
-                </head>
+                <h1>{name}</h1>
+                <p><strong>{age_group}</strong> • ID: {band_id}</p>
+                <h3>⚠️ {condition}</h3>
+                <p><strong>WHAT TO DO:</strong><br>{instructions}</p>
+                <p><strong>MEDICAL NOTES:</strong><br>{medical_notes}</p>
 
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <img src="{LOGO_URL}" width="95">
-                            <div class="name">{name}</div>
-                            <div class="sub">{age_group} • ID: {band_id}</div>
-                        </div>
+                <p><a href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a></p>
 
-                        <div class="badge">⚠️ {condition}</div>
-
-                        <div class="section">
-                            <div class="title">WHAT TO DO</div>
-                            <div class="text">{instructions}</div>
-                        </div>
-
-                        <div class="section">
-                            <div class="title">MEDICAL NOTES</div>
-                            <div class="text">{medical_notes}</div>
-                        </div>
-
-                        <a class="btn alert" href="/customer/{band_id}?confirm_alert=yes">
-                            🚨 Activate Emergency Alert
-                        </a>
-
-                        <button class="btn gps" onclick="shareLocation()">
-                            📍 Share Location
-                        </button>
-
-                        <div class="unlock">
-                            <form method="GET" action="/customer/{band_id}">
-                                <strong>Authorized Access</strong>
-                                <input type="password" name="pin" placeholder="Enter PIN">
-                                <button class="unlock-btn" type="submit">Unlock Full Info</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <script>
-                    function shareLocation(){{
-                        if (navigator.geolocation) {{
-                            navigator.geolocation.getCurrentPosition(function(pos){{
-                                let lat = pos.coords.latitude;
-                                let lon = pos.coords.longitude;
-                                let link = "https://maps.google.com/?q=" + lat + "," + lon;
-                                window.open(link, "_blank");
-                            }}, function(){{
-                                alert("Location permission denied.");
-                            }});
-                        }} else {{
-                            alert("Location not supported.");
-                        }}
-                    }}
-                    </script>
-                </body>
-                </html>
+                <form method="GET" action="/customer/{band_id}">
+                    <input type="password" name="pin" placeholder="Enter PIN">
+                    <button type="submit">Unlock Full Info</button>
+                </form>
                 """
 
     return """
@@ -676,7 +488,7 @@ def alert_with_location():
 
                 return f"""
                 <h1>✅ Alert Sent</h1>
-                <p>Location and profile were sent to caregiver.</p>
+                <p>Location and profile were sent to emergency contact(s).</p>
                 <p><a href="/customer/{band_id}">Go Back</a></p>
                 """
 
