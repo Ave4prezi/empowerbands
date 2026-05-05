@@ -115,6 +115,10 @@ def send_alert_text(name, phones, band_id):
 # HOME PAGE
 # ===============================
 
+# ===============================
+# HOME PAGE
+# ===============================
+
 @app.route("/")
 def home():
     return """
@@ -130,78 +134,82 @@ def home():
                 background: linear-gradient(180deg, #eaf3ff 0%, #ffffff 100%);
                 color: #102033;
             }
+
             .page {
                 max-width: 520px;
                 margin: 0 auto;
                 padding: 30px 20px;
                 text-align: center;
             }
+
             .logo {
                 width: 150px;
-                margin: 0 auto 14px;
-                display: block;
+                margin-bottom: 15px;
             }
+
             .badge {
-                display: inline-block;
                 background: #dcebff;
                 color: #0a58ca;
                 padding: 8px 14px;
                 border-radius: 999px;
                 font-size: 13px;
                 font-weight: bold;
-                margin-bottom: 16px;
+                display: inline-block;
+                margin-bottom: 15px;
             }
+
             h1 {
-                font-size: 36px;
-                margin: 8px 0;
+                font-size: 34px;
+                margin: 10px 0;
                 color: #0a58ca;
             }
+
             .lead {
-                font-size: 18px;
-                line-height: 1.5;
+                font-size: 17px;
                 color: #445;
-                margin-bottom: 24px;
+                margin-bottom: 25px;
             }
+
             .btn {
                 display: block;
                 padding: 16px;
-                margin: 12px auto;
-                max-width: 360px;
+                margin: 10px auto;
+                max-width: 340px;
                 border-radius: 14px;
                 text-decoration: none;
-                font-size: 17px;
                 font-weight: bold;
                 background: #0a58ca;
                 color: white;
-                box-shadow: 0 8px 18px rgba(10,88,202,0.22);
             }
+
             .btn.dark {
                 background: #111827;
             }
+
             .card {
                 background: white;
                 border-radius: 20px;
-                padding: 22px;
-                margin-top: 26px;
+                padding: 20px;
+                margin-top: 25px;
                 text-align: left;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             }
+
             .item {
-                font-size: 16px;
-                margin: 14px 0;
-                line-height: 1.4;
+                margin: 10px 0;
             }
+
             .footer {
-                margin-top: 24px;
-                color: #667;
+                margin-top: 20px;
                 font-size: 13px;
-                line-height: 1.4;
+                color: #666;
             }
         </style>
     </head>
 
     <body>
         <div class="page">
+
             <img class="logo" src="https://i.imgur.com/dE4kSOz.png">
 
             <div class="badge">Emergency Support Wearable</div>
@@ -209,39 +217,42 @@ def home():
             <h1>EmpowerBands</h1>
 
             <p class="lead">
-                Smart wearable bands that help children with visible and invisible disabilities,
-                and elderly individuals with dementia or Alzheimer’s communicate in emergencies.
+                Tap the band to instantly access emergency support info,
+                contact caregivers, and send alerts with location.
             </p>
 
             <a class="btn" href="/customer/EB001">View Live Demo</a>
             <a class="btn dark" href="/admin">Admin Login</a>
 
             <div class="card">
-                <div class="item">🔵 Tap the band with a phone</div>
-                <div class="item">🔵 Instantly view support instructions</div>
-                <div class="item">🔵 Activate caregiver alerts when needed</div>
-                <div class="item">🔵 Call and share location with one tap</div>
+                <div class="item">🔵 Tap band with phone</div>
+                <div class="item">🔵 View instructions instantly</div>
+                <div class="item">🔵 Call caregiver fast</div>
+                <div class="item">🔵 Send emergency alert + location</div>
             </div>
 
             <div class="footer">
-                Built for families, caregivers, schools, and support organizations.
+                Built for families, caregivers, and emergency responders
             </div>
+
         </div>
     </body>
     </html>
     """
 
 
-# Old short link support: /EB001 redirects to /customer/EB001
+# ===============================
+# SHORT LINK REDIRECT
+# ===============================
+
 @app.route("/<band_id>")
 def old_band_link(band_id):
     blocked_routes = ["admin", "add", "alert_with_location", "customer"]
 
     if band_id.lower() in blocked_routes:
-        return redirect("/admin")
+        return redirect("/")
 
     return redirect(f"/customer/{band_id}")
-
 
 # ===============================
 # ADMIN LOGIN
@@ -631,12 +642,7 @@ def alert_with_location():
                 <p><a href="/customer/{band_id}">Go Back</a></p>
                 """
 
-    return "<h1>Error sending alert</h1>"
-    @app.route("/<band_id>")
-def old_band_link(band_id):
-    if band_id.lower() in ["admin", "add", "alert_with_location"]:
-        return redirect("/")
-    return redirect(f"/customer/{band_id}")
+ 
 
 
 if __name__ == "__main__":
