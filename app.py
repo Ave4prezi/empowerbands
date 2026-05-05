@@ -630,7 +630,6 @@ def profile(band_id):
     <p><a href="/admin">Admin Login</a></p>
     """
 
-
 # ===============================
 # GPS ALERT ROUTE
 # ===============================
@@ -675,7 +674,12 @@ def alert_with_location():
 
     return "<h1>Error sending alert</h1>"
 
-    @app.route("/manifest.json")
+
+# ===============================
+# APP MANIFEST
+# ===============================
+
+@app.route("/manifest.json")
 def manifest():
     return {
         "name": "EmpowerBands",
