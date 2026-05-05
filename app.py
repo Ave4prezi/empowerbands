@@ -24,15 +24,6 @@ LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 # CREATE FILES
 # ===============================
 
-# ===============================
-# CREATE FILES
-# ===============================
-
-# Create customers file if missing
-# ===============================
-# CREATE FILES
-# ===============================
-
 demo_row = [
     "EB001",
     "Jordan",
@@ -46,8 +37,8 @@ demo_row = [
 ]
 
 header = [
-    "band_id","name","email","phone","age_group",
-    "condition","instructions","medical_notes","pin"
+    "band_id", "name", "email", "phone", "age_group",
+    "condition", "instructions", "medical_notes", "pin"
 ]
 
 rows = []
@@ -56,7 +47,6 @@ if os.path.exists(file_name):
     with open(file_name, "r", newline="", encoding="utf-8") as f:
         rows = list(csv.reader(f))
 
-# Keep only rows that have the correct 9-column format
 clean_rows = [header]
 demo_exists = False
 
@@ -79,6 +69,8 @@ if not os.path.exists(scan_log_file):
     with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["BandID", "Name", "Time", "Type", "IP"])
+
+
 # ===============================
 # FUNCTIONS
 # ===============================
@@ -238,13 +230,12 @@ def home():
     </body>
     </html>
     """
-   
 
 
 # Old short link support: /EB001 redirects to /customer/EB001
 @app.route("/<band_id>")
 def old_band_link(band_id):
-    if band_id.lower() in ["admin", "add"]:
+    if band_id.lower() in ["admin", "add", "alert_with_location"]:
         return redirect("/")
     return redirect(f"/customer/{band_id}")
 
@@ -354,15 +345,61 @@ def profile(band_id):
 
                 if confirm_alert:
                     return f"""
-                    <html><body style="font-family:Arial;text-align:center;padding:30px;">
-                        <h2>Confirm Emergency Alert</h2>
-                        <p>This will send a text alert to the caregiver with your location.</p>
+                    <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                        <style>
+                            body {{
+                                margin: 0;
+                                font-family: Arial;
+                                background: #f3f4f6;
+                                text-align: center;
+                                padding: 30px;
+                            }}
+                            .box {{
+                                background: white;
+                                padding: 25px;
+                                border-radius: 16px;
+                                max-width: 420px;
+                                margin: auto;
+                                box-shadow: 0 10px 30px rgba(0,0,0,.08);
+                            }}
+                            .btn {{
+                                display: block;
+                                padding: 15px;
+                                margin-top: 15px;
+                                border-radius: 12px;
+                                text-decoration: none;
+                                font-weight: bold;
+                                border: none;
+                                width: 100%;
+                                font-size: 16px;
+                                box-sizing: border-box;
+                            }}
+                            .alert {{
+                                background: #dc2626;
+                                color: white;
+                            }}
+                            .cancel {{
+                                background: #111827;
+                                color: white;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="box">
+                            <img src="{LOGO_URL}" width="95">
+                            <h2>Confirm Emergency Alert</h2>
+                            <p>This will send a text alert to the caregiver with location if allowed.</p>
 
-                        <button onclick="sendAlertWithLocation()" style="padding:15px;background:#dc2626;color:white;border:none;border-radius:10px;font-weight:bold;">
-                            🚨 Send Emergency Alert
-                        </button>
+                            <button class="btn alert" onclick="sendAlertWithLocation()">
+                                🚨 Send Emergency Alert
+                            </button>
 
-                        <p><a href="/customer/{band_id}">Cancel</a></p>
+                            <a class="btn cancel" href="/customer/{band_id}">
+                                Cancel
+                            </a>
+                        </div>
 
                         <script>
                         function sendAlertWithLocation(){{
@@ -379,95 +416,167 @@ def profile(band_id):
                             }}
                         }}
                         </script>
-                    </body></html>
+                    </body>
+                    </html>
                     """
 
-                if entered_pin != pin:
+                if entered_pin == pin:
                     return f"""
                     <html>
                     <head>
                         <meta name="viewport" content="width=device-width, initial-scale=1">
                         <style>
                             body {{ margin:0; font-family:Arial; background:#f3f4f6; }}
-                            .container {{ max-width:420px; margin:auto; padding:20px; }}
-                            .header {{ text-align:center; margin-top:10px; }}
-                            .name {{ font-size:26px; font-weight:bold; }}
-                            .sub {{ color:#555; }}
-                            .badge {{ background:#dbeafe; padding:12px; border-radius:12px; margin-top:15px; font-weight:bold; }}
-                            .section {{ margin-top:20px; }}
-                            .title {{ font-weight:bold; color:#555; margin-bottom:6px; }}
-                            .btn {{ display:block; width:100%; padding:16px; border-radius:12px; text-align:center; text-decoration:none; font-weight:bold; margin-top:12px; border:none; font-size:16px; box-sizing:border-box; }}
-                            .alert {{ background:#dc2626; color:white; }}
-                            .gps {{ background:#111827; color:white; }}
-                            .unlock {{ margin-top:20px; }}
-                            input {{ width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; margin-top:8px; box-sizing:border-box; }}
-                            .unlock-btn {{ margin-top:10px; width:100%; padding:12px; border-radius:10px; border:none; background:#0a58ca; color:white; font-weight:bold; }}
+                            .container {{ max-width:430px; margin:auto; padding:20px; }}
+                            .card {{ background:white; border-radius:18px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.08); }}
+                            .header {{ text-align:center; }}
+                            .logo {{ width:90px; }}
+                            h1 {{ font-size:24px; margin:12px 0 4px; color:#111827; }}
+                            .sub {{ color:#0a58ca; font-weight:bold; }}
+                            .warning {{ background:#fee2e2; color:#991b1b; padding:12px; border-radius:12px; margin-top:18px; font-weight:bold; }}
+                            .section {{ margin-top:18px; }}
+                            .label {{ font-size:12px; font-weight:bold; color:#6b7280; text-transform:uppercase; }}
+                            .value {{ font-size:16px; margin-top:5px; color:#111827; line-height:1.4; }}
+                            .btn {{ display:block; padding:15px; border-radius:12px; text-align:center; text-decoration:none; font-weight:bold; margin-top:12px; }}
+                            .call {{ background:#0a58ca; color:white; }}
+                            .back {{ background:#111827; color:white; }}
                         </style>
                     </head>
+
                     <body>
                         <div class="container">
-                            <div class="header">
-                                <img src="{LOGO_URL}" width="90">
-                                <div class="name">{name}</div>
-                                <div class="sub">{age_group} • ID: {band_id}</div>
-                            </div>
+                            <div class="card">
+                                <div class="header">
+                                    <img class="logo" src="{LOGO_URL}">
+                                    <h1>Full Emergency Info</h1>
+                                    <div class="sub">{name} • ID: {band_id}</div>
+                                </div>
 
-                            <div class="badge">⚠️ {condition}</div>
+                                <div class="warning">
+                                    Authorized access only. Use this information to assist safely.
+                                </div>
 
-                            <div class="section">
-                                <div class="title">WHAT TO DO</div>
-                                <div>{instructions}</div>
-                            </div>
+                                <div class="section">
+                                    <div class="label">Name</div>
+                                    <div class="value">{name}</div>
+                                </div>
 
-                            <div class="section">
-                                <div class="title">MEDICAL NOTES</div>
-                                <div>{medical_notes}</div>
-                            </div>
+                                <div class="section">
+                                    <div class="label">Email</div>
+                                    <div class="value">{email}</div>
+                                </div>
 
-                            <a class="btn alert" href="/customer/{band_id}?confirm_alert=yes">
-                                🚨 Activate Emergency Alert
-                            </a>
+                                <div class="section">
+                                    <div class="label">Emergency Contact</div>
+                                    <div class="value">{phone}</div>
+                                </div>
 
-                            <button class="btn gps" onclick="shareLocation()">
-                                📍 Share Location
-                            </button>
+                                <div class="section">
+                                    <div class="label">Age Group</div>
+                                    <div class="value">{age_group}</div>
+                                </div>
 
-                            <div class="unlock">
-                                <form method="GET" action="/customer/{band_id}">
-                                    <input type="password" name="pin" placeholder="Enter PIN">
-                                    <button class="unlock-btn" type="submit">Unlock Full Info</button>
-                                </form>
+                                <div class="section">
+                                    <div class="label">Condition</div>
+                                    <div class="value">{condition}</div>
+                                </div>
+
+                                <div class="section">
+                                    <div class="label">Instructions</div>
+                                    <div class="value">{instructions}</div>
+                                </div>
+
+                                <div class="section">
+                                    <div class="label">Medical Notes</div>
+                                    <div class="value">{medical_notes}</div>
+                                </div>
+
+                                <a class="btn call" href="tel:{phone.split(',')[0].strip()}">📞 Call Emergency Contact</a>
+                                <a class="btn back" href="/customer/{band_id}">Back to Public View</a>
                             </div>
                         </div>
-
-                        <script>
-                        function shareLocation(){{
-                            if (navigator.geolocation) {{
-                                navigator.geolocation.getCurrentPosition(function(pos){{
-                                    let lat = pos.coords.latitude;
-                                    let lon = pos.coords.longitude;
-                                    let link = "https://maps.google.com/?q=" + lat + "," + lon;
-                                    window.open(link, "_blank");
-                                }});
-                            }}
-                        }}
-                        </script>
                     </body>
                     </html>
                     """
 
                 return f"""
-                <h1>Full Emergency Info</h1>
-                <p><strong>Name:</strong> {name}</p>
-                <p><strong>Email:</strong> {email}</p>
-                <p><strong>Emergency Contact:</strong> {phone}</p>
-                <p><strong>Age Group:</strong> {age_group}</p>
-                <p><strong>Condition:</strong> {condition}</p>
-                <p><strong>Instructions:</strong> {instructions}</p>
-                <p><strong>Medical Notes:</strong> {medical_notes}</p>
+                <html>
+                <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>
+                        body {{ margin:0; font-family:Arial; background:#f3f4f6; }}
+                        .container {{ max-width:420px; margin:auto; padding:20px; }}
+                        .header {{ text-align:center; margin-top:10px; }}
+                        .name {{ font-size:30px; font-weight:bold; margin-top:8px; }}
+                        .sub {{ color:#0a58ca; font-size:16px; margin-top:4px; }}
+                        .badge {{ background:#dbeafe; padding:15px; border-radius:14px; margin-top:22px; font-weight:bold; font-size:18px; border-left:6px solid #0a58ca; }}
+                        .section {{ margin-top:22px; }}
+                        .title {{ font-weight:bold; color:#4b5563; margin-bottom:8px; font-size:14px; }}
+                        .text {{ font-size:17px; line-height:1.45; color:#111827; }}
+                        .btn {{ display:block; width:100%; padding:17px; border-radius:14px; text-align:center; text-decoration:none; font-weight:bold; margin-top:14px; border:none; font-size:17px; box-sizing:border-box; }}
+                        .alert {{ background:#dc2626; color:white; }}
+                        .gps {{ background:#111827; color:white; }}
+                        .unlock {{ margin-top:22px; background:white; padding:16px; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.06); }}
+                        input {{ width:100%; padding:13px; border-radius:10px; border:1px solid #ccc; margin-top:8px; box-sizing:border-box; font-size:16px; }}
+                        .unlock-btn {{ margin-top:10px; width:100%; padding:13px; border-radius:10px; border:none; background:#0a58ca; color:white; font-weight:bold; font-size:16px; }}
+                    </style>
+                </head>
 
-                <p><a href="tel:{phone.split(',')[0].strip()}">📞 Call Emergency Contact</a></p>
-                <p><a href="/customer/{band_id}">Back to Public View</a></p>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <img src="{LOGO_URL}" width="95">
+                            <div class="name">{name}</div>
+                            <div class="sub">{age_group} • ID: {band_id}</div>
+                        </div>
+
+                        <div class="badge">⚠️ {condition}</div>
+
+                        <div class="section">
+                            <div class="title">WHAT TO DO</div>
+                            <div class="text">{instructions}</div>
+                        </div>
+
+                        <div class="section">
+                            <div class="title">MEDICAL NOTES</div>
+                            <div class="text">{medical_notes}</div>
+                        </div>
+
+                        <a class="btn alert" href="/customer/{band_id}?confirm_alert=yes">
+                            🚨 Activate Emergency Alert
+                        </a>
+
+                        <button class="btn gps" onclick="shareLocation()">
+                            📍 Share Location
+                        </button>
+
+                        <div class="unlock">
+                            <form method="GET" action="/customer/{band_id}">
+                                <strong>Authorized Access</strong>
+                                <input type="password" name="pin" placeholder="Enter PIN">
+                                <button class="unlock-btn" type="submit">Unlock Full Info</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <script>
+                    function shareLocation(){{
+                        if (navigator.geolocation) {{
+                            navigator.geolocation.getCurrentPosition(function(pos){{
+                                let lat = pos.coords.latitude;
+                                let lon = pos.coords.longitude;
+                                let link = "https://maps.google.com/?q=" + lat + "," + lon;
+                                window.open(link, "_blank");
+                            }}, function(){{
+                                alert("Location permission denied.");
+                            }});
+                        }} else {{
+                            alert("Location not supported.");
+                        }}
+                    }}
+                    </script>
+                </body>
+                </html>
                 """
 
     return """
@@ -475,6 +584,11 @@ def profile(band_id):
     <p>This band ID has not been added yet.</p>
     <p><a href="/admin">Admin Login</a></p>
     """
+
+
+# ===============================
+# GPS ALERT ROUTE
+# ===============================
 
 @app.route("/alert_with_location")
 def alert_with_location():
@@ -499,7 +613,11 @@ def alert_with_location():
                         phone = phone.strip()
                         if phone:
                             client.messages.create(
-                                body=f"🚨 EmpowerBands Alert: {name} may need help.\n📍 Location: {location_link}\nProfile: {BASE_URL}/customer/{band_id}",
+                                body=(
+                                    f"🚨 EmpowerBands Alert: {name} may need help.\n"
+                                    f"📍 Location: {location_link}\n"
+                                    f"Profile: {BASE_URL}/customer/{band_id}"
+                                ),
                                 from_=TWILIO_PHONE_NUMBER,
                                 to=phone
                             )
@@ -515,4 +633,3 @@ def alert_with_location():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
-
