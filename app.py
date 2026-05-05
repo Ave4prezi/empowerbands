@@ -31,7 +31,7 @@ demo_row = [
     "+12565551234,+12565550000",
     "Child",
     "Autism – Nonverbal",
-    "Please stay calm. I may not respond verbally. Call my caregiver immediately.",
+    "Please stay calm. I may not respond verbally. Call my emergency contact(s) immediately.",
     "No allergies",
     "1234"
 ]
@@ -422,7 +422,7 @@ def profile(band_id):
 
             <h2>⚠️ Emergency Alert</h2>
 
-            <p>This will notify the caregiver immediately.</p>
+            <p>This will notify the designated emergency contact(s) on file.</p>
 
             <div class="warning">
                 <strong>Important:</strong><br>
