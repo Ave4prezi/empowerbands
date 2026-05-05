@@ -28,7 +28,7 @@ demo_row = [
     "EB001",
     "Jordan",
     "email@test.com",
-    "+19382655364,+12565550000",
+    "+19382655364,+12566420238",
     "Child",
     "Autism – Nonverbal",
     "Please stay calm. I may not respond verbally. Call my emergency contact(s) immediately.",
