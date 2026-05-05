@@ -354,27 +354,27 @@ def profile(band_id):
 
                 log_scan(band_id, name, "scan", request.remote_addr)
 
-                                if alert_mode:
-                    success = send_alert_text(name, phone, band_id)
+    if alert_mode:
+        success = send_alert_text(name, phone, band_id)
 
-                    if success:
-                        return f"""
-                        <h1>✅ Alert Sent</h1>
-                        <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/customer/{band_id}">Go Back</a></p>
-                        """
-                    else:
-                        return f"""
-                        <h1>❌ Alert Failed</h1>
-                        <p>There was a problem sending the alert.</p>
-                        <p><a href="/customer/{band_id}">Go Back</a></p>
-                        """
+        if success:
+            return f"""
+        <h1>✅ Alert Sent</h1>
+        <p>Emergency contact(s) have been notified.</p>
+        <p><a href="/customer/{band_id}">Go Back</a></p>
+        """
+        else:
+            return f"""
+        <h1>❌ Alert Failed</h1>
+        <p>There was a problem sending the alert.</p>
+        <p><a href="/customer/{band_id}">Go Back</a></p>
+        """
 
-                if confirm_alert:
-                    return f"""
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+     if confirm_alert:
+            return f"""
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
             body {{
                 font-family: Arial;
