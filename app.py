@@ -534,6 +534,10 @@ input {{
 # GPS ALERT ROUTE
 # ===============================
 
+# ===============================
+# GPS ALERT ROUTE
+# ===============================
+
 @app.route("/alert_with_location")
 def alert_with_location():
     band_id = request.args.get("band_id", "").strip().upper()
@@ -550,26 +554,27 @@ def alert_with_location():
                 phones = row[3]
                 location_link = f"https://maps.google.com/?q={lat},{lon}"
 
-               if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
-    return """
-    <h1>❌ Alert Not Sent</h1>
-    <p>Twilio is not configured in Render environment variables.</p>
-    <p><a href="/customer/EB001">Go Back</a></p>
-    """
-                    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+                if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
+                    return f"""
+                    <h1>❌ Alert Not Sent</h1>
+                    <p>Twilio is not configured in Render environment variables.</p>
+                    <p><a href="/customer/{band_id}">Go Back</a></p>
+                    """
 
-                    for phone in phones.split(","):
-                        phone = phone.strip()
-                        if phone:
-                            client.messages.create(
-                                body=(
-                                    f"🚨 EmpowerBands Alert: {name} may need help.\n"
-                                    f"📍 Location: {location_link}\n"
-                                    f"Profile: {BASE_URL}/customer/{band_id}"
-                                ),
-                                from_=TWILIO_PHONE_NUMBER,
-                                to=phone
-                            )
+                client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+                for phone in phones.split(","):
+                    phone = phone.strip()
+                    if phone:
+                        client.messages.create(
+                            body=(
+                                f"🚨 EmpowerBands Alert: {name} may need help.\n"
+                                f"📍 Location: {location_link}\n"
+                                f"Profile: {BASE_URL}/customer/{band_id}"
+                            ),
+                            from_=TWILIO_PHONE_NUMBER,
+                            to=phone
+                        )
 
                 return f"""
                 <h1>✅ Alert Sent</h1>
