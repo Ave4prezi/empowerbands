@@ -588,7 +588,7 @@ def alert_with_location():
 
                 if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
                     return f"""
-                    <h1>❌ Alert Not Sent</h1>
+                    <h1> Alert Not Sent</h1>
                     <p>Twilio is not configured in Render environment variables.</p>
                     <p><a href="/customer/{band_id}">Go Back</a></p>
                     """
