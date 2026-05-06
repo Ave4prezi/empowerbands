@@ -508,9 +508,9 @@ input {{
     <div>{medical_notes}</div>
 </div>
 
-<a class="btn alert" href="/customer/{band_id}?confirm_alert=yes">
-🚨 Activate Emergency Alert
-</a>
+<button class="btn alert" onclick="smartSmsAlert()">
+🚨 Text Emergency Contact
+</button>
 
 <form method="GET" action="/customer/{band_id}">
     <input type="password" name="pin" placeholder="Enter PIN">
@@ -520,9 +520,41 @@ input {{
 </form>
 
 </div>
+
+<script>
+function smartSmsAlert(){
+    const phone = "{phone.split(',')[0].strip()}";
+
+    function openSms(locationText){
+        const message =
+            "🚨 EmpowerBands Alert%0A%0A" +
+            "Name: {name}%0A" +
+            "Condition: {condition}%0A" +
+            "Instructions: {instructions}%0A%0A" +
+            locationText +
+            "%0AProfile: {BASE_URL}/customer/{band_id}";
+
+        window.location.href = "sms:" + phone + "?body=" + message;
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos){
+            const location =
+                "Location: https://maps.google.com/?q=" +
+                pos.coords.latitude + "," + pos.coords.longitude + "%0A%0A";
+
+            openSms(location);
+        }, function(){
+            openSms("Location: Not shared%0A%0A");
+        });
+    } else {
+        openSms("Location: Not supported%0A%0A");
+    }
+}
+</script>
+
 </body>
 </html>
-"""
 
     return """
     <h1>Band Not Found</h1>
