@@ -430,19 +430,99 @@ def profile(band_id):
                     """
 
                 return f"""
-                <h1>{name}</h1>
-                <p><strong>{age_group}</strong> • ID: {band_id}</p>
-                <h3>⚠️ {condition}</h3>
-                <p><strong>WHAT TO DO:</strong><br>{instructions}</p>
-                <p><strong>MEDICAL NOTES:</strong><br>{medical_notes}</p>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {{ margin:0; font-family:Arial; background:#f3f4f6; }}
 
-                <p><a href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a></p>
+.container {{ max-width:420px; margin:auto; padding:20px; }}
 
-                <form method="GET" action="/customer/{band_id}">
-                    <input type="password" name="pin" placeholder="Enter PIN">
-                    <button type="submit">Unlock Full Info</button>
-                </form>
-                """
+.header {{ text-align:center; }}
+.name {{ font-size:26px; font-weight:bold; }}
+.sub {{ color:#555; }}
+
+.badge {{
+    background:#dbeafe;
+    padding:12px;
+    border-radius:12px;
+    margin-top:15px;
+    font-weight:bold;
+}}
+
+.section {{ margin-top:20px; }}
+.title {{ font-weight:bold; color:#555; margin-bottom:6px; }}
+
+.btn {{
+    display:block;
+    width:100%;
+    padding:16px;
+    border-radius:12px;
+    text-align:center;
+    text-decoration:none;
+    font-weight:bold;
+    margin-top:12px;
+}}
+
+.alert {{ background:#dc2626; color:white; }}
+
+input {{
+    width:100%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    margin-top:8px;
+}}
+
+.unlock-btn {{
+    margin-top:10px;
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    background:#0a58ca;
+    color:white;
+    font-weight:bold;
+}}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="header">
+    <img src="{LOGO_URL}" width="90">
+    <div class="name">{name}</div>
+    <div class="sub">{age_group} • ID: {band_id}</div>
+</div>
+
+<div class="badge">⚠️ {condition}</div>
+
+<div class="section">
+    <div class="title">WHAT TO DO</div>
+    <div>{instructions}</div>
+</div>
+
+<div class="section">
+    <div class="title">MEDICAL NOTES</div>
+    <div>{medical_notes}</div>
+</div>
+
+<a class="btn alert" href="/customer/{band_id}?confirm_alert=yes">
+🚨 Activate Emergency Alert
+</a>
+
+<form method="GET" action="/customer/{band_id}">
+    <input type="password" name="pin" placeholder="Enter PIN">
+    <button class="unlock-btn" type="submit">
+        Unlock Full Info
+    </button>
+</form>
+
+</div>
+</body>
+</html>
+"""
 
     return """
     <h1>Band Not Found</h1>
