@@ -550,7 +550,12 @@ def alert_with_location():
                 phones = row[3]
                 location_link = f"https://maps.google.com/?q={lat},{lon}"
 
-                if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER:
+               if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
+    return """
+    <h1>❌ Alert Not Sent</h1>
+    <p>Twilio is not configured in Render environment variables.</p>
+    <p><a href="/customer/EB001">Go Back</a></p>
+    """
                     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
                     for phone in phones.split(","):
