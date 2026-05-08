@@ -914,6 +914,7 @@ PIN verified • EmpowerBands Emergency Response System
 </body>
 </html>
 """
+                return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -1141,6 +1142,7 @@ EmpowerBands Emergency Response System
 </body>
 </html>
 """
+
 
     return """
     <h1>Band Not Found</h1>
