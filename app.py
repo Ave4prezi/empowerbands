@@ -480,7 +480,6 @@ def add():
         return redirect("/customer/" + row[0])
 
     return """
-    return """
 <!DOCTYPE html>
 <html>
 <head>
