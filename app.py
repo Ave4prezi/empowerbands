@@ -596,7 +596,7 @@ def profile(band_id):
                     <p><strong>Age Group:</strong> {age_group}</p>
                     <p><strong>Condition:</strong> {condition}</p>
                     <p><strong>Instructions:</strong> {instructions}</p>
-                    <p><strong>Medical Notes:</strong> {medical_notes}</p>
+                    <p><strong>MEDICAL NOTES:</strong><br>Protected — enter PIN to view</p>
                     <p><a href="tel:{phone.split(',')[0].strip()}">📞 Call Emergency Contact</a></p>
                     <p><a href="/customer/{band_id}">Back to Public View</a></p>
                     """
