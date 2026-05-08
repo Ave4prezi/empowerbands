@@ -276,6 +276,7 @@ def admin():
         """
 
     return """
+return """
 <!DOCTYPE html>
 <html>
 <head>
