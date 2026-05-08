@@ -602,19 +602,233 @@ def profile(band_id):
                     """
 
                 return f"""
-                <h1>{name}</h1>
-                <p><strong>{age_group}</strong> • ID: {band_id}</p>
-                <h3>⚠️ {condition}</h3>
-                <p><strong>WHAT TO DO:</strong><br>{instructions}</p>
-                <p><strong>MEDICAL NOTES:</strong><br>{medical_notes}</p>
+<!DOCTYPE html>
+<html>
+<head>
+<title>EmpowerBand {band_id}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-                <p><a href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a></p>
+<style>
 
-                <form method="GET" action="/customer/{band_id}">
-                    <input type="password" name="pin" placeholder="Enter PIN">
-                    <button type="submit">Unlock Full Info</button>
-                </form>
-                """
+body {{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    min-height:100vh;
+    color:white;
+}}
+
+.page {{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+}}
+
+.card {{
+    width:100%;
+    max-width:520px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}}
+
+.badge {{
+    display:inline-block;
+    background:rgba(56,189,248,.12);
+    color:#7dd3fc;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:18px;
+}}
+
+h1 {{
+    margin:0;
+    font-size:38px;
+    font-weight:800;
+}}
+
+.info {{
+    color:#cbd5e1;
+    margin-top:8px;
+    margin-bottom:25px;
+}}
+
+.alert-box {{
+    background:rgba(250,204,21,.12);
+    border:1px solid rgba(250,204,21,.35);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:20px;
+}}
+
+.section {{
+    margin-top:22px;
+}}
+
+.section-title {{
+    color:#67e8f9;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:8px;
+}}
+
+.section-text {{
+    color:#e5e7eb;
+    line-height:1.6;
+}}
+
+.btn {{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+    padding:16px;
+    border-radius:16px;
+    margin-top:16px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:16px;
+}}
+
+.btn-red {{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;
+}}
+
+.btn-blue {{
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+}}
+
+.pin-box {{
+    margin-top:25px;
+}}
+
+input {{
+    width:100%;
+    box-sizing:border-box;
+    padding:15px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    background:rgba(255,255,255,.1);
+    color:white;
+    margin-bottom:14px;
+    font-size:16px;
+}}
+
+input::placeholder {{
+    color:#cbd5e1;
+}}
+
+.unlock-btn {{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    color:white;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+}}
+
+.footer {{
+    margin-top:25px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+}}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="card">
+
+<div class="badge">
+EmpowerBands Emergency Profile
+</div>
+
+<h1>{name}</h1>
+
+<div class="info">
+{age_group} • ID: {band_id}
+</div>
+
+<div class="alert-box">
+⚠️ <strong>{condition}</strong>
+</div>
+
+<div class="section">
+<div class="section-title">
+WHAT TO DO
+</div>
+
+<div class="section-text">
+{instructions}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+MEDICAL NOTES
+</div>
+
+<div class="section-text">
+Protected — enter PIN to view
+</div>
+</div>
+
+<a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">
+🚨 Activate Emergency Alert
+</a>
+
+<a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
+📞 Call Emergency Contact
+</a>
+
+<div class="pin-box">
+
+<form method="GET" action="/customer/{band_id}">
+
+<input
+type="password"
+name="pin"
+placeholder="Enter PIN to unlock full info"
+required
+>
+
+<button class="unlock-btn" type="submit">
+Unlock Full Info
+</button>
+
+</form>
+
+</div>
+
+<div class="footer">
+EmpowerBands Emergency Response System
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
+"""
 
     return """
     <h1>Band Not Found</h1>
