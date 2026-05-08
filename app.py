@@ -714,8 +714,8 @@ def profile(band_id):
                     </html>
                     """
 
-               if entered_pin == pin:
-    return f"""
+                if entered_pin == pin:
+                    return f"""
 <!DOCTYPE html>
 <html>
 <head>
