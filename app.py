@@ -279,116 +279,173 @@ def admin():
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>EmpowerBands Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #07111f, #0b2545, #111827);
-        color: white;
-        min-height: 100vh;
-    }
+<title>EmpowerBands Admin</title>
 
-    .page {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 25px;
-    }
+<style>
 
-    .card {
-        width: 100%;
-        max-width: 430px;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.18);
-        border-radius: 24px;
-        padding: 28px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-    }
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    min-height:100vh;
+    color:white;
+    overflow:hidden;
+}
 
-    .logo {
-        text-align: center;
-        font-size: 34px;
-        font-weight: 800;
-        margin-bottom: 8px;
-    }
+.bg-glow{
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:#06b6d4;
+    filter:blur(140px);
+    opacity:.15;
+    top:-120px;
+    right:-120px;
+}
 
-    .subtitle {
-        text-align: center;
-        color: #cbd5e1;
-        margin-bottom: 25px;
-    }
+.page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+    position:relative;
+    z-index:2;
+}
 
-    input {
-        width: 100%;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 14px;
-        border: none;
-        outline: none;
-        font-size: 16px;
-        box-sizing: border-box;
-    }
+.card{
+    width:100%;
+    max-width:460px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:35px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
 
-    .btn {
-        width: 100%;
-        padding: 15px;
-        border: none;
-        border-radius: 14px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 12px;
-        background: linear-gradient(135deg, #38bdf8, #2563eb);
-        color: white;
-    }
+.logo{
+    text-align:center;
+    font-size:38px;
+    font-weight:800;
+    margin-bottom:6px;
+    letter-spacing:.5px;
+}
 
-    .footer {
-        text-align: center;
-        margin-top: 18px;
-        font-size: 12px;
-        color: #94a3b8;
-    }
-    </style>
+.logo span{
+    color:#38bdf8;
+}
+
+.subtitle{
+    text-align:center;
+    color:#cbd5e1;
+    margin-bottom:28px;
+    font-size:15px;
+}
+
+input{
+    width:100%;
+    box-sizing:border-box;
+    padding:16px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    margin-bottom:16px;
+    font-size:16px;
+    background:rgba(255,255,255,0.12);
+    color:white;
+}
+
+input::placeholder{
+    color:#cbd5e1;
+}
+
+.btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    font-size:17px;
+    font-weight:700;
+    cursor:pointer;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+    transition:.25s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    opacity:.95;
+}
+
+.footer{
+    text-align:center;
+    margin-top:22px;
+    color:#94a3b8;
+    font-size:12px;
+    line-height:1.5;
+}
+
+.shield{
+    width:80px;
+    height:80px;
+    margin:0 auto 20px;
+    border-radius:50%;
+    background:rgba(56,189,248,.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    border:1px solid rgba(255,255,255,.12);
+}
+
+</style>
 </head>
 
 <body>
 
+<div class="bg-glow"></div>
+
 <div class="page">
 
-    <div class="card">
+<div class="card">
 
-        <div class="logo">
-            EmpowerBands
-        </div>
+<div class="shield">
+🛡️
+</div>
 
-        <div class="subtitle">
-            Secure Admin Portal
-        </div>
+<div class="logo">
+Empower<span>Bands</span>
+</div>
 
-        <form method="POST">
+<div class="subtitle">
+Secure Admin Access Portal
+</div>
 
-            <input
-                type="password"
-                name="password"
-                placeholder="Enter admin password"
-                required
-            >
+<form method="POST">
 
-            <button class="btn" type="submit">
-                Login
-            </button>
+<input
+type="password"
+name="password"
+placeholder="Enter admin password"
+required
+>
 
-        </form>
+<button class="btn" type="submit">
+Login To Dashboard
+</button>
 
-        <div class="footer">
-            Protected access for authorized EmpowerBands staff only.
-        </div>
+</form>
 
-    </div>
+<div class="footer">
+Protected access for authorized personnel only.<br>
+EmpowerBands Emergency System
+</div>
+
+</div>
 
 </div>
 
