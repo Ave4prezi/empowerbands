@@ -714,21 +714,206 @@ def profile(band_id):
                     </html>
                     """
 
-                if entered_pin == pin:
-                    return f"""
-                    <h1>Full Emergency Info</h1>
-                    <p><strong>Name:</strong> {name}</p>
-                    <p><strong>Email:</strong> {email}</p>
-                    <p><strong>Emergency Contact:</strong> {phone}</p>
-                    <p><strong>Age Group:</strong> {age_group}</p>
-                    <p><strong>Condition:</strong> {condition}</p>
-                    <p><strong>Instructions:</strong> {instructions}</p>
-                    <p><strong>MEDICAL NOTES:</strong><br>Protected — enter PIN to view</p>
-                    <p><a href="tel:{phone.split(',')[0].strip()}">📞 Call Emergency Contact</a></p>
-                    <p><a href="/customer/{band_id}">Back to Public View</a></p>
-                    """
+               if entered_pin == pin:
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<title>Full Emergency Info</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-                return f"""
+<style>
+
+body {{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#22c55e 0%,#07111f 28%,#030712 100%);
+    min-height:100vh;
+    color:white;
+}}
+
+.page {{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+}}
+
+.card {{
+    width:100%;
+    max-width:560px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}}
+
+.badge {{
+    display:inline-block;
+    background:rgba(34,197,94,.15);
+    color:#86efac;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:18px;
+}}
+
+h1 {{
+    margin:0;
+    font-size:36px;
+    font-weight:800;
+}}
+
+.info {{
+    color:#cbd5e1;
+    margin-top:8px;
+    margin-bottom:22px;
+}}
+
+.section {{
+    margin-top:18px;
+    padding:16px;
+    border-radius:18px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.1);
+}}
+
+.section-title {{
+    color:#67e8f9;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:7px;
+}}
+
+.section-text {{
+    color:#e5e7eb;
+    line-height:1.6;
+}}
+
+.btn {{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+    padding:16px;
+    border-radius:16px;
+    margin-top:16px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:16px;
+}}
+
+.btn-blue {{
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+}}
+
+.btn-dark {{
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:1px solid rgba(255,255,255,.15);
+}}
+
+.footer {{
+    margin-top:25px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+}}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="card">
+
+<div class="badge">
+Unlocked Full Emergency Info
+</div>
+
+<h1>{name}</h1>
+
+<div class="info">
+{age_group} • ID: {band_id}
+</div>
+
+<div class="section">
+<div class="section-title">
+EMAIL
+</div>
+
+<div class="section-text">
+{email}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+EMERGENCY CONTACT
+</div>
+
+<div class="section-text">
+{phone}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+CONDITION
+</div>
+
+<div class="section-text">
+{condition}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+INSTRUCTIONS
+</div>
+
+<div class="section-text">
+{instructions}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+PRIVATE MEDICAL NOTES
+</div>
+
+<div class="section-text">
+{medical_notes}
+</div>
+</div>
+
+<a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
+📞 Call Emergency Contact
+</a>
+
+<a class="btn btn-dark" href="/customer/{band_id}">
+Back to Public View
+</a>
+
+<div class="footer">
+PIN verified • EmpowerBands Emergency Response System
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
+"""
 <!DOCTYPE html>
 <html>
 <head>
