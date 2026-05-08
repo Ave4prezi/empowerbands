@@ -269,180 +269,129 @@ def admin():
         if request.form.get("password") == ADMIN_PASSWORD:
             session["logged_in"] = True
             return redirect("/add")
-        return "<h2>Wrong password</h2><p><a href='/admin'>Try again</a></p>"
+
+        return """
+        <h2>Wrong password</h2>
+        <p><a href='/admin'>Try again</a></p>
+        """
 
     return """
-return f"""
 <!DOCTYPE html>
 <html>
 <head>
-    <title>EmpowerBand {band_id}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EmpowerBands Admin</title>
+
+    <style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #07111f, #0b2545, #111827);
+        color: white;
+        min-height: 100vh;
+    }
+
+    .page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 25px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 430px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    }
+
+    .logo {
+        text-align: center;
+        font-size: 34px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #cbd5e1;
+        margin-bottom: 25px;
+    }
+
+    input {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 14px;
+        border: none;
+        outline: none;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 12px;
+        background: linear-gradient(135deg, #38bdf8, #2563eb);
+        color: white;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 12px;
+        color: #94a3b8;
+    }
+    </style>
 </head>
 
-<style>
-body {{
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #07111f, #0b2545, #111827);
-    color: white;
-    min-height: 100vh;
-}}
-
-.page {{
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 25px;
-}}
-
-.card {{
-    width: 100%;
-    max-width: 480px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 24px;
-    padding: 28px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-}}
-
-.logo {{
-    text-align: center;
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 8px;
-}}
-
-.subtitle {{
-    text-align: center;
-    color: #cbd5e1;
-    margin-bottom: 20px;
-}}
-
-.badge {{
-    display: inline-block;
-    padding: 7px 12px;
-    border-radius: 999px;
-    background: rgba(56,189,248,0.2);
-    color: #7dd3fc;
-    font-size: 13px;
-    margin-bottom: 15px;
-}}
-
-.info-box {{
-    background: rgba(255,255,255,0.09);
-    border-radius: 18px;
-    padding: 16px;
-    margin: 14px 0;
-    border: 1px solid rgba(255,255,255,0.12);
-}}
-
-.label {{
-    color: #94a3b8;
-    font-size: 13px;
-    margin-bottom: 4px;
-}}
-
-.value {{
-    font-size: 18px;
-    font-weight: bold;
-}}
-
-.btn {{
-    display: block;
-    text-align: center;
-    text-decoration: none;
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 12px;
-    box-sizing: border-box;
-}}
-
-.btn-alert {{
-    background: linear-gradient(135deg, #ef4444, #991b1b);
-    color: white;
-}}
-
-.btn-call {{
-    background: linear-gradient(135deg, #22c55e, #15803d);
-    color: white;
-}}
-
-.btn-dark {{
-    background: #020617;
-    color: white;
-    border: 1px solid #334155;
-}}
-
-input {{
-    width: 100%;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 14px;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    box-sizing: border-box;
-}}
-
-.footer {{
-    text-align: center;
-    margin-top: 18px;
-    font-size: 12px;
-    color: #94a3b8;
-}}
-</style>
-
 <body>
-    <div class="page">
-        <div class="card">
 
-            <div class="logo">EmpowerBands</div>
-            <div class="subtitle">Emergency ID Profile</div>
+<div class="page">
 
-            <span class="badge">Band ID: {band_id}</span>
+    <div class="card">
 
-            <div class="info-box">
-                <div class="label">Name</div>
-                <div class="value">{name}</div>
-            </div>
-
-            <div class="info-box">
-                <div class="label">Condition / Notes</div>
-                <div class="value">{condition}</div>
-            </div>
-
-            <div class="info-box">
-                <div class="label">Instructions</div>
-                <div class="value">{instructions}</div>
-            </div>
-
-            <a class="btn btn-call" href="tel:{phone}">
-                📞 Call Emergency Contact
-            </a>
-
-            <a class="btn btn-alert" href="/alert_with_location?band_id={band_id}">
-                🚨 Send Emergency Alert
-            </a>
-
-            <form method="GET" action="/customer/{band_id}">
-                <input type="password" name="pin" placeholder="Enter PIN for full info">
-                <button class="btn btn-dark" type="submit">
-                    Unlock Full Info
-                </button>
-            </form>
-
-            <div class="footer">
-                If this person appears to need help, contact their emergency contact immediately.
-            </div>
-
+        <div class="logo">
+            EmpowerBands
         </div>
+
+        <div class="subtitle">
+            Secure Admin Portal
+        </div>
+
+        <form method="POST">
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Enter admin password"
+                required
+            >
+
+            <button class="btn" type="submit">
+                Login
+            </button>
+
+        </form>
+
+        <div class="footer">
+            Protected access for authorized EmpowerBands staff only.
+        </div>
+
     </div>
+
+</div>
+
 </body>
 </html>
 """
