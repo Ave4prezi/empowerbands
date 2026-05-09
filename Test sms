@@ -1,0 +1,15 @@
+from twilio.rest import Client
+
+# Your real Twilio credentials
+account_sid = "ACa0bee0c5a4b03c6724f92417cd0a57c4"
+auth_token = "1d28168784e4c8480c96884b858345e8"
+
+client = Client(account_sid, auth_token)
+
+message = client.messages.create(
+    body="🚨 EmpowerBands test SOS alert",
+    from_="+YOUR_TWILIO_NUMBER",
+    to="+YOUR_CELL_NUMBER"
+)
+
+print(message.sid)
