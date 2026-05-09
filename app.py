@@ -456,10 +456,31 @@ EmpowerBands Emergency System
 # ADD PROFILE
 # ===============================
 
+def generate_band_id():
+    highest = 0
+
+    with open(file_name, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+
+        for row in reader:
+            if len(row) > 0:
+                band = row[0].strip().upper()
+
+                if band.startswith("EB"):
+                    try:
+                        number = int(band.replace("EB", ""))
+                        if number > highest:
+                            highest = number
+                    except:
+                        pass
+
+    return f"EB{highest + 1:03d}"
 @app.route("/add", methods=["GET", "POST"])
 def add():
     if not session.get("logged_in"):
         return redirect("/admin")
+    next_band_id = generate_band_id()
 
     if request.method == "POST":
         row = [
@@ -475,9 +496,7 @@ def add():
         ]
 
         with open(file_name, "a", newline="", encoding="utf-8") as f:
-            csv.writer(f).writerow(row)
-
-        return redirect("/customer/" + row[0])
+            csv.writer(f).writerow(       return redirect("/customer/" + row[0])
 
     return f"""
 <!DOCTYPE html>
