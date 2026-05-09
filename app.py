@@ -26,9 +26,9 @@ LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 
 demo_row = [
     "EB001",
-    "Jaden",
+    "Jordan",
     "email@test.com",
-    "+19382655364,+12566121274",
+    "+19382655364,+12566121274,+12566367487",
     "Child",
     "Autism – Nonverbal",
     "Please stay calm. I may not respond verbally. Call my emergency contact(s) immediately.",
