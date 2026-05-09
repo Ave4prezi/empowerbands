@@ -588,7 +588,7 @@ Create a secure EmpowerBand emergency profile
 
 <form method="POST">
 
-<input name="band_id" placeholder="Band ID example: EB002" required>
+<input name="band_id" value="{next_band_id}" readonly>
 
 <input name="name" placeholder="Full Name" required>
 
