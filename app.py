@@ -26,9 +26,9 @@ LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 
 demo_row = [
     "EB001",
-    "Jordan",
+    "Jaden",
     "email@test.com",
-    "+12566121274,+12566367487",
+    "+19382655364,+12566121274",
     "Child",
     "Autism – Nonverbal",
     "Please stay calm. I may not respond verbally. Call my emergency contact(s) immediately.",
@@ -463,11 +463,11 @@ def add():
 
     if request.method == "POST":
         row = [
-            <input name="band_id" value="{next_band_id}" readonly>
+            request.form["band_id"].strip().upper(),
             request.form["name"].strip(),
             request.form["email"].strip(),
             request.form["phone"].strip(),
-            request.form["age"].strip(),
+            request.form["age_group"].strip(),
             request.form["condition"].strip(),
             request.form["instructions"].strip(),
             request.form["medical_notes"].strip(),
@@ -479,7 +479,7 @@ def add():
 
         return redirect("/customer/" + row[0])
 
-    return f"""
+    return """
 <!DOCTYPE html>
 <html>
 <head>
@@ -588,7 +588,7 @@ Create a secure EmpowerBand emergency profile
 
 <form method="POST">
 
-<input name="band_id" value="{next_band_id}" readonly>
+<input name="band_id" placeholder="Band ID example: EB002" required>
 
 <input name="name" placeholder="Full Name" required>
 
@@ -1218,3 +1218,5 @@ def manifest():
     }
 
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=False)
