@@ -190,4 +190,4 @@ EmpowerBands Admin System
 
 </body>
 </html>
-"""
+return f"""
