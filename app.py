@@ -463,11 +463,11 @@ def add():
 
     if request.method == "POST":
         row = [
-            request.form["band_id"].strip().upper(),
+            <input name="band_id" value="{next_band_id}" readonly>
             request.form["name"].strip(),
             request.form["email"].strip(),
             request.form["phone"].strip(),
-            request.form["age_group"].strip(),
+            request.form["age"].strip(),
             request.form["condition"].strip(),
             request.form["instructions"].strip(),
             request.form["medical_notes"].strip(),
@@ -479,7 +479,7 @@ def add():
 
         return redirect("/customer/" + row[0])
 
-    return """
+    return f"""
 <!DOCTYPE html>
 <html>
 <head>
