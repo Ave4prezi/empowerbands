@@ -1,3 +1,13 @@
+from flask import Flask, request, redirect, session
+from twilio.rest import Client
+import csv
+import os
+import time
+import html
+
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
+
 def generate_band_id():
     highest = 0
 
