@@ -1112,6 +1112,12 @@ Protected — enter PIN to view
 📞 Call Emergency Contact
 </a>
 
+<a class="btn secondary" href="https://https://linktr.ee/EmpowerBandsWorldwide">
+    🔗 More EmpowerBands Links
+</a>
+
+
+
 <div class="pin-box">
 
 <form method="GET" action="/customer/{band_id}">
