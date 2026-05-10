@@ -1115,9 +1115,9 @@ Protected — enter PIN to view
 <a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
 📞 Call Emergency Contact
 </a>
-
 <a class="btn secondary" href="https://linktr.ee/EmpowerBandsWorldwide">
-    🔗 More EmpowerBands Links
+    🔗 Explore EmpowerBands Pro
+</a>
 </a>
 
 
