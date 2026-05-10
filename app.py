@@ -1112,7 +1112,7 @@ Protected — enter PIN to view
 📞 Call Emergency Contact
 </a>
 
-<a class="btn secondary" href="linktr.ee/EmpowerBandsWorldwide">
+<a class="btn secondary" href="www.linktr.ee/EmpowerBandsWorldwide">
     🔗 More EmpowerBands Links
 </a>
 
