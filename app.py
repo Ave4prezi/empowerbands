@@ -629,8 +629,8 @@ EmpowerBands Admin System
 # BAND PROFILE
 # ===============================
 
-@app.route("/customer/<band_id>")
-def profile(band_id):
+@app.route("/<band_id>")
+def customer_page(band_id):
     band_id = band_id.strip().upper()
     confirm_alert = request.args.get("confirm_alert") == "yes"
     alert_mode = request.args.get("alert") == "yes"
