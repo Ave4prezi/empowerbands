@@ -897,6 +897,10 @@ PRIVATE MEDICAL NOTES
 
 <a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
 📞 Call Emergency Contact
+</a> 
+
+<a class="btn alert" href="/alert?band_id={band_id}">
+    🚨 Send Alert
 </a>
 
 <a class="btn btn-dark" href="/customer/{band_id}">
@@ -1159,6 +1163,9 @@ EmpowerBands Emergency Response System
 # ===============================
 # GPS ALERT ROUTE
 # ===============================
+
+@app.route("/alert_with_location")
+def alert_with_location():
 
 @app.route("/alert_with_location")
 def alert_with_location():
