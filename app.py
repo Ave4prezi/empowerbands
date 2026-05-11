@@ -1207,14 +1207,18 @@ EmpowerBands Emergency Response System
 # GPS ALERT ROUTE
 # ===============================
 
-@app.route("/alert_with_location")
-def alert_with_location():
+def send_email_alert(name, email, band_id):
+    pass
+
 
 @app.route("/alert_with_location")
 def alert_with_location():
+
     band_id = request.args.get("band_id", "").strip().upper()
     lat = request.args.get("lat")
     lon = request.args.get("lon")
+
+    return f"Location received for {band_id}: {lat}, {lon}"
 
     with open(file_name, "r", encoding="utf-8") as f:
         reader = csv.reader(f)
