@@ -698,8 +698,9 @@ def profile(band_id):
 
                 if alert_mode:
                     success = send_alert_text(name, phone, band_id)
+                    email_success = send_email_alert(name, email, band_id)
 
-                    if success:
+                    if success or email_success:
                         return f"""
                         <h1>✅ Alert Sent</h1>
                         <p>Emergency contact(s) have been notified.</p>
@@ -1208,8 +1209,45 @@ EmpowerBands Emergency Response System
 # ===============================
 
 def send_email_alert(name, email, band_id):
-    pass
 
+    sender_email = os.environ.get("ALERT_EMAIL")
+    sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
+
+    if not sender_email or not sender_password:
+        print("Email credentials missing")
+        return False
+
+    subject = f"🚨 EmpowerBands Emergency Alert for {name}"
+
+    body = f"""
+EmpowerBands Emergency Alert
+
+{name}'s emergency profile was accessed.
+
+Profile:
+{BASE_URL}/customer/{band_id}
+
+This person may need assistance.
+"""
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = email
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, msg.as_string())
+        server.quit()
+
+        print("Email alert sent")
+        return True
+
+    except Exception as e:
+        print("Email error:", e)
+        return False
 
 @app.route("/alert_with_location")
 def alert_with_location():
