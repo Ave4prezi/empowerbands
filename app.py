@@ -3,6 +3,8 @@ from twilio.rest import Client
 import csv
 import os
 import time
+import smtplib
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
@@ -109,6 +111,47 @@ def send_alert_text(name, phones, band_id):
             print(f"Twilio error for {phone}: {e}")
 
     return True
+
+def send_email_alert(name, email, band_id):
+
+    sender_email = os.environ.get("ALERT_EMAIL")
+    sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
+
+    if not sender_email or not sender_password:
+        print("Email credentials missing")
+        return False
+
+    subject = f"🚨 EmpowerBands Emergency Alert for {name}"
+
+    body = f"""
+EmpowerBands Emergency Alert
+
+{name}'s emergency profile was accessed.
+
+Profile:
+{BASE_URL}/customer/{band_id}
+
+This person may need assistance.
+"""
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = email
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, email, msg.as_string())
+        server.quit()
+
+        print("Email alert sent")
+        return True
+
+    except Exception as e:
+        print("Email error:", e)
+        return False
 
 
 # ===============================
