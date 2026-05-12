@@ -154,9 +154,7 @@ This person may need assistance.
         return False
 
 
-# ===============================
-# HOME PAGE
-# ===============================
+
 
 # ===============================
 # HOME PAGE
@@ -300,7 +298,7 @@ def old_band_link(band_id):
     if band_id.lower() in blocked_routes:
         return redirect("/")
 
-    return redirect(f"/customer/{band_id}")
+    return redirect(f"/customer/{band_id.upper()}")
 
 # ===============================
 # ADMIN LOGIN
