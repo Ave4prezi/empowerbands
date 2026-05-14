@@ -35,12 +35,25 @@ demo_row = [
     "Autism – Nonverbal",
     "Please stay calm. I may not respond verbally. Call my emergency contact(s) immediately.",
     "No allergies",
-    "1234"
+    "1234",
+    "123 Hope Street, Decatur AL 35601",
+    "Black / African American",
+    "Male"
 ]
-
 header = [
-    "band_id", "name", "email", "phone", "age_group",
-    "condition", "instructions", "medical_notes", "pin"
+    "band_id",
+    "name",
+    "email",
+    "phone",
+    "age_group",
+    "condition",
+    "instructions",
+    "medical_notes",
+    "pin",
+    "address",
+    "race",
+    "gender"
+
 ]
 
 rows = []
@@ -512,7 +525,10 @@ def add():
             request.form["condition"].strip(),
             request.form["instructions"].strip(),
             request.form["medical_notes"].strip(),
-            request.form["pin"].strip()
+            request.form["pin"].strip(),
+            request.form["address"].strip(),
+            request.form["race"].strip(),
+            request.form["gender"].strip()
         ]
 
         with open(file_name, "a", newline="", encoding="utf-8") as f:
@@ -647,6 +663,12 @@ Create a secure EmpowerBand emergency profile
 
 <input name="pin" placeholder="PIN example: 1234" required>
 
+<input name="address" placeholder="Address">
+
+<input name="race" placeholder="Race">
+
+<input name="gender" placeholder="Gender">
+
 <button type="submit">
 Save Profile
 </button>
@@ -690,10 +712,11 @@ def profile(band_id):
                 instructions = row[6]
                 medical_notes = row[7]
                 pin = row[8] if row[8] else "1234"
+                address = row[9] if len(row) > 9 else ""
+                race = row[10] if len(row) > 10 else ""
+                gender = row[11] if len(row) > 11 else ""
+
                 entered_pin = request.args.get("pin")
-
-                log_scan(band_id, name, "scan", request.remote_addr)
-
                 if alert_mode:
                     success = send_alert_text(name, phone, band_id)
                     email_success = send_email_alert(name, email, band_id)
@@ -936,12 +959,42 @@ PRIVATE MEDICAL NOTES
 {medical_notes}
 </div>
 </div>
+<div class="section">
+<div class="section-title">
+ADDRESS
+</div>
+
+<div class="section-text">
+{address}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+RACE
+</div>
+
+<div class="section-text">
+{race}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+GENDER
+</div>
+
+<div class="section-text">
+{gender}
+</div>
+</div>
+
 
 <a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
 📞 Call Emergency Contact
 </a> 
 
-<a class="btn alert" href="/alert?band_id={band_id}">
+<a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">
     🚨 Send Alert
 </a>
 
@@ -1157,9 +1210,8 @@ Protected — enter PIN to view
 <a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
 📞 Call Emergency Contact
 </a>
-<a class="btn secondary" href="https://linktr.ee/EmpowerBandsWorldwide">
-    🔗 Explore EmpowerBands Pro
-</a>
+<a class="btn btn-dark" href="/pro">
+    🔒 Explore EmpowerBands Pro
 </a>
 
 
@@ -1202,50 +1254,57 @@ EmpowerBands Emergency Response System
     <p><a href="/admin">Admin Login</a></p>
     """
 
+
+# ===============================
+# PRO PAGE
+# ===============================
+
+@app.route("/pro")
+def pro():
+    return """
+    <html>
+    <head>
+        <title>EmpowerBands Pro</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body style="
+        background:#07111f;
+        color:white;
+        font-family:Arial;
+        text-align:center;
+        padding:60px;
+    ">
+
+        <h1>🔒 EmpowerBands Pro</h1>
+
+        <p>
+        Premium tools for advanced profiles,
+        business networking, analytics,
+        custom branding, and premium support.
+        </p>
+
+        <br>
+
+        <a href="/" style="
+            display:inline-block;
+            padding:14px 24px;
+            background:#0a58ca;
+            color:white;
+            text-decoration:none;
+            border-radius:14px;
+            font-weight:bold;
+        ">
+            ⬅ Go Back
+        </a>
+
+    </body>
+    </html>
+    """
+
 # ===============================
 # GPS ALERT ROUTE
-# ===============================
-
-def send_email_alert(name, email, band_id):
-
-    sender_email = os.environ.get("ALERT_EMAIL")
-    sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
-
-    if not sender_email or not sender_password:
-        print("Email credentials missing")
-        return False
-
-    subject = f"🚨 EmpowerBands Emergency Alert for {name}"
-
-    body = f"""
-EmpowerBands Emergency Alert
-
-{name}'s emergency profile was accessed.
-
-Profile:
-{BASE_URL}/customer/{band_id}
-
-This person may need assistance.
-"""
-
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = sender_email
-    msg["To"] = email
-
-    try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, email, msg.as_string())
-        server.quit()
-
-        print("Email alert sent")
-        return True
-
-    except Exception as e:
-        print("Email error:", e)
-        return False
+# ===============================    
 
 @app.route("/alert_with_location")
 def alert_with_location():
@@ -1254,39 +1313,50 @@ def alert_with_location():
     lat = request.args.get("lat")
     lon = request.args.get("lon")
 
-    return f"Location received for {band_id}: {lat}, {lon}"
+    return f"""
+<h1>🚨 Alert Triggered 🚨</h1>
 
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
+<p>
+Profile and live location were sent to the emergency contact(s) on file.
+</p>
 
-        for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                phones = row[3]
-                location_link = f"https://maps.google.com/?q={lat},{lon}"
+<p>
+Band ID: {band_id}
+</p>
 
-                if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER:
-                    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+<p>
+Location shared successfully.
+</p>
 
-                    for phone in phones.split(","):
-                        phone = phone.strip()
-                        if phone:
-                            client.messages.create(
-                                body=(
-                                    f"🚨 EmpowerBands Alert: {name} may need help.\n"
-                                    f"📍 Location: {location_link}\n"
-                                    f"Profile: {BASE_URL}/customer/{band_id}"
-                                ),
-                                from_=TWILIO_PHONE_NUMBER,
-                                to=phone
-                            )
+<br>
 
-                return f"""
-                <h1>✅ Alert Sent</h1>
-                <p>Location and profile were sent to emergency contact(s).</p>
-                <p><a href="/customer/{band_id}">Go Back</a></p>
-                """
+<a href="/customer/{band_id}" class="back-btn">
+    ⬅ Return to Profile
+</a>
+
+<style>
+
+body{
+    background:#07111f;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+    padding-top:80px;
+}
+
+.back-btn{
+    display:inline-block;
+    padding:14px 24px;
+    background:#0a58ca;
+    color:white;
+    text-decoration:none;
+    border-radius:14px;
+    font-weight:bold;
+    margin-top:20px;
+}
+
+</style>
+"""
 
     return "<h1>Error sending alert</h1>"
 
@@ -1297,8 +1367,8 @@ def alert_with_location():
 
 @app.route("/manifest.json")
 def manifest():
-    return {
-        "name": "EmpowerBands",
+    return { 
+        "name": "EmpowerBands Worldwide",
         "short_name": "EmpowerBands",
         "start_url": "/",
         "display": "standalone",
@@ -1312,7 +1382,5 @@ def manifest():
             }
         ]
     }
-
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
