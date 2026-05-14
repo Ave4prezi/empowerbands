@@ -1324,52 +1324,89 @@ def alert_with_location():
     lat = request.args.get("lat")
     lon = request.args.get("lon")
 
-    return f"""
-<h1>🚨 Alert Triggered 🚨</h1>
+    maps_link = f"https://maps.google.com/?q={lat},{lon}"
+
+    with open(file_name, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+
+        for row in reader:
+            if row[0].strip().upper() == band_id:
+
+                name = row[1]
+                email = row[2]
+                phone = row[3]
+
+                send_alert_text(name, phone, band_id)
+                send_email_alert(name, email, band_id)
+
+                return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{{
+    background:#07111f;
+    color:white;
+    font-family:Arial,sans-serif;
+    text-align:center;
+    padding:60px 20px;
+}}
+
+.card{{
+    max-width:500px;
+    margin:auto;
+    background:rgba(255,255,255,0.08);
+    padding:30px;
+    border-radius:24px;
+}}
+
+.btn{{
+    display:block;
+    margin-top:20px;
+    padding:16px;
+    border-radius:14px;
+    text-decoration:none;
+    background:#0a58ca;
+    color:white;
+    font-weight:bold;
+}}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>🚨 Alert Sent</h1>
 
 <p>
-Profile and live location were sent to the emergency contact(s) on file.
+Emergency contact(s) have been notified successfully.
 </p>
 
 <p>
 Band ID: {band_id}
 </p>
 
-<p>
-Location shared successfully.
-</p>
-
-<br>
-
-<a href="/{band_id}" class="back-btn">
-    ⬅ Return to Profile
+<a class="btn" href="{maps_link}" target="_blank">
+📍 Open Shared Location
 </a>
 
-<style>
+<a class="btn" href="/{band_id}">
+⬅ Return To Profile
+</a>
 
-body{
-    background:#07111f;
-    color:white;
-    font-family:Arial;
-    text-align:center;
-    padding-top:80px;
-}
+</div>
 
-.back-btn{
-    display:inline-block;
-    padding:14px 24px;
-    background:#0a58ca;
-    color:white;
-    text-decoration:none;
-    border-radius:14px;
-    font-weight:bold;
-    margin-top:20px;
-}
-
-</style>
+</body>
+</html>
 """
 
-    return "<h1>Error sending alert</h1>"
+    return "<h1>Band not found</h1>"
 
 
 # ===============================
