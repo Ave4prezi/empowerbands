@@ -107,7 +107,7 @@ def send_alert_text(name, phones, band_id):
     message = (
         f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
         f"They may be lost, confused, or unable to communicate. "
-        f"Profile: {BASE_URL}/customer/{band_id}"
+        f"Profile: {BASE_URL}/{band_id}"
     )
 
     phone_list = [p.strip() for p in phones.split(",") if p.strip()]
@@ -142,7 +142,7 @@ EmpowerBands Emergency Alert
 {name}'s emergency profile was accessed.
 
 Profile:
-{BASE_URL}/customer/{band_id}
+{BASE_URL}/{band_id}
 
 This person may need assistance.
 """
@@ -280,7 +280,7 @@ def home():
                 contact caregivers, and send alerts with location.
             </p>
 
-            <a class="btn" href="/customer/EB001">View Live Demo</a>
+            <a class="btn" href="/EB001">View Live Demo</a>
             <a class="btn dark" href="/admin">Admin Login</a>
 
             <div class="card">
@@ -303,16 +303,21 @@ def home():
 # ===============================
 # SHORT LINK REDIRECT
 # ===============================
-
 @app.route("/<band_id>")
-def old_band_link(band_id):
-    blocked_routes = ["admin", "add", "alert_with_location", "customer"]
+def band_profile_shortcut(band_id):
+
+    blocked_routes = [
+        "admin",
+        "add",
+        "alert_with_location",
+        "manifest.json",
+        "pro"
+    ]
 
     if band_id.lower() in blocked_routes:
         return redirect("/")
 
-    return redirect(f"/customer/{band_id.upper()}")
-
+    return profile(band_id.upper())
 # ===============================
 # ADMIN LOGIN
 # ===============================
@@ -516,6 +521,8 @@ def add():
         return redirect("/admin")
 
     if request.method == "POST":
+        # save profile
+        
         row = [
             request.form["band_id"].strip().upper(),
             request.form["name"].strip(),
@@ -534,9 +541,13 @@ def add():
         with open(file_name, "a", newline="", encoding="utf-8") as f:
             csv.writer(f).writerow(row)
 
-        return redirect("/customer/" + row[0])
+        print(f"PROFILE SAVED: {row[0]}")
+
+        return redirect("/" + row[0])
 
     return """
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -725,13 +736,13 @@ def profile(band_id):
                         return f"""
                         <h1>✅ Alert Sent</h1>
                         <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/customer/{band_id}">Go Back</a></p>
+                        <p><a href="/{band_id}">Go Back</a></p>
                         """
                     else:
                         return f"""
                         <h1>❌ Alert Failed</h1>
                         <p>There was a problem sending the alert.</p>
-                        <p><a href="/customer/{band_id}">Go Back</a></p>
+                        <p><a href="/{band_id}">Go Back</a></p>
                         """
 
                 if confirm_alert:
@@ -755,7 +766,7 @@ def profile(band_id):
                                 🚨 Send Alert With Location
                             </button>
 
-                            <a href="/customer/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+                            <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
                                 Cancel
                             </a>
                         </div>
@@ -768,10 +779,10 @@ def profile(band_id):
                                     let lon = pos.coords.longitude;
                                     window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
                                 }}, function(){{
-                                    window.location.href = "/customer/{band_id}?alert=yes";
+                                    window.location.href = "/{band_id}?alert=yes";
                                 }});
                             }} else {{
-                                window.location.href = "/customer/{band_id}?alert=yes";
+                                window.location.href = "/{band_id}?alert=yes";
                             }}
                         }}
                         </script>
@@ -994,11 +1005,11 @@ GENDER
 📞 Call Emergency Contact
 </a> 
 
-<a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">
+<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
     🚨 Send Alert
 </a>
 
-<a class="btn btn-dark" href="/customer/{band_id}">
+<a class="btn btn-dark" href="/{band_id}">
 Back to Public View
 </a>
 
@@ -1203,7 +1214,7 @@ Protected — enter PIN to view
 </div>
 </div>
 
-<a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">
+<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
 🚨 Activate Emergency Alert
 </a>
 
@@ -1218,7 +1229,7 @@ Protected — enter PIN to view
 
 <div class="pin-box">
 
-<form method="GET" action="/customer/{band_id}">
+<form method="GET" action="/{band_id}">
 
 <input
 type="password"
@@ -1330,7 +1341,7 @@ Location shared successfully.
 
 <br>
 
-<a href="/customer/{band_id}" class="back-btn">
+<a href="/{band_id}" class="back-btn">
     ⬅ Return to Profile
 </a>
 
