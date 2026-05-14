@@ -14,7 +14,7 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 file_name = "customers.csv"
 scan_log_file = "scan_log.csv"
 
-BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.onrender.com")
+BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.org")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
