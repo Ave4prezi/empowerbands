@@ -1,2 +1,4 @@
-band_id,name,email,phone,age_group,condition,instructions,medical_notes,pin,address,race,gender
-EA1800,Avery,Averyjohnsonmhkc@gmail.com,+19382655364,Adult,Hugging – Nonverbal,"Please stay calm. I may overly hug. Call my emergency contact immediately.","No allergies",1218,217 11th Ave Nw Decatur, AL 35601,Black,Male
+band_id,name,email,emergency_contact(s),age_group,condition,instructions,medical_notes,pin,address,race,gender
+EB001,Jaden,email@test.com,"+19382655364,+12566121274",Child,Autism – Nonverbal,Please stay calm. I may not respond verbally. Call my emergency contact(s) immediately.,No allergies,1234,"123 Hope Street, Decatur AL 35601",Black / African American,Male
+EA1800,Avery,Averyjohnsonmhkc@gmail.com,"+19382655364,+12564171970",Adult,Hugging – Nonverbal,"Please stay calm. I may overly hug. Call my emergency contact(s) immediately.","No allergies",1218,"217 11th Ave Nw Decatur AL 35601",Black / African American,Male
+EB0004,Selina Dobbins,Dobbins.Selina143@gmail.com,+12566420818,Adult,Rheumatoid arthritis/ADHD/,Both hips deteriorated/Hearing problems (May have to talk loud),No allergies,7777,"1413 Phillips ave Decatur AL 35601",White,Female
