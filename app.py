@@ -122,10 +122,11 @@ for phone in phone_list:
             from_=TWILIO_PHONE_NUMBER,
             to=phone
         )
-            
-            print(f"Alert sent to {phone}")
-        except Exception as e:
-            print(f"Twilio error for {phone}: {e}")
+
+        print(f"Alert sent to {phone}")
+
+    except Exception as e:
+        print(f"SMS failed for {phone}: {e}")
 
     return True
 
