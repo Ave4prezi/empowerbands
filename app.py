@@ -110,7 +110,7 @@ def send_alert_text(name, phones, band_id):
     message = (
         f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
         f"They may be lost, confused, or unable to communicate. "
-        f"Profile: {BASE_URL}/{
+        f"Profile: {BASE_URL}/{band_id}"
             
 def send_alert(message, phone_list):
 
