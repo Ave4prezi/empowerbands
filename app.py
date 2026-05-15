@@ -1534,5 +1534,51 @@ def manifest():
             }
         ]
     }
+
+    # ===============================
+# PRIVACY POLICY
+# ===============================
+
+@app.route("/privacy")
+def privacy():
+    return """
+    <html>
+    <head>
+        <title>EmpowerBands Privacy Policy</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body style="font-family:Arial; padding:30px; background:#07111f; color:white; line-height:1.6;">
+
+        <h1>Privacy Policy</h1>
+
+        <p>
+        EmpowerBands collects limited profile information to support emergency response,
+        caregiver communication, and safety alerts.
+        </p>
+
+        <p>
+        Information may include name, emergency contacts, medical notes, instructions,
+        and optional profile details entered by the user, guardian, school, or caregiver.
+        </p>
+
+        <p>
+        SMS alerts are used only for emergency-related notifications connected to an
+        activated EmpowerBand profile. Message and data rates may apply. Reply STOP to opt out.
+        </p>
+
+        <p>
+        EmpowerBands does not sell personal information.
+        </p>
+
+        <p>
+        Contact: support@empowerbands.org
+        </p>
+
+        <a href="/" style="color:#7dd3fc;">Back to Home</a>
+
+    </body>
+    </html>
+    """
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
