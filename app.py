@@ -1581,7 +1581,7 @@ def manifest():
         ]
     }
 
-    # ===============================
+# ===============================
 # PRIVACY POLICY
 # ===============================
 
@@ -1682,7 +1682,7 @@ def terms():
     </html>
     """
 
-    @app.route("/privacy")
+@app.route("/privacy")
 def privacy():
     return """
     <h1>Privacy Policy</h1>
@@ -1693,7 +1693,7 @@ def privacy():
     <p><a href="/">Back Home</a></p>
     """
 
-    @app.route("/terms")
+@app.route("/terms")
 def terms():
     return """
     <h1>Terms of Service</h1>
@@ -1704,7 +1704,7 @@ def terms():
     <p><a href="/">Back Home</a></p>
     """
 
-    @app.route("/delete-request")
+@app.route("/delete-request")
 def delete_request():
     return """
     <h1>Data Deletion Request</h1>
