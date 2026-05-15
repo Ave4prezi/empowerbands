@@ -113,14 +113,15 @@ def send_alert_text(name, phones, band_id):
         f"Profile: {BASE_URL}/{band_id}"
     )
 
-    phone_list = [p.strip() for p in phones.split(",") if p.strip()]
+    
 
-    for phone in phone_list:
-        try:
-            client.messages.create(
-                body=message,
-                from_=TWILIO_PHONE_NUMBER,
-                to=phone
+for phone in phone_list:
+    try:
+        client.messages.create(
+            body=message,
+            from_=TWILIO_PHONE_NUMBER,
+            to=phone
+        )
             )
             print(f"Alert sent to {phone}")
         except Exception as e:
@@ -420,12 +421,15 @@ def home():
 def band_profile_shortcut(band_id):
 
     blocked_routes = [
-        "admin",
-        "add",
-        "alert_with_location",
-        "manifest.json",
-        "pro"
-    ]
+    "admin",
+    "add",
+    "alert_with_location",
+    "manifest.json",
+    "pro",
+    "privacy",
+    "terms",
+    "delete-request"
+]
 
     if band_id.lower() in blocked_routes:
         return redirect("/")
@@ -787,7 +791,7 @@ Create a secure EmpowerBand emergency profile
 
 <input name="email" placeholder="Email">
 
-<input name="phone" placeholder="Emergency Phone Number" required>
+<input name="phone" placeholder="Emergency Contacts (comma separated)" required>
 
 <input name="age_group" placeholder="Child / Adult / Senior">
 
