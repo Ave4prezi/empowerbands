@@ -279,6 +279,18 @@ def home():
                 Tap the band to instantly access emergency support info,
                 contact caregivers, and send alerts with location.
             </p>
+            
+            <div class="card">
+    <h3>SMS Alert Consent</h3>
+    <p>
+        By registering or activating an EmpowerBand, users and guardians consent
+        to receive SMS emergency alerts, safety notifications, and location-sharing
+        messages related to emergency events and authorized safety responses.
+    </p>
+    <p>
+        Message and data rates may apply. Reply STOP to opt out.
+    </p>
+</div>
 
             <a class="btn" href="/EB001">View Live Demo</a>
             <a class="btn dark" href="/admin">Admin Login</a>
