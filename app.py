@@ -110,23 +110,22 @@ def send_alert_text(name, phones, band_id):
     message = (
         f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
         f"They may be lost, confused, or unable to communicate. "
-        f"Profile: {BASE_URL}/{band_id}"
-    )
+        f"Profile: {BASE_URL}/{
+            
+def send_alert(message, phone_list):
 
-    
+    for phone in phone_list:
+        try:
+            client.messages.create(
+                body=message,
+                from_=TWILIO_PHONE_NUMBER,
+                to=phone
+            )
 
-for phone in phone_list:
-    try:
-        client.messages.create(
-            body=message,
-            from_=TWILIO_PHONE_NUMBER,
-            to=phone
-        )
+            print(f"Alert sent to {phone}")
 
-        print(f"Alert sent to {phone}")
-
-    except Exception as e:
-        print(f"SMS failed for {phone}: {e}")
+        except Exception as e:
+            print(f"SMS failed for {phone}: {e}")
 
     return True
 
