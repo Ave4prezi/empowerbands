@@ -1576,7 +1576,11 @@ def manifest():
             {
                 "src": LOGO_URL,
                 "sizes": "192x192",
-                "type": "image/ 
+                            "type": "image/png"
+        }
+    ]
+} 
+                
 # ===============================
 # PRIVACY POLICY
 # ===============================
