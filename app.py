@@ -374,6 +374,26 @@ def home():
                 <div class="item">🔵 Send emergency alert + location</div>
             </div>
 
+            <div class="card">
+
+    <h3>Privacy & Terms</h3>
+
+    <p>
+        EmpowerBands only uses contact and profile information to support
+        emergency response, caregiver communication, and safety alerts.
+    </p>
+
+    <p>
+        SMS alerts are only sent for emergency-related notifications connected
+        to an activated EmpowerBand profile.
+    </p>
+
+    <p>
+        Privacy Policy and Terms of Service pages coming soon.
+    </p>
+
+</div>
+
             <div class="footer">
                 Built for families, caregivers, and emergency responders
             </div>
