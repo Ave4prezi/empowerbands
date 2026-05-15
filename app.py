@@ -330,6 +330,40 @@ def home():
 
 </div>
 
+<div class="card">
+
+    <h3>How EmpowerBands Works</h3>
+
+    <div class="item">1️⃣ Tap the EmpowerBand with a smartphone</div>
+
+    <div class="item">
+        2️⃣ View emergency instructions and support information instantly
+    </div>
+
+    <div class="item">
+        3️⃣ Contact caregivers or activate emergency alerts with location sharing
+    </div>
+
+    <div class="card">
+
+    <h3>Built For Schools & Student Safety</h3>
+
+    <p>
+        EmpowerBands supports schools, special education programs,
+        athletics, field trips, and student safety initiatives by
+        helping staff and emergency contacts respond faster during
+        emergencies or medical situations.
+    </p>
+
+    <p>
+        Designed to support communication, safety awareness,
+        and rapid emergency response.
+    </p>
+
+</div>
+
+</div>
+
             <a class="btn" href="/EB001">View Live Demo</a>
             <a class="btn dark" href="/admin">Admin Login</a>
 
