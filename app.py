@@ -1576,11 +1576,7 @@ def manifest():
             {
                 "src": LOGO_URL,
                 "sizes": "192x192",
-                "type": "image/png"
-            }
-        ]
-    }
-
+                "type": "image/ 
 # ===============================
 # PRIVACY POLICY
 # ===============================
@@ -1623,75 +1619,12 @@ def privacy():
 
         
 
-        <a href="/" style="color:#7dd3fc;">Back to Home</a>
+        <a href="/" style="color:#i7dd3fc;">Back to Home</a>
 
     </body>
     </html>
     """
 
-    
-# ===============================
-# TERMS OF SERVICE
-# ===============================
-
-@app.route("/terms")
-def terms():
-    return """
-    <html>
-    <head>
-        <title>EmpowerBands Terms of Service</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-
-    <body style="font-family:Arial; padding:30px; background:#07111f; color:white; line-height:1.6;">
-
-        <h1>Terms of Service</h1>
-
-        <p>
-        EmpowerBands is designed to support emergency communication,
-        caregiver notifications, and safety awareness through NFC-enabled
-        wearable technology.
-        </p>
-
-        <p>
-        By activating or using an EmpowerBand, users consent to receiving
-        emergency-related SMS alerts and notifications connected to their profile.
-        </p>
-
-        <p>
-        Users are responsible for ensuring profile information and emergency
-        contacts remain accurate and updated.
-        </p>
-
-        <p>
-        EmpowerBands is not a replacement for 911 or emergency medical services.
-        Always contact emergency responders during life-threatening situations.
-        </p>
-
-        <p>
-        Message and data rates may apply. Reply STOP to opt out of SMS alerts.
-        </p>
-
-        <p>
-        Contact: support@empowerbands.org
-        </p>
-
-        <a href="/" style="color:#7dd3fc;">Back to Home</a>
-
-    </body>
-    </html>
-    """
-
-@app.route("/privacy")
-def privacy():
-    return """
-    <h1>Privacy Policy</h1>
-    <p>EmpowerBands collects information provided by users to help display emergency profile details and send emergency alerts.</p>
-    <p>Information may include name, phone number, email, emergency contacts, medical notes, and scan activity.</p>
-    <p>We do not sell personal information.</p>
-    <p>Users may request deletion of their information by contacting EmpowerBands support.</p>
-    <p><a href="/">Back Home</a></p>
-    """
 
 @app.route("/terms")
 def terms():
