@@ -614,6 +614,18 @@ Protected access for authorized personnel only.<br>
 EmpowerBands Emergency System
 </div>
 
+<footer style="text-align:center; padding:20px; font-size:13px; opacity:0.8;">
+    <p>
+        <a href="/privacy">Privacy Policy</a> |
+        <a href="/terms">Terms of Service</a> |
+        <a href="/delete-request">Data Deletion Request</a>
+    </p>
+
+    <p>
+        EmpowerBands is not a replacement for 911, EMS, or professional medical monitoring.
+    </p>
+</footer>
+
 </div>
 
 </div>
@@ -783,6 +795,10 @@ Create a secure EmpowerBand emergency profile
 <textarea name="medical_notes" placeholder="Private medical notes"></textarea>
 
 <input name="pin" placeholder="PIN example: 1234" required>
+<p style="font-size:12px; opacity:0.8;">
+    By providing a phone number, you consent to receive emergency SMS alerts from EmpowerBands.
+    Message and data rates may apply. Message frequency varies. Reply STOP to opt out.
+</p>
 
 <input name="address" placeholder="Address">
 
@@ -790,6 +806,15 @@ Create a secure EmpowerBand emergency profile
 
 <input name="gender" placeholder="Gender">
 
+<label style="display:block; margin-top:15px; font-size:13px;">
+    <input type="checkbox" name="agree_terms" required>
+    I agree to the Privacy Policy and Terms of Service.
+</label>
+
+<label style="display:block; margin-top:10px; font-size:13px;">
+    <input type="checkbox" name="sms_consent" required>
+    I consent to receive emergency SMS alerts from EmpowerBands.
+</label>
 <button type="submit">
 Save Profile
 </button>
@@ -1118,6 +1143,9 @@ GENDER
 <a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
     🚨 Send Alert
 </a>
+<p style="font-size:12px; color:#ffcccc; margin-top:10px;">
+    EmpowerBands is not 911. In a life-threatening emergency, call 911 immediately.
+</p>
 
 <a class="btn btn-dark" href="/{band_id}">
 Back to Public View
@@ -1357,8 +1385,20 @@ Unlock Full Info
 </div>
 
 <div class="footer">
-EmpowerBands Emergency Response System
+    EmpowerBands Emergency Response System
 </div>
+
+<footer style="text-align:center; padding:20px; font-size:13px; opacity:0.8;">
+    <p>
+        <a href="/privacy">Privacy Policy</a> |
+        <a href="/terms">Terms of Service</a> |
+        <a href="/delete-request">Data Deletion Request</a>
+    </p>
+
+    <p>
+        EmpowerBands is not a replacement for 911, EMS, or professional medical monitoring.
+    </p>
+</footer>
 
 </div>
 
@@ -1640,6 +1680,38 @@ def terms():
 
     </body>
     </html>
+    """
+
+    @app.route("/privacy")
+def privacy():
+    return """
+    <h1>Privacy Policy</h1>
+    <p>EmpowerBands collects information provided by users to help display emergency profile details and send emergency alerts.</p>
+    <p>Information may include name, phone number, email, emergency contacts, medical notes, and scan activity.</p>
+    <p>We do not sell personal information.</p>
+    <p>Users may request deletion of their information by contacting EmpowerBands support.</p>
+    <p><a href="/">Back Home</a></p>
+    """
+
+    @app.route("/terms")
+def terms():
+    return """
+    <h1>Terms of Service</h1>
+    <p>EmpowerBands is a supplemental safety and communication tool.</p>
+    <p>EmpowerBands is not a replacement for 911, emergency medical services, law enforcement, or professional healthcare monitoring.</p>
+    <p>Users are responsible for keeping their emergency profile information accurate and updated.</p>
+    <p>By using EmpowerBands, users agree to receive emergency-related communication when their band or profile is activated.</p>
+    <p><a href="/">Back Home</a></p>
+    """
+
+    @app.route("/delete-request")
+def delete_request():
+    return """
+    <h1>Data Deletion Request</h1>
+    <p>To request removal of your EmpowerBands profile, emergency contact information, scan logs, or related data, contact EmpowerBands support.</p>
+    <p>Email: support@empowerbands.org</p>
+    <p>Please include your Band ID so we can locate your profile.</p>
+    <p><a href="/">Back Home</a></p>
     """
 
 if __name__ == "__main__":
