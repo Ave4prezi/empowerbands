@@ -292,6 +292,21 @@ def home():
     </p>
 </div>
 
+<div class="card">
+    <h3>About EmpowerBands</h3>
+
+    <p>
+        EmpowerBands provides NFC-enabled wearable safety bands designed to help
+        schools, families, caregivers, and emergency responders access important
+        support information quickly.
+    </p>
+
+    <p>
+        Each band can connect to a secure emergency profile with instructions,
+        medical notes, emergency contacts, and alert options.
+    </p>
+</div>
+
             <a class="btn" href="/EB001">View Live Demo</a>
             <a class="btn dark" href="/admin">Admin Login</a>
 
