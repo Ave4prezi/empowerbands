@@ -389,7 +389,13 @@ def home():
     </p>
 
     <p>
-        Privacy Policy and Terms of Service pages coming soon.
+        <a href="/privacy" style="color:#0a58ca;font-weight:bold;">
+            Privacy Policy
+        </a>
+        |
+        <a href="/terms" style="color:#0a58ca;font-weight:bold;">
+            Terms of Service
+        </a>
     </p>
 
 </div>
@@ -1574,6 +1580,8 @@ def privacy():
         <p>
         Contact: support@empowerbands.org
         </p>
+
+        
 
         <a href="/" style="color:#7dd3fc;">Back to Home</a>
 
