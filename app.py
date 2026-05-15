@@ -306,6 +306,29 @@ def home():
         medical notes, emergency contacts, and alert options.
     </p>
 </div>
+<div class="card">
+
+    <h3>Contact & Support</h3>
+
+    <p>
+        EmpowerBands Worldwide
+    </p>
+
+    <p>
+        Support Email:
+        support@empowerbands.org
+    </p>
+
+    <p>
+        Website:
+        https://empowerbands.org
+    </p>
+
+    <p>
+        School safety • Emergency response • NFC wearable technology
+    </p>
+
+</div>
 
             <a class="btn" href="/EB001">View Live Demo</a>
             <a class="btn dark" href="/admin">Admin Login</a>
