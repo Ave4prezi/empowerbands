@@ -1580,5 +1580,59 @@ def privacy():
     </body>
     </html>
     """
+
+    
+# ===============================
+# TERMS OF SERVICE
+# ===============================
+
+@app.route("/terms")
+def terms():
+    return """
+    <html>
+    <head>
+        <title>EmpowerBands Terms of Service</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body style="font-family:Arial; padding:30px; background:#07111f; color:white; line-height:1.6;">
+
+        <h1>Terms of Service</h1>
+
+        <p>
+        EmpowerBands is designed to support emergency communication,
+        caregiver notifications, and safety awareness through NFC-enabled
+        wearable technology.
+        </p>
+
+        <p>
+        By activating or using an EmpowerBand, users consent to receiving
+        emergency-related SMS alerts and notifications connected to their profile.
+        </p>
+
+        <p>
+        Users are responsible for ensuring profile information and emergency
+        contacts remain accurate and updated.
+        </p>
+
+        <p>
+        EmpowerBands is not a replacement for 911 or emergency medical services.
+        Always contact emergency responders during life-threatening situations.
+        </p>
+
+        <p>
+        Message and data rates may apply. Reply STOP to opt out of SMS alerts.
+        </p>
+
+        <p>
+        Contact: support@empowerbands.org
+        </p>
+
+        <a href="/" style="color:#7dd3fc;">Back to Home</a>
+
+    </body>
+    </html>
+    """
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
