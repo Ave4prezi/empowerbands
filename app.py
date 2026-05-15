@@ -19,6 +19,9 @@ TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 
+ALERT_EMAIL = os.environ.get("ALERT_EMAIL")
+ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
+
 LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 
 
