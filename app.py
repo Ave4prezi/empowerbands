@@ -1033,11 +1033,8 @@ button{
     font-size:12px;
 }
 
-.band-row{
-    display:flex;
-    gap:12px;
-    margin-bottom:16px;
-}
+
+
 
 .band-row{
     display:flex;
@@ -1381,13 +1378,14 @@ def profile(band_id):
                 photo_url = row[12] if len(row) > 12 else ""
 
                 visitor_ip = request.remote_addr
+                log_scan(
+                    band_id,
+                    name,
+                    "PROFILE_VIEW",
+                    visitor_ip
+                )
 
-log_scan(
-    band_id,
-    name,
-    "PROFILE_VIEW",
-    visitor_ip
-)
+    
 
                 entered_pin = request.args.get("pin")
                 if alert_mode:
