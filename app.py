@@ -708,6 +708,11 @@ def dashboard():
                    View Profile
                 </a>
 
+                <a class="btn edit"
+   href="/edit/{band_id}">
+   Edit Profile
+</a>
+
             </div>
 
         </div>
@@ -851,6 +856,11 @@ body{{
     padding:80px 20px;
     color:#94a3b8;
 }}
+
+.edit{
+    background:#0f766e;
+    margin-left:8px;
+}
 
 </style>
 
@@ -1162,6 +1172,180 @@ function generateBandId(){
 }
 
 </script>
+</body>
+</html>
+"""
+
+# ===============================
+# EDIT PROFILE
+# ===============================
+
+@app.route("/edit/<band_id>", methods=["GET", "POST"])
+def edit_profile(band_id):
+
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    band_id = band_id.strip().upper()
+
+    with open(file_name, "r", newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+
+    header = rows[0]
+    data_rows = rows[1:]
+
+    found_row = None
+
+    for row in data_rows:
+        if row[0].strip().upper() == band_id:
+            while len(row) < 13:
+                row.append("")
+            found_row = row
+            break
+
+    if not found_row:
+        return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
+
+    if request.method == "POST":
+
+        updated_row = [
+            request.form["band_id"].strip().upper(),
+            request.form["name"].strip(),
+            request.form["email"].strip(),
+            request.form["phone"].strip(),
+            request.form["age_group"].strip(),
+            request.form["condition"].strip(),
+            request.form["instructions"].strip(),
+            request.form["medical_notes"].strip(),
+            request.form["pin"].strip(),
+            request.form["address"].strip(),
+            request.form["race"].strip(),
+            request.form["gender"].strip(),
+            request.form["photo_url"].strip()
+        ]
+
+        new_rows = [header]
+
+        for row in data_rows:
+            if row[0].strip().upper() == band_id:
+                new_rows.append(updated_row)
+            else:
+                new_rows.append(row)
+
+        with open(file_name, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerows(new_rows)
+
+        return redirect("/dashboard")
+
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit EmpowerBand Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    min-height:100vh;
+    color:white;
+}}
+
+.page{{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+}}
+
+.card{{
+    width:100%;
+    max-width:560px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}}
+
+h1{{
+    text-align:center;
+}}
+
+input, textarea{{
+    width:100%;
+    box-sizing:border-box;
+    padding:15px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    background:rgba(255,255,255,.1);
+    color:white;
+    margin-bottom:14px;
+    font-size:16px;
+}}
+
+textarea{{
+    min-height:90px;
+}}
+
+button{{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    color:white;
+    font-weight:bold;
+    font-size:17px;
+}}
+
+.back{{
+    display:block;
+    text-align:center;
+    margin-top:15px;
+    color:#7dd3fc;
+}}
+</style>
+</head>
+
+<body>
+<div class="page">
+<div class="card">
+
+<h1>Edit Profile</h1>
+
+<form method="POST">
+
+<input name="band_id" value="{found_row[0]}" required>
+<input name="name" value="{found_row[1]}" required>
+<input name="email" value="{found_row[2]}">
+<input name="phone" value="{found_row[3]}" required>
+<input name="age_group" value="{found_row[4]}">
+<input name="condition" value="{found_row[5]}">
+
+<textarea name="instructions">{found_row[6]}</textarea>
+<textarea name="medical_notes">{found_row[7]}</textarea>
+
+<input name="pin" value="{found_row[8]}" required>
+<input name="address" value="{found_row[9]}">
+<input name="race" value="{found_row[10]}">
+<input name="gender" value="{found_row[11]}">
+<input name="photo_url" value="{found_row[12]}" placeholder="Photo URL">
+
+<button type="submit">Save Changes</button>
+
+</form>
+
+<a class="back" href="/dashboard">Back to Dashboard</a>
+
+</div>
+</div>
 </body>
 </html>
 """
