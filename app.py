@@ -1507,8 +1507,11 @@ def alert_with_location():
                 email = row[2]
                 phone = row[3]
 
-                send_alert_text(name, phone, band_id)
-                send_email_alert(name, email, band_id)
+                sms_success = send_alert_text(name, phone, band_id)
+email_success = send_email_alert(name, email, band_id)
+
+print("SMS success:", sms_success)
+print("Email success:", email_success)
 
                 return f"""
 <!DOCTYPE html>
