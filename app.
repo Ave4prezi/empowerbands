@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, session
+I'm from flask import Flask, request, redirect, session
 from twilio.rest import Client
 import csv
 import os
@@ -110,9 +110,12 @@ def send_alert_text(name, phones, band_id):
     message = (
         f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
         f"They may be lost, confused, or unable to communicate. "
-        f"Profile: {BASE_URL}/{band_id}") 
-            
-def send_alert(message, phone_list):
+        f"Profile: {BASE_URL}/{band_id}"
+    )
+
+    phone_list = [p.strip() for p in phones.split(",") if p.strip()]
+
+    success = False
 
     for phone in phone_list:
         try:
@@ -121,13 +124,13 @@ def send_alert(message, phone_list):
                 from_=TWILIO_PHONE_NUMBER,
                 to=phone
             )
-
             print(f"Alert sent to {phone}")
+            success = True
 
         except Exception as e:
             print(f"SMS failed for {phone}: {e}")
 
-    return True
+    return success
 
 def send_email_alert(name, email, band_id):
 
@@ -1037,6 +1040,11 @@ h1 {{
     border:1px solid rgba(255,255,255,.15);
 }}
 
+a[href^="tel"] {{
+    color:white;
+    text-decoration:none;
+}}
+
 .footer {{
     margin-top:25px;
     text-align:center;
@@ -1307,6 +1315,11 @@ input::placeholder {{
     font-weight:bold;
     font-size:16px;
     cursor:pointer;
+}}
+
+a[href^="tel"] {{ 
+    color:white;
+    text-decoration:none;
 }}
 
 .footer {{
@@ -1630,7 +1643,7 @@ def privacy():
 
         
 
-        <a href="/" style="color:#i7dd3fc;">Back to Home</a>
+        <a href="/" style="color:#7dd3fc;">Back to Home</a>
 
     </body>
     </html>
