@@ -421,6 +421,7 @@ def band_profile_shortcut(band_id):
     blocked_routes = [
     "admin",
     "add",
+    "scans",   
     "alert_with_location",
     "manifest.json",
     "pro",
@@ -878,6 +879,10 @@ body{{
 
         <a class="add-btn" href="/add">
             + Add Band
+        </a>
+
+        <a class="add-btn" href="/scans">
+            📡 View Scans
         </a>
 
     </div>
@@ -1962,6 +1967,160 @@ Unlock Full Info
     <p><a href="/admin">Admin Login</a></p>
     """
 
+
+
+# ===============================
+# SCAN LOGS PAGE
+# ===============================
+
+@app.route("/scans")
+def scans():
+
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    scans = []
+
+    try:
+
+        with open(scan_log_file, "r", encoding="utf-8") as f:
+
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                scans.append(row)
+
+        scans.reverse()
+
+    except:
+        scans = []
+
+    rows_html = ""
+
+    for scan in scans:
+
+        rows_html += f"""
+
+        <tr>
+            <td>{scan.get("BandID","")}</td>
+            <td>{scan.get("Name","")}</td>
+            <td>{scan.get("Time","")}</td>
+            <td>{scan.get("Type","")}</td>
+            <td>{scan.get("IP","")}</td>
+        </tr>
+
+        """
+
+    return f"""
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Scan Logs</title>
+
+<style>
+
+body{{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+    color:white;
+    min-height:100vh;
+}}
+
+.page{{
+    padding:25px;
+}}
+
+h1{{
+    font-size:34px;
+    margin-bottom:20px;
+}}
+
+.top-btn{{
+    display:inline-block;
+    margin-bottom:20px;
+    padding:14px 18px;
+    border-radius:14px;
+    background:#2563eb;
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}}
+
+.table-wrap{{
+    overflow-x:auto;
+    background:rgba(255,255,255,0.08);
+    border-radius:24px;
+    padding:20px;
+    border:1px solid rgba(255,255,255,0.12);
+}}
+
+table{{
+    width:100%;
+    border-collapse:collapse;
+}}
+
+th{{
+    text-align:left;
+    padding:14px;
+    color:#7dd3fc;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}}
+
+td{{
+    padding:14px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    color:#e5e7eb;
+}}
+
+.empty{{
+    text-align:center;
+    padding:40px;
+    color:#94a3b8;
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+<h1>📡 Scan Logs</h1>
+
+<a class="top-btn" href="/dashboard">
+⬅ Back To Dashboard
+</a>
+
+<div class="table-wrap">
+
+<table>
+
+<tr>
+    <th>Band ID</th>
+    <th>Name</th>
+    <th>Time</th>
+    <th>Type</th>
+    <th>IP</th>
+</tr>
+
+{rows_html if rows_html else '<tr><td colspan="5" class="empty">No scans yet</td></tr>'}
+
+</table>
+
+</div>
+
+</div>
+
+</body>
+</html>
+"""
 
 # ===============================
 # PRO PAGE
