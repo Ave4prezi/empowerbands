@@ -2203,86 +2203,52 @@ def alert_with_location():
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Sent</title>
 
-<style>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            text-align: center;
+            padding: 40px;
+        }}
 
-body{{
-    background:#07111f;
-    color:white;
-    font-family:Arial,sans-serif;
-    text-align:center;
-    padding:60px 20px;
-}}
+        .card {{
+            background: white;
+            padding: 30px;
+            border-radius: 18px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }}
 
-.card{{
-    max-width:500px;
-    margin:auto;
-    background:rgba(255,255,255,0.08);
-    padding:30px;
-    border-radius:24px;
-}}
+        .home-btn {{
+            display:inline-block;
+            margin-top:20px;
+            padding:14px 24px;
+            background:#111827;
+            color:white;
+            text-decoration:none;
+            border-radius:12px;
+            font-weight:bold;
+            box-shadow:0 4px 12px rgba(0,0,0,0.25);
+            transition:0.3s;
+        }}
 
-.btn{{
-    display:block;
-    margin-top:20px;
-    padding:16px;
-    border-radius:14px;
-    text-decoration:none;
-    background:#0a58ca;
-    color:white;
-    font-weight:bold;
-}}
-
-<style>
-.home-btn{
-    display:inline-block;
-    margin-top:20px;
-    padding:14px 24px;
-    background:#111827;
-    color:white;
-    text-decoration:none;
-    border-radius:12px;
-    font-weight:bold;
-    box-shadow:0 4px 12px rgba(0,0,0,0.25);
-    transition:0.3s;
-}
-
-.home-btn:hover{
-    transform:translateY(-2px);
-    background:#1f2937;
-}
-</style>
+        .home-btn:hover {{
+            transform:translateY(-2px);
+            background:#1f2937;
+        }}
+    </style>
 </head>
 
 <body>
+    <div class="card">
+        <h1>✅ Alert Sent</h1>
+        <p>Emergency contacts have been notified.</p>
 
-<div class="card">
-
-<h1>🚨 Alert Sent</h1>
-
-<a href="/customer/{{ band_id }}" class="home-btn">
-    🏠 Return To Profile
-</a>
-
-<p>
-Emergency contact(s) have been notified successfully.
-</p>
-
-<p>
-Band ID: {band_id}
-</p>
-
-<a class="btn" href="{maps_link}" target="_blank">
-📍 Open Shared Location
-</a>
-
-<a class="btn" href="/{band_id}">
-⬅ Return To Profile
-</a>
-
-</div>
-
+        <a href="/" class="home-btn">🏠 Return Home</a>
+    </div>
 </body>
 </html>
 """
