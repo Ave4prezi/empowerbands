@@ -29,20 +29,6 @@ LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 # CREATE FILES
 # ===============================
 
-demo_row = [
-    "EB001",
-    "Jaden",
-    "email@test.com",
-    "+19382655364,+12566121274",
-    "Child",
-    "Autism – Nonverbal",
-    "Please stay calm. I may not respond verbally. Call my emergency contact(s) immediately.",
-    "No allergies",
-    "1234",
-    "123 Hope Street, Decatur AL 35601",
-    "Black / African American",
-    "Male"
-]
 header = [
     "band_id",
     "name",
@@ -56,38 +42,45 @@ header = [
     "address",
     "race",
     "gender"
-
 ]
 
-rows = []
+# Create customers.csv only if missing
+if not os.path.exists(file_name):
 
-if os.path.exists(file_name):
-    with open(file_name, "r", newline="", encoding="utf-8") as f:
-        rows = list(csv.reader(f))
+    with open(file_name, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
 
-clean_rows = [header]
-demo_exists = False
+        writer.writerow(header)
 
-for row in rows[1:]:
-    if len(row) >= 9:
-        if row[0].strip().upper() == "EB001":
-            clean_rows.append(demo_row)
-            demo_exists = True
-        else:
-            clean_rows.append(row)
+        # Optional demo profile
+        writer.writerow([
+            "EB001",
+            "Jaden",
+            "email@test.com",
+            "+19382655364,+12566121274",
+            "Child",
+            "Autism – Nonverbal",
+            "Please stay calm. I may not respond verbally. Call emergency contacts immediately.",
+            "No allergies",
+            "1234",
+            "123 Hope Street, Decatur AL 35601",
+            "Black / African American",
+            "Male"
+        ])
 
-if not demo_exists:
-    clean_rows.append(demo_row)
-
-with open(file_name, "w", newline="", encoding="utf-8") as f:
-    writer = csv.writer(f)
-    writer.writerows(clean_rows)
-
+# Create scan log only if missing
 if not os.path.exists(scan_log_file):
+
     with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["BandID", "Name", "Time", "Type", "IP"])
 
+        writer.writerow([
+            "BandID",
+            "Name",
+            "Time",
+            "Type",
+            "IP"
+        ])
 
 # ===============================
 # FUNCTIONS
@@ -1027,6 +1020,25 @@ button{
     font-size:12px;
 }
 
+.band-row{
+    display:flex;
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.band-row input{
+    flex:1;
+}
+
+.generate-btn{ 
+    border:none;
+    border-radius:16px;
+    padding:0 18px;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+}
 </style>
 </head>
 
@@ -1044,7 +1056,25 @@ Create a secure EmpowerBand emergency profile
 
 <form method="POST">
 
-<input name="band_id" placeholder="Band ID example: EB002" required>
+<div class="band-row">
+
+<input
+type="text"
+id="band_id"
+name="band_id"
+placeholder="Band ID"
+required
+>
+
+<button
+type="button"
+class="generate-btn"
+onclick="generateBandId()"
+>
+Generate
+</button>
+
+</div>
 
 <input name="name" placeholder="Full Name" required>
 
@@ -1095,6 +1125,18 @@ EmpowerBands Admin System
 
 </div>
 
+<script>
+
+function generateBandId(){
+
+    const randomNumber =
+        Math.floor(1000 + Math.random() * 9000);
+
+    document.getElementById("band_id").value =
+        "EB" + randomNumber;
+}
+
+</script>
 </body>
 </html>
 """
