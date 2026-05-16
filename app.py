@@ -918,7 +918,7 @@ def add():
             request.form["pin"].strip(),
             request.form["address"].strip(),
             request.form["race"].strip(),
-            request.form["gender"].strip()
+            request.form["gender"].strip(),
             request.form["photo_url"].strip()
         ]
 
