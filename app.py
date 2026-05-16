@@ -1026,11 +1026,20 @@ button{
     margin-bottom:16px;
 }
 
-.band-row input{
-    flex:1;
+.band-row{
+    display:flex;
+    gap:12px;
+    margin-bottom:16px;
 }
 
-.generate-btn{ 
+.band-row input{
+    flex:2;
+    min-width:0;
+}
+
+.generate-btn{
+    width:auto;
+    min-width:140px;
     border:none;
     border-radius:16px;
     padding:0 18px;
@@ -1038,6 +1047,17 @@ button{
     color:white;
     font-weight:700;
     cursor:pointer;
+}
+
+@media(max-width:480px){
+    .band-row{
+        flex-direction:column;
+    }
+
+    .generate-btn{
+        width:100%;
+        padding:16px;
+    }
 }
 </style>
 </head>
