@@ -1513,7 +1513,7 @@ email_success = send_email_alert(name, email, band_id)
 print("SMS success:", sms_success)
 print("Email success:", email_success)
 
-                return f"""
+  return f"""
 <!DOCTYPE html>
 <html>
 <head>
