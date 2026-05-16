@@ -857,10 +857,10 @@ body{{
     color:#94a3b8;
 }}
 
-.edit{
+.edit{{
     background:#0f766e;
     margin-left:8px;
-}
+}}
 
 </style>
 
