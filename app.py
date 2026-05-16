@@ -42,6 +42,7 @@ header = [
     "address",
     "race",
     "gender"
+    "photo_url"
 ]
 
 # Create customers.csv only if missing
@@ -917,6 +918,7 @@ def add():
             request.form["address"].strip(),
             request.form["race"].strip(),
             request.form["gender"].strip()
+            request.form["photo_url"].strip()
         ]
 
         with open(file_name, "a", newline="", encoding="utf-8") as f:
@@ -1122,6 +1124,8 @@ Generate
 
 <input name="gender" placeholder="Gender">
 
+<input name="photo_url" placeholder="Photo URL">
+
 <label style="display:block; margin-top:15px; font-size:13px;">
     <input type="checkbox" name="agree_terms" required>
     I agree to the Privacy Policy and Terms of Service.
@@ -1189,6 +1193,7 @@ def profile(band_id):
                 address = row[9] if len(row) > 9 else ""
                 race = row[10] if len(row) > 10 else ""
                 gender = row[11] if len(row) > 11 else ""
+                photo_url = row[12] if len(row) > 12 else ""
 
                 entered_pin = request.args.get("pin")
                 if alert_mode:
@@ -1659,6 +1664,18 @@ a[href^="tel"] {{
 <div class="badge">
 EmpowerBands Emergency Profile
 </div>
+
+<img
+src="{photo_url}"
+style="
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid rgba(255,255,255,.15);
+margin-bottom:20px;
+"
+>
 
 <h1>{name}</h1>
 
