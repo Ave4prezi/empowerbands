@@ -444,16 +444,24 @@ def band_profile_shortcut(band_id):
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
+
     if request.method == "POST":
+
         if request.form.get("password") == ADMIN_PASSWORD:
             session["logged_in"] = True
-            return redirect("/add")
+            return redirect("/dashboard")
 
         return """
-        <h2>Wrong password</h2>
-        <p><a href='/admin'>Try again</a></p>
+        <h2 style='color:white;text-align:center;margin-top:100px;'>
+        Wrong Password
+        </h2>
+
+        <p style='text-align:center;'>
+        <a href='/admin'>Try Again</a>
+        </p>
         """
 
+    
     return """
 <!DOCTYPE html>
 <html>
@@ -643,6 +651,254 @@ EmpowerBands Emergency System
 </body>
 </html>
 """
+
+# ===============================
+# DASHBOARD
+# ===============================
+
+@app.route("/dashboard")
+def dashboard():
+
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    customers = []
+
+    try:
+        with open(file_name, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                customers.append(row)
+
+    except:
+        customers = []
+
+    customer_cards = ""
+
+    for customer in customers:
+
+        band_id = customer.get("band_id", "")
+        name = customer.get("name", "")
+        email = customer.get("email", "")
+        phone = customer.get("phone", "")
+
+        customer_cards += f"""
+
+        <div class="customer-card">
+
+            <div class="top-row">
+                <div>
+                    <div class="band-id">{band_id}</div>
+                    <div class="customer-name">{name}</div>
+                </div>
+
+                <div class="status">
+                    ACTIVE
+                </div>
+            </div>
+
+            <div class="info">
+                📧 {email}
+            </div>
+
+            <div class="info">
+                📱 {phone}
+            </div>
+
+            <div class="actions">
+
+                <a class="btn view"
+                   href="/customer/{band_id}">
+                   View Profile
+                </a>
+
+            </div>
+
+        </div>
+
+        """
+
+    return f"""
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EmpowerBands Dashboard</title>
+
+<style>
+
+body{{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+    min-height:100vh;
+    color:white;
+}}
+
+.page{{
+    padding:25px;
+}}
+
+.topbar{{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}}
+
+.logo{{
+    font-size:32px;
+    font-weight:800;
+}}
+
+.logo span{{
+    color:#38bdf8;
+}}
+
+.add-btn{{
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    padding:14px 20px;
+    border-radius:16px;
+    color:white;
+    text-decoration:none;
+    font-weight:700;
+}}
+
+.stats{{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px;
+    margin-bottom:25px;
+}}
+
+.stat-card{{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(20px);
+    border-radius:24px;
+    padding:22px;
+}}
+
+.stat-number{{
+    font-size:34px;
+    font-weight:800;
+}}
+
+.stat-label{{
+    color:#cbd5e1;
+    margin-top:5px;
+}}
+
+.customer-card{{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(20px);
+    border-radius:24px;
+    padding:22px;
+    margin-bottom:18px;
+}}
+
+.top-row{{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}}
+
+.band-id{{
+    color:#38bdf8;
+    font-size:14px;
+    font-weight:700;
+}}
+
+.customer-name{{
+    font-size:24px;
+    font-weight:700;
+    margin-top:4px;
+}}
+
+.status{{
+    background:#16a34a;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+}}
+
+.info{{
+    margin-top:14px;
+    color:#dbeafe;
+}}
+
+.actions{{
+    margin-top:20px;
+}}
+
+.btn{{
+    display:inline-block;
+    padding:12px 18px;
+    border-radius:14px;
+    text-decoration:none;
+    color:white;
+    font-weight:700;
+}}
+
+.view{{
+    background:#2563eb;
+}}
+
+.empty{{
+    text-align:center;
+    padding:80px 20px;
+    color:#94a3b8;
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="topbar">
+
+        <div class="logo">
+            Empower<span>Bands</span>
+        </div>
+
+        <a class="add-btn" href="/add">
+            + Add Band
+        </a>
+
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <div class="stat-number">
+                {len(customers)}
+            </div>
+
+            <div class="stat-label">
+                Active Bands
+            </div>
+        </div>
+
+    </div>
+
+    {customer_cards if customer_cards else '<div class="empty">No bands added yet.</div>'}
+
+</div>
+
+</body>
+</html>
+"""
+
 # ===============================
 # ADD PROFILE
 # ===============================
