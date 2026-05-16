@@ -1380,6 +1380,15 @@ def profile(band_id):
                 gender = row[11] if len(row) > 11 else ""
                 photo_url = row[12] if len(row) > 12 else ""
 
+                visitor_ip = request.remote_addr
+
+log_scan(
+    band_id,
+    name,
+    "PROFILE_VIEW",
+    visitor_ip
+)
+
                 entered_pin = request.args.get("pin")
                 if alert_mode:
                     success = send_alert_text(name, phone, band_id)
