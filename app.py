@@ -1508,12 +1508,12 @@ def alert_with_location():
                 phone = row[3]
 
                 sms_success = send_alert_text(name, phone, band_id)
-email_success = send_email_alert(name, email, band_id)
+                email_success = send_email_alert(name, email, band_id)
 
-print("SMS success:", sms_success)
-print("Email success:", email_success)
+                print("SMS success:", sms_success)
+                print("Email success:", email_success)
 
-  return f"""
+                return f"""
 <!DOCTYPE html>
 <html>
 <head>
