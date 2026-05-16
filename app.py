@@ -41,7 +41,7 @@ header = [
     "pin",
     "address",
     "race",
-    "gender"
+    "gender",
     "photo_url"
 ]
 
