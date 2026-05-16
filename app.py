@@ -2234,6 +2234,24 @@ body{{
     font-weight:bold;
 }}
 
+<style>
+.home-btn{
+    display:inline-block;
+    margin-top:20px;
+    padding:14px 24px;
+    background:#111827;
+    color:white;
+    text-decoration:none;
+    border-radius:12px;
+    font-weight:bold;
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+    transition:0.3s;
+}
+
+.home-btn:hover{
+    transform:translateY(-2px);
+    background:#1f2937;
+}
 </style>
 </head>
 
@@ -2242,6 +2260,10 @@ body{{
 <div class="card">
 
 <h1>🚨 Alert Sent</h1>
+
+<a href="/customer/{{ band_id }}" class="home-btn">
+    🏠 Return To Profile
+</a>
 
 <p>
 Emergency contact(s) have been notified successfully.
