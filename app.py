@@ -55,19 +55,20 @@ if not os.path.exists(file_name):
 
         # Optional demo profile
         writer.writerow([
-            "EB001",
-            "Jaden",
-            "email@test.com",
-            "+19382655364,+12566121274",
-            "Child",
-            "Autism – Nonverbal",
-            "Please stay calm. I may not respond verbally. Call emergency contacts immediately.",
-            "No allergies",
-            "1234",
-            "123 Hope Street, Decatur AL 35601",
-            "Black / African American",
-            "Male"
-        ])
+    "EB001",
+    "Jaden",
+    "email@test.com",
+    "+19382655364,+12566121274",
+    "Child",
+    "Autism – Nonverbal",
+    "Please stay calm. I may not respond verbally. Call emergency contacts immediately.",
+    "No allergies",
+    "1234",
+    "123 Hope Street, Decatur AL 35601",
+    "Black / African American",
+    "Male",
+    "https://i.imgur.com/dE4kSOz.png"
+])
 
 # Create scan log only if missing
 if not os.path.exists(scan_log_file):
