@@ -477,7 +477,7 @@ h1{
     <section class="hero">
 
 <img 
-src="https://i.imgur.com/1Xh7Z9R.png"
+src="https://i.imgur.com/bYsulfh.png"
 style="
 width:100%;
 max-width:760px;
