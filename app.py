@@ -197,7 +197,7 @@ body{
     margin:0;
     font-family:Arial,sans-serif;
     background:
-    radial-gradient(circle at top,#0ea5e9 0%,#07111f 32%,#030712 100%);
+    radial-gradient(circle at top,#1487d8 0%,#07111f 38%,#030712 100%);
     color:white;
 }
 
