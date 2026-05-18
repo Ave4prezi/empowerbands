@@ -237,6 +237,33 @@ body{
         transform:scale(1);
     }
 }
+.float-glow{
+    width:170px;
+    height:170px;
+    margin:30px auto 0;
+    border-radius:50%;
+    background:radial-gradient(circle,#0ea5e9 0%,#1d4ed8 45%,rgba(15,23,42,0.1) 75%);
+    box-shadow:0 0 55px rgba(14,165,233,0.75);
+    animation: floatBand 4s ease-in-out infinite;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:55px;
+}
+
+@keyframes floatBand{
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-14px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+}
 
 .badge{
     display:inline-block;
@@ -450,6 +477,9 @@ h1{
     <section class="hero">
 
         <img class="logo-img" src="https://i.imgur.com/dE4kSOz.png">
+        <div class="float-glow">
+    📡
+</div>
 
         <div class="badge">
             Nonprofit Safety Technology
