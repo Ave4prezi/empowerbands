@@ -952,19 +952,12 @@ onkeyup="filterBands()"
 </div>
 
 <script>
-
 function filterBands(){
-
-    let input =
-        document.getElementById("searchInput").value.toLowerCase();
-
-    let cards =
-        document.getElementsByClassName("searchable");
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let cards = document.getElementsByClassName("searchable");
 
     for(let i = 0; i < cards.length; i++){
-
-        let text =
-            cards[i].innerText.toLowerCase();
+        let text = cards[i].innerText.toLowerCase();
 
         if(text.includes(input)){
             cards[i].style.display = "block";
@@ -973,7 +966,6 @@ function filterBands(){
         }
     }
 }
-
 </script>
 
 </body>
