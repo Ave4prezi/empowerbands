@@ -1421,13 +1421,17 @@ button{{
 # DELETE PROFILE
 # ===============================
 
+# ===============================
+# DELETE PROFILE
+# ===============================
+
 @app.route("/delete/<band_id>")
-def delete_profile():
+def delete_profile(band_id):
 
     if not session.get("logged_in"):
         return redirect("/admin")
 
-    band_id = request.view_args["band_id"].strip().upper()
+    band_id = band_id.strip().upper()
 
     with open(file_name, "r", newline="", encoding="utf-8") as f:
         rows = list(csv.reader(f))
@@ -1438,7 +1442,6 @@ def delete_profile():
     updated_rows = [header]
 
     for row in data_rows:
-
         if row[0].strip().upper() != band_id:
             updated_rows.append(row)
 
