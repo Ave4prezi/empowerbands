@@ -530,7 +530,7 @@ h1{
     <section class="hero">
 
 <img
-src=""
+src="https://i.imgur.com/RpBUbHd.png"
 style="
 width:100%;
 max-width:520px;
@@ -725,7 +725,7 @@ filter:drop-shadow(0 0 12px rgba(14,165,233,0.35));
     <div class="cta-inner">
 
         <div class="cta-logo">
-            <img src="https://i.imgur.com/RpBUbHd.png"
+            <img src=
         </div>
 
         <div class="cta-text">
