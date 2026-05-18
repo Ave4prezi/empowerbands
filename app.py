@@ -530,7 +530,7 @@ h1{
     <section class="hero">
 
 <img
-src="https://imgur.com/a/zeyAfCY#HsyYYO5"
+src="https://i.imgur.com/RpBUbHd.png"
 style="
 width:100%;
 max-width:760px;
