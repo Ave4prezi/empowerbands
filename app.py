@@ -893,26 +893,7 @@ body{{
 <div class="page">
 
     <div class="topbar">
-    <div style="margin-bottom:25px;">
-
-<input
-type="text"
-id="searchInput"
-placeholder="Search by name, band ID, or phone..."
-style="
-width:100%;
-padding:16px;
-border:none;
-border-radius:16px;
-background:rgba(255,255,255,0.1);
-color:white;
-font-size:16px;
-box-sizing:border-box;
-"
-onkeyup="filterBands()"
->
-
-</div>
+    
 
         <div class="logo">
             Empower<span>Bands</span>
@@ -926,9 +907,31 @@ onkeyup="filterBands()"
             📡 View Scans
         </a>
 
-    </div>
+</div>
 
-    <div class="stats">
+<div style="margin-bottom:25px; max-width:700px; margin-left:auto; margin-right:auto;">
+
+<input
+type="text"
+id="searchInput"
+placeholder="🔍 Search by name, band ID, or phone..."
+style="
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+background:rgba(255,255,255,0.1);
+color:white;
+font-size:16px;
+box-sizing:border-box;
+outline:none;
+"
+onkeyup="filterBands()"
+>
+
+</div>
+
+<div class="stats">
 
         <div class="stat-card">
             <div class="stat-number">{total_bands}</div>
