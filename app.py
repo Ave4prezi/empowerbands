@@ -612,10 +612,7 @@ h1{
         </div>
     </div>
 
-    <div class="btn-row">
-        <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
-        <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
-    </div>
+    
 </section>
     <section class="cta">
 
