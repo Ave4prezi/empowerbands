@@ -907,6 +907,10 @@ body{{
             📡 View Scans
         </a>
 
+        <a class="add-btn" href="/">
+            🏠 Home
+</a>
+
 </div>
 
 <div style="margin-bottom:25px; max-width:700px; margin-left:auto; margin-right:auto;">
