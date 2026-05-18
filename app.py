@@ -800,7 +800,7 @@ filter:drop-shadow(0 0 12px rgba(14,165,233,0.35));
 
     
 </section>
-    section>
+    
 
     <div class="footer">
         <strong>EmpowerBands Worldwide</strong><br>
