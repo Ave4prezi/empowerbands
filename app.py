@@ -195,11 +195,29 @@ def home():
 
 body{
     margin:0;
+    min-height:100vh;
     font-family:Arial,sans-serif;
     background:
-    radial-gradient(circle at top,#1487d8 0%,#07111f 38%,#030712 100%);
+        radial-gradient(circle at 20% 20%, rgba(0,255,255,0.35), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(37,99,235,0.45), transparent 35%),
+        radial-gradient(circle at top,#1487d8 0%,#075c9e 45%,#030712 100%);
+    background-size:200% 200%;
+    animation:bgMove 12s ease-in-out infinite;
     color:white;
+    overflow-x:hidden;
 }
+@keyframes bgMove{
+    0%{
+        background-position: 0% 50%;
+    }
+    50%{
+        background-position: 100% 50%;
+    }
+    100%{
+        background-position: 0% 50%;
+    }
+}
+
 
 .page{
     max-width:1100px;
@@ -251,19 +269,7 @@ body{
     font-size:55px;
 }
 
-@keyframes floatBand{
-    0%{
-        transform:translateY(0px);
-    }
 
-    50%{
-        transform:translateY(-14px);
-    }
-
-    100%{
-        transform:translateY(0px);
-    }
-}
 
 .badge{
     display:inline-block;
@@ -467,10 +473,57 @@ h1{
     }
 }
 
+.bg-orb{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(40px);
+    opacity:0.45;
+    z-index:-1;
+    animation:floatOrb 9s ease-in-out infinite;
+}
+
+.orb-one{
+    width:220px;
+    height:220px;
+    background:#00eaff;
+    top:12%;
+    left:-60px;
+}
+
+.orb-two{
+    width:260px;
+    height:260px;
+    background:#2563eb;
+    bottom:10%;
+    right:-80px;
+    animation-delay:2s;
+}
+
+.orb-three{
+    width:180px;
+    height:180px;
+    background:#38bdf8;
+    top:55%;
+    left:35%;
+    animation-delay:4s;
+}
+
+@keyframes floatOrb{
+    0%,100%{
+        transform:translateY(0) scale(1);
+    }
+    50%{
+        transform:translateY(-35px) scale(1.08);
+    }
+}
+
 </style>
 </head>
 
 <body>
+<div class="bg-orb orb-one"></div>
+<div class="bg-orb orb-two"></div>
+<div class="bg-orb orb-three"></div>
 
 <div class="page">
 
