@@ -219,6 +219,23 @@ body{
     object-fit:cover;
     border:3px solid rgba(255,255,255,0.18);
     box-shadow:0 0 40px rgba(14,165,233,0.35);
+    animation: logoPulse 2.8s infinite ease-in-out;
+}
+@keyframes logoPulse{
+    0%{
+        box-shadow:0 0 20px rgba(14,165,233,0.35);
+        transform:scale(1);
+    } 
+
+    50%{
+        box-shadow:0 0 55px rgba(14,165,233,0.9);
+        transform:scale(1.04);
+    }
+
+    100%{
+        box-shadow:0 0 20px rgba(14,165,233,0.35);
+        transform:scale(1);
+    }
 }
 
 .badge{
