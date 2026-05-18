@@ -482,8 +482,9 @@ style="
 width:100%;
 max-width:760px;
 display:block;
-margin:0 auto 25px;
-filter:drop-shadow(0 0 18px rgba(14,165,233,0.45));
+margin:0 auto 10px;
+mix-blend-mode:screen;
+filter:drop-shadow(0 0 14px rgba(14,165,233,0.28));
 "
 >
 
