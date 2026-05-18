@@ -457,6 +457,72 @@ h1{
         width:100%;
     }
 }
+.support-section{
+    margin-top:60px;
+    padding:35px 25px;
+    text-align:center;
+    border-radius:28px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.14);
+    backdrop-filter:blur(18px);
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+
+.support-section h2{
+    font-size:38px;
+    line-height:1.1;
+    margin:0 0 18px;
+    color:white;
+}
+
+.support-section p{
+    max-width:680px;
+    margin:0 auto 28px;
+    color:#dbeafe;
+    font-size:18px;
+    line-height:1.6;
+}
+
+.support-buttons{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:16px;
+}
+
+.support-btn{
+    display:block;
+    padding:18px 20px;
+    border-radius:18px;
+    color:white;
+    text-decoration:none;
+    font-weight:800;
+    font-size:17px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.22);
+}
+
+.support-btn.donate{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.support-btn.partner{
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+}
+
+.support-btn.demo{
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.18);
+}
+
+@media(max-width:600px){
+    .support-section h2{
+        font-size:32px;
+    }
+
+    .support-section p{
+        font-size:16px;
+    }
+}
+}
 
 .footer{
     margin-top:45px;
@@ -734,39 +800,7 @@ filter:drop-shadow(0 0 12px rgba(14,165,233,0.35));
 
     
 </section>
-    <section class="cta">
-
-    <div class="cta-inner">
-
-        <div class="cta-logo">
-            <img src=
-        </div>
-
-        <div class="cta-text">
-            <h2>Ready To Support The Mission?</h2>
-            <p>
-                Partner with EmpowerBands Worldwide to help build safer,
-                more accessible communities.
-            </p>
-        </div>
-
-        <div class="cta-buttons">
-            <a class="btn" href="mailto:support@empowerbands.org">
-                ❤️ Support The Mission
-            </a>
-
-            <a class="btn dark" href="mailto:support@empowerbands.org">
-                🤝 Partner With Us
-            </a>
-
-            <a class="btn dark" href="/EB001">
-                🚀 View Demo
-            </a>
-        </div>
-
-    </div>
-
-</section>
+    section>
 
     <div class="footer">
         <strong>EmpowerBands Worldwide</strong><br>
