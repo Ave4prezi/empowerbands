@@ -1418,6 +1418,37 @@ button{{
 
 
 # ===============================
+# DELETE PROFILE
+# ===============================
+
+@app.route("/delete/<band_id>")
+def delete_profile():
+
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    band_id = request.view_args["band_id"].strip().upper()
+
+    with open(file_name, "r", newline="", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+
+    header = rows[0]
+    data_rows = rows[1:]
+
+    updated_rows = [header]
+
+    for row in data_rows:
+
+        if row[0].strip().upper() != band_id:
+            updated_rows.append(row)
+
+    with open(file_name, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(updated_rows)
+
+    return redirect("/dashboard")
+
+# ===============================
 # BAND PROFILE
 # ===============================
 
