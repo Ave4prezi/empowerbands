@@ -952,23 +952,24 @@ onkeyup="filterBands()"
 </div>
 
 <script>
-function filterBands(){
+function filterBands(){{
     let input = document.getElementById("searchInput").value.toLowerCase();
     let cards = document.getElementsByClassName("searchable");
 
-    for(let i = 0; i < cards.length; i++){
+    for(let i = 0; i < cards.length; i++){{
         let text = cards[i].innerText.toLowerCase();
 
-        if(text.includes(input)){
+        if(text.includes(input)){{
             cards[i].style.display = "block";
-        }else{
+        }}else{{
             cards[i].style.display = "none";
-        }
-    }
-}
+        }}
+    }}
+}}
 </script>
 
 </body>
+
 </html>
 """
 
