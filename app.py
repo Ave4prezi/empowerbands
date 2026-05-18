@@ -874,10 +874,10 @@ body{{
     margin-left:8px;
 }}
 
-.delete{
+.delete{{
     background:#dc2626;
     margin-left:8px;
-} 
+}} 
 .empty{{ 
     text-align:center;
     padding:80px 20px;
@@ -1417,9 +1417,7 @@ button{{
 """
 
 
-# ===============================
-# DELETE PROFILE
-# ===============================
+
 
 # ===============================
 # DELETE PROFILE
