@@ -536,7 +536,7 @@ width:100%;
 max-width:760px;
 display:block;
 margin:0 auto 25px;
-filter:drop-shadow(0 0 18px rgba(14,165,233,0.45));
+filter:drop-shadow(0 0 30px rgba(14,165,233,0.8));
 "
 >
 
