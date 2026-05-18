@@ -725,7 +725,7 @@ filter:drop-shadow(0 0 30px rgba(14,165,233,0.8));
     <div class="cta-inner">
 
         <div class="cta-logo">
-            <img src=>
+            <img src=>src="https://i.imgur.com/dE4kSOz.png"
         </div>
 
         <div class="cta-text">
