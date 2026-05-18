@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, session
+ from flask import Flask, request, redirect, session
 from twilio.rest import Client
 import csv
 import os
@@ -689,7 +689,7 @@ def dashboard():
 
         customer_cards += f"""
 
-        <div class="customer-card">
+        <div class="customer-card searchable">
 
             <div class="top-row">
                 <div>
@@ -893,6 +893,26 @@ body{{
 <div class="page">
 
     <div class="topbar">
+    <div style="margin-bottom:25px;">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Search by name, band ID, or phone..."
+style="
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+background:rgba(255,255,255,0.1);
+color:white;
+font-size:16px;
+box-sizing:border-box;
+"
+onkeyup="filterBands()"
+>
+
+</div>
 
         <div class="logo">
             Empower<span>Bands</span>
@@ -931,6 +951,31 @@ body{{
 
 </div>
 
+<script>
+
+function filterBands(){
+
+    let input =
+        document.getElementById("searchInput").value.toLowerCase();
+
+    let cards =
+        document.getElementsByClassName("searchable");
+
+    for(let i = 0; i < cards.length; i++){
+
+        let text =
+            cards[i].innerText.toLowerCase();
+
+        if(text.includes(input)){
+            cards[i].style.display = "block";
+        }else{
+            cards[i].style.display = "none";
+        }
+    }
+}
+
+</script>
+            
 </body>
 </html>
 """
