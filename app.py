@@ -712,16 +712,23 @@ def dashboard():
 
             <div class="actions">
 
-                <a class="btn view"
-                   href="/customer/{band_id}">
-                   View Profile
-                </a>
+    <a class="btn view"
+       href="/customer/{band_id}">
+       View Profile
+    </a>
 
-                <a class="btn edit"
-   href="/edit/{band_id}">
-   Edit Profile
-</a>
+    <a class="btn edit"
+       href="/edit/{band_id}">
+       Edit Profile
+    </a>
 
+    <a class="btn delete"
+       href="/delete/{band_id}"
+       onclick="return confirm('Delete this band permanently?')">
+       Delete
+    </a>
+
+</div>
             </div>
 
         </div>
@@ -867,7 +874,11 @@ body{{
     margin-left:8px;
 }}
 
-.empty{{
+.delete{
+    background:#dc2626;
+    margin-left:8px;
+} 
+.empty{{ 
     text-align:center;
     padding:80px 20px;
     color:#94a3b8;
@@ -1931,6 +1942,10 @@ margin-bottom:20px;
 <img src="/qr/{band_id}" style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
 
 <p>Scan QR backup if NFC is unavailable.</p>
+
+<a class="btn btn-blue" href="/qr/{band_id}" download="{band_id}-qr.png">
+    ⬇️ Download QR Code
+</a>
 
 <div class="info">
 {age_group} • ID: {band_id}
