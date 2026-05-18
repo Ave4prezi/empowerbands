@@ -179,236 +179,379 @@ This person may need assistance.
 def home():
     return """
     <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>EmpowerBands</title>
-        <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0a58ca">
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EmpowerBands Worldwide</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0f172a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="EmpowerBands">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <style>
-            body {
-                margin: 0;
-                font-family: Arial, sans-serif;
-                background: linear-gradient(180deg, #eaf3ff 0%, #ffffff 100%);
-                color: #102033;
-            }
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-            .page {
-                max-width: 520px;
-                margin: 0 auto;
-                padding: 30px 20px;
-                text-align: center;
-            }
+<style>
 
-            .logo {
-                width: 150px;
-                margin-bottom: 15px;
-            }
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 32%,#030712 100%);
+    color:white;
+}
 
-            .badge {
-                background: #dcebff;
-                color: #0a58ca;
-                padding: 8px 14px;
-                border-radius: 999px;
-                font-size: 13px;
-                font-weight: bold;
-                display: inline-block;
-                margin-bottom: 15px;
-            }
+.page{
+    max-width:1100px;
+    margin:auto;
+    padding:28px 20px 60px;
+}
 
-            h1 {
-                font-size: 34px;
-                margin: 10px 0;
-                color: #0a58ca;
-            }
+.hero{
+    text-align:center;
+    padding:50px 0 35px;
+}
 
-            .lead {
-                font-size: 17px;
-                color: #445;
-                margin-bottom: 25px;
-            }
+.logo-img{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid rgba(255,255,255,0.18);
+    box-shadow:0 0 40px rgba(14,165,233,0.35);
+}
 
-            .btn {
-                display: block;
-                padding: 16px;
-                margin: 10px auto;
-                max-width: 340px;
-                border-radius: 14px;
-                text-decoration: none;
-                font-weight: bold;
-                background: #0a58ca;
-                color: white;
-            }
+.badge{
+    display:inline-block;
+    margin-top:20px;
+    padding:8px 16px;
+    border-radius:999px;
+    background:rgba(14,165,233,0.14);
+    border:1px solid rgba(125,211,252,0.35);
+    color:#7dd3fc;
+    font-weight:bold;
+    font-size:13px;
+}
 
-            .btn.dark {
-                background: #111827;
-            }
+h1{
+    font-size:46px;
+    margin:18px 0 10px;
+    line-height:1.05;
+}
 
-            .card {
-                background: white;
-                border-radius: 20px;
-                padding: 20px;
-                margin-top: 25px;
-                text-align: left;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            }
+.lead{
+    max-width:760px;
+    margin:0 auto;
+    color:#cbd5e1;
+    font-size:18px;
+    line-height:1.6;
+}
 
-            .item {
-                margin: 10px 0;
-            }
+.btn-row{
+    margin-top:28px;
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+}
 
-            .footer {
-                margin-top: 20px;
-                font-size: 13px;
-                color: #666;
-            }
-        </style>
-    </head>
+.btn{
+    display:inline-block;
+    padding:15px 22px;
+    border-radius:16px;
+    text-decoration:none;
+    color:white;
+    font-weight:800;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+}
 
-    <body>
-        <div class="page">
+.btn.dark{
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.15);
+}
 
-            <img class="logo" src="https://i.imgur.com/dE4kSOz.png">
+.trust{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:14px;
+    margin:35px 0;
+}
 
-            <div class="badge">Emergency Support Wearable</div>
+.trust-card,
+.card{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:24px;
+    padding:22px;
+    backdrop-filter:blur(18px);
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
 
-            <h1>EmpowerBands</h1>
+.trust-card{
+    text-align:center;
+    font-weight:bold;
+    color:#e0f2fe;
+}
 
-            <p class="lead">
-                Tap the band to instantly access emergency support info,
-                contact caregivers, and send alerts with location.
-            </p>
-            
-            <div class="card">
-    <h3>SMS Alert Consent</h3>
-    <p>
-        By registering or activating an EmpowerBand, users and guardians consent
-        to receive SMS emergency alerts, safety notifications, and location-sharing
-        messages related to emergency events and authorized safety responses.
-    </p>
-    <p>
-        Message and data rates may apply. Reply STOP to opt out.
-    </p>
-</div>
+.section{
+    margin-top:40px;
+}
 
-<div class="card">
-    <h3>About EmpowerBands</h3>
+.section h2{
+    font-size:32px;
+    margin-bottom:12px;
+}
 
-    <p>
-        EmpowerBands provides NFC-enabled wearable safety bands designed to help
-        schools, families, caregivers, and emergency responders access important
-        support information quickly.
-    </p>
+.section p{
+    color:#cbd5e1;
+    line-height:1.6;
+}
 
-    <p>
-        Each band can connect to a secure emergency profile with instructions,
-        medical notes, emergency contacts, and alert options.
-    </p>
-</div>
-<div class="card">
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:18px;
+    margin-top:20px;
+}
 
-    <h3>Contact & Support</h3>
+.card h3{
+    margin-top:0;
+    color:#7dd3fc;
+}
 
-    <p>
-        EmpowerBands Worldwide
-    </p>
+.card p{
+    color:#dbeafe;
+}
 
-    <p>
-        Support Email:
-        support@empowerbands.org
-    </p>
+.alert{
+    background:rgba(239,68,68,0.12);
+    border:1px solid rgba(248,113,113,0.35);
+}
 
-    <p>
-        Website:
-        https://empowerbands.org
-    </p>
+.cta{
+    text-align:center;
+    margin-top:50px;
+    padding:35px 22px;
+    border-radius:28px;
+    background:linear-gradient(135deg,rgba(14,165,233,0.2),rgba(37,99,235,0.18));
+    border:1px solid rgba(255,255,255,0.12);
+}
 
-    <p>
-        School safety • Emergency response • NFC wearable technology
-    </p>
+.footer{
+    margin-top:45px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:13px;
+    line-height:1.7;
+}
 
-</div>
+.footer a{
+    color:#7dd3fc;
+    text-decoration:none;
+    font-weight:bold;
+}
 
-<div class="card">
+@media(max-width:600px){
+    h1{
+        font-size:36px;
+    }
 
-    <h3>How EmpowerBands Works</h3>
+    .lead{
+        font-size:16px;
+    }
 
-    <div class="item">1️⃣ Tap the EmpowerBand with a smartphone</div>
+    .btn{
+        width:100%;
+        box-sizing:border-box;
+    }
+}
 
-    <div class="item">
-        2️⃣ View emergency instructions and support information instantly
-    </div>
+</style>
+</head>
 
-    <div class="item">
-        3️⃣ Contact caregivers or activate emergency alerts with location sharing
-    </div>
+<body>
 
-    <div class="card">
+<div class="page">
 
-    <h3>Built For Schools & Student Safety</h3>
+    <section class="hero">
 
-    <p>
-        EmpowerBands supports schools, special education programs,
-        athletics, field trips, and student safety initiatives by
-        helping staff and emergency contacts respond faster during
-        emergencies or medical situations.
-    </p>
+        <img class="logo-img" src="https://i.imgur.com/dE4kSOz.png">
 
-    <p>
-        Designed to support communication, safety awareness,
-        and rapid emergency response.
-    </p>
-
-</div>
-
-</div>
-
-            <a class="btn" href="/EB001">View Live Demo</a>
-            <a class="btn dark" href="/admin">Admin Login</a>
-
-            <div class="card">
-                <div class="item">🔵 Tap band with phone</div>
-                <div class="item">🔵 View instructions instantly</div>
-                <div class="item">🔵 Call caregiver fast</div>
-                <div class="item">🔵 Send emergency alert + location</div>
-            </div>
-
-            <div class="card">
-
-    <h3>Privacy & Terms</h3>
-
-    <p>
-        EmpowerBands only uses contact and profile information to support
-        emergency response, caregiver communication, and safety alerts.
-    </p>
-
-    <p>
-        SMS alerts are only sent for emergency-related notifications connected
-        to an activated EmpowerBand profile.
-    </p>
-
-    <p>
-        <a href="/privacy" style="color:#0a58ca;font-weight:bold;">
-            Privacy Policy
-        </a>
-        |
-        <a href="/terms" style="color:#0a58ca;font-weight:bold;">
-            Terms of Service
-        </a>
-    </p>
-
-</div>
-
-            <div class="footer">
-                Built for families, caregivers, and emergency responders
-            </div>
-
+        <div class="badge">
+            Nonprofit Safety Technology
         </div>
-    </body>
-    </html>
+
+        <h1>EmpowerBands Worldwide</h1>
+
+        <p class="lead">
+            Smart NFC and QR wearable safety technology designed to help children,
+            seniors, caregivers, schools, and individuals with disabilities communicate
+            faster during emergencies.
+        </p>
+
+        <div class="btn-row">
+            <a class="btn" href="/EB001">🚀 View Live Demo</a>
+            <a class="btn dark" href="/admin">🛡️ Admin Login</a>
+            <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Contact Us</a>
+        </div>
+
+    </section>
+
+    <div class="trust">
+        <div class="trust-card">📡 NFC + QR Access</div>
+        <div class="trust-card">♿ Accessibility Focused</div>
+        <div class="trust-card">❤️ Nonprofit Mission</div>
+        <div class="trust-card">🏫 School & Caregiver Ready</div>
+    </div>
+
+    <section class="section">
+        <h2>How EmpowerBands Works</h2>
+        <p>
+            EmpowerBands helps make emergency support information easier to access
+            when communication may be difficult or time-sensitive.
+        </p>
+
+        <div class="grid">
+            <div class="card">
+                <h3>1️⃣ Tap The Band</h3>
+                <p>A smartphone taps the NFC wearable or scans the QR code.</p>
+            </div>
+
+            <div class="card">
+                <h3>2️⃣ View Emergency Profile</h3>
+                <p>Important instructions, caregiver contacts, and support details appear instantly.</p>
+            </div>
+
+            <div class="card">
+                <h3>3️⃣ Send Alerts Fast</h3>
+                <p>Emergency contacts can receive alerts and GPS location sharing within seconds.</p>
+            </div>
+
+            <div class="card">
+                <h3>4️⃣ Improve Safety</h3>
+                <p>Supports schools, caregivers, seniors, disabilities, and emergency response situations.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Real-World Scenarios</h2>
+
+        <div class="grid">
+            <div class="card">
+                <h3>👦 Child With Autism</h3>
+                <p>
+                    A nonverbal child becomes separated during a field trip. Staff scan the band
+                    and instantly access caregiver instructions and emergency contacts.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>👵 Senior With Dementia</h3>
+                <p>
+                    A senior experiencing confusion can be safely identified and connected with
+                    family members quickly.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>🏫 School Safety Support</h3>
+                <p>
+                    Teachers and school staff can access emergency instructions during medical,
+                    behavioral, or communication-related situations.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>♿ Accessibility Support</h3>
+                <p>
+                    Individuals with visible or invisible disabilities can communicate essential
+                    support needs quickly and privately.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Why EmpowerBands Matters</h2>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🔒 PIN-Protected Information</h3>
+                <p>Public instructions can be visible while sensitive medical notes remain protected.</p>
+            </div>
+
+            <div class="card">
+                <h3>📱 Mobile-Friendly Profiles</h3>
+                <p>Designed to open quickly on smartphones without requiring an app download.</p>
+            </div>
+
+            <div class="card">
+                <h3>📍 Location Alerts</h3>
+                <p>Emergency alerts can include GPS location when permission is granted.</p>
+            </div>
+
+            <div class="card">
+                <h3>🌎 Community Impact</h3>
+                <p>Built to support families, caregivers, schools, nonprofits, and vulnerable populations.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card">
+            <h2>About EmpowerBands Worldwide</h2>
+            <p>
+                EmpowerBands Worldwide is a registered nonprofit organization focused on
+                wearable safety technology, accessibility innovation, emergency communication,
+                and community empowerment.
+            </p>
+
+            <p>
+                Our mission is to improve safety, inclusion, and communication for individuals
+                and families through accessible technology solutions.
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Mission Disclaimer</h2>
+
+        <div class="card alert">
+            <p>
+                EmpowerBands is a supplemental safety and communication tool. It is not a
+                replacement for 911, emergency medical services, law enforcement, or professional
+                medical monitoring. In a life-threatening emergency, call 911 immediately.
+            </p>
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>Ready To Support The Mission?</h2>
+        <p>
+            Partner with EmpowerBands Worldwide to help build safer, more accessible communities.
+        </p>
+
+        <div class="btn-row">
+            <a class="btn" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
+            <a class="btn dark" href="/EB001">🚀 View Demo</a>
+        </div>
+    </section>
+
+    <div class="footer">
+        <strong>EmpowerBands Worldwide</strong><br>
+        One Tap. One Network. Infinite Possibilities.<br>
+        Decatur, Alabama | support@empowerbands.org<br><br>
+
+        <a href="/privacy">Privacy Policy</a> |
+        <a href="/terms">Terms of Service</a> |
+        <a href="/delete-request">Data Deletion Request</a>
+    </div>
+
+</div>
+
+</body>
+</html>
     """
 
 
