@@ -2239,6 +2239,20 @@ def alert_with_location():
             transform:translateY(-2px);
             background:#1f2937;
         }}
+
+        .site-footer{
+    margin-top:40px;
+    padding:25px 15px;
+    text-align:center;
+    color:rgba(255,255,255,0.75);
+    font-size:14px;
+    border-top:1px solid rgba(255,255,255,0.15);
+    background:rgba(0,0,0,0.18);
+}
+
+.site-footer p{
+    margin:6px 0;
+}
     </style>
 </head>
 
@@ -2249,6 +2263,14 @@ def alert_with_location():
 
         <a href="/" class="home-btn">🏠 Return Home</a>
     </div>
+
+    <footer class="site-footer">
+        <p><strong>EmpowerBands Worldwide</strong> © 2026</p>
+        <p>One Tap. One Network. Infinite Possibilities.</p>
+        <p>Emergency support profiles powered by NFC + QR access.</p>
+        <p>Decatur, Alabama | support@empowerbands.org</p>
+    </footer>
+
 </body>
 </html>
 """
