@@ -975,7 +975,7 @@ function filterBands(){
 }
 
 </script>
-            
+
 </body>
 </html>
 """
