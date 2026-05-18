@@ -329,12 +329,69 @@ h1{
 }
 
 .cta{
-    text-align:center;
-    margin-top:50px;
-    padding:35px 22px;
+    margin-top:55px;
+    padding:28px;
     border-radius:28px;
-    background:linear-gradient(135deg,rgba(14,165,233,0.2),rgba(37,99,235,0.18));
-    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(15,23,42,0.85);
+    border:1px solid rgba(37,99,235,0.7);
+    box-shadow:0 0 35px rgba(37,99,235,0.25);
+}
+
+.cta-inner{
+    display:grid;
+    grid-template-columns:120px 1fr 300px;
+    gap:25px;
+    align-items:center;
+}
+
+.cta-logo{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    background:rgba(14,165,233,0.12);
+    border:1px solid rgba(125,211,252,0.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.cta-logo img{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    object-fit:cover;
+}
+
+.cta-text h2{
+    margin:0 0 10px;
+    font-size:30px;
+}
+
+.cta-text p{
+    margin:0;
+    color:#cbd5e1;
+    line-height:1.6;
+}
+
+.cta-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+@media(max-width:800px){
+    .cta-inner{
+        grid-template-columns:1fr;
+        text-align:center;
+    }
+
+    .cta-logo{
+        margin:auto;
+    }
+
+    .cta-buttons{
+        width:100%;
+    }
 }
 
 .footer{
@@ -561,16 +618,38 @@ h1{
     </div>
 </section>
     <section class="cta">
-        <h2>Ready To Support The Mission?</h2>
-        <p>
-            Partner with EmpowerBands Worldwide to help build safer, more accessible communities.
-        </p>
 
-        <div class="btn-row">
-            <a class="btn" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
-            <a class="btn dark" href="/EB001">🚀 View Demo</a>
+    <div class="cta-inner">
+
+        <div class="cta-logo">
+            <img src="https://i.imgur.com/dE4kSOz.png">
         </div>
-    </section>
+
+        <div class="cta-text">
+            <h2>Ready To Support The Mission?</h2>
+            <p>
+                Partner with EmpowerBands Worldwide to help build safer,
+                more accessible communities.
+            </p>
+        </div>
+
+        <div class="cta-buttons">
+            <a class="btn" href="mailto:support@empowerbands.org">
+                ❤️ Support The Mission
+            </a>
+
+            <a class="btn dark" href="mailto:support@empowerbands.org">
+                🤝 Partner With Us
+            </a>
+
+            <a class="btn dark" href="/EB001">
+                🚀 View Demo
+            </a>
+        </div>
+
+    </div>
+
+</section>
 
     <div class="footer">
         <strong>EmpowerBands Worldwide</strong><br>
