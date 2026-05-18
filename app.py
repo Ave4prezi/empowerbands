@@ -5,7 +5,7 @@ import os
 import time
 import smtplib
 from email.mime.text import MIMEText
-
+import qrcode
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
@@ -651,6 +651,12 @@ EmpowerBands Emergency System
 # ===============================
 # DASHBOARD
 # ===============================
+def count_rows(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return max(0, sum(1 for row in f) - 1)
+    except:
+        return 0
 
 @app.route("/dashboard")
 def dashboard():
@@ -659,6 +665,8 @@ def dashboard():
         return redirect("/admin")
 
     customers = []
+    total_bands = count_rows(file_name)
+    total_scans = count_rows(scan_log_file)
 
     try:
         with open(file_name, "r", encoding="utf-8") as f:
@@ -671,7 +679,7 @@ def dashboard():
         customers = []
 
     customer_cards = ""
-
+    
     for customer in customers:
 
         band_id = customer.get("band_id", "")
@@ -750,6 +758,8 @@ body{{
     justify-content:space-between;
     align-items:center;
     margin-bottom:25px;
+    gap:10px;
+    flex-wrap:wrap;
 }}
 
 .logo{{
@@ -852,15 +862,15 @@ body{{
     background:#2563eb;
 }}
 
+.edit{{
+    background:#0f766e;
+    margin-left:8px;
+}}
+
 .empty{{
     text-align:center;
     padding:80px 20px;
     color:#94a3b8;
-}}
-
-.edit{{
-    background:#0f766e;
-    margin-left:8px;
 }}
 
 </style>
@@ -890,13 +900,18 @@ body{{
     <div class="stats">
 
         <div class="stat-card">
-            <div class="stat-number">
-                {len(customers)}
-            </div>
+            <div class="stat-number">{total_bands}</div>
+            <div class="stat-label">Total Bands</div>
+        </div>
 
-            <div class="stat-label">
-                Active Bands
-            </div>
+        <div class="stat-card">
+            <div class="stat-number">{total_scans}</div>
+            <div class="stat-label">Total Scans</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">{len(customers)}</div>
+            <div class="stat-label">Active Bands</div>
         </div>
 
     </div>
@@ -1164,20 +1179,58 @@ EmpowerBands Admin System
 
 <script>
 
-function generateBandId(){
+async function generateBandId(){
 
-    const randomNumber =
-        Math.floor(1000 + Math.random() * 9000);
+    try{
 
-    document.getElementById("band_id").value =
-        "EB" + randomNumber;
+        const response = await fetch("/next-band-id");
+
+        const data = await response.text();
+
+        document.getElementById("band_id").value = data;
+
+    }catch(error){
+
+        alert("Could not generate Band ID");
+    }
 }
 
 </script>
 </body>
 </html>
 """
+@app.route("/next-band-id")
+def next_band_id():
 
+    highest = 0
+
+    try:
+
+        with open(file_name, "r", encoding="utf-8") as f:
+
+            reader = csv.DictReader(f)
+
+            for row in reader:
+
+                band_id = row.get("band_id", "")
+
+                if band_id.startswith("EB"):
+
+                    try:
+                        number = int(band_id.replace("EB", ""))
+
+                        if number > highest:
+                            highest = number
+
+                    except:
+                        pass
+
+    except:
+        pass
+
+    next_id = highest + 1
+
+    return f"EB{next_id:03d}"
 # ===============================
 # EDIT PROFILE
 # ===============================
@@ -1875,6 +1928,9 @@ margin-bottom:20px;
 >
 
 <h1>{name}</h1>
+<img src="/qr/{band_id}" style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
+
+<p>Scan QR backup if NFC is unavailable.</p>
 
 <div class="info">
 {age_group} • ID: {band_id}
@@ -1967,7 +2023,19 @@ Unlock Full Info
     <p><a href="/admin">Admin Login</a></p>
     """
 
+@app.route("/qr/<band_id>")
+def qr_code(band_id):
+    band_id = band_id.strip().upper()
+    url = f"{BASE_URL}/{band_id}"
 
+    img = qrcode.make(url)
+
+    from io import BytesIO
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return app.response_class(buffer.getvalue(), mimetype="image/png")
 
 # ===============================
 # SCAN LOGS PAGE
