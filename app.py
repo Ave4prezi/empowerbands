@@ -526,6 +526,40 @@ h1{
         </div>
     </section>
 
+    <section class="section">
+    <h2>Support Our Mission</h2>
+
+    <div class="grid">
+        <div class="card">
+            <h3>❤️ Donate</h3>
+            <p>
+                Help provide EmpowerBands to children, seniors, individuals with disabilities,
+                and families who need emergency support tools.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🏫 Sponsor A School</h3>
+            <p>
+                Support school safety programs by helping classrooms, special education teams,
+                and student support staff access wearable safety technology.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🤝 Become A Partner</h3>
+            <p>
+                Partner with EmpowerBands Worldwide to expand accessibility, safety,
+                and emergency communication in your community.
+            </p>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
+        <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
+    </div>
+</section>
     <section class="cta">
         <h2>Ready To Support The Mission?</h2>
         <p>
