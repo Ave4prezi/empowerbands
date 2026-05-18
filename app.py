@@ -1959,7 +1959,7 @@ EmpowerBands Emergency Profile
 </div>
 
 <img
-src="{photo_url}"
+src="{photo_url if photo_url else LOGO_URL}"
 style="
 width:120px;
 height:120px;
