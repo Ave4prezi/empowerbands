@@ -2400,7 +2400,7 @@ def alert_with_location():
             background:#1f2937;
         }}
 
-        .site-footer{
+        .site-footer{{
     margin-top:40px;
     padding:25px 15px;
     text-align:center;
@@ -2408,11 +2408,11 @@ def alert_with_location():
     font-size:14px;
     border-top:1px solid rgba(255,255,255,0.15);
     background:rgba(0,0,0,0.18);
-}
+}}
 
-.site-footer p{
+.site-footer p{{
     margin:6px 0;
-}
+}}
     </style>
 </head>
 
