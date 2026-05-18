@@ -476,10 +476,16 @@ h1{
 
     <section class="hero">
 
-        <img class="logo-img" src="https://i.imgur.com/dE4kSOz.png">
-        <div class="float-glow">
-    📡
-</div>
+<img 
+src="https://i.imgur.com/1Xh7Z9R.png"
+style="
+width:100%;
+max-width:760px;
+display:block;
+margin:0 auto 25px;
+filter:drop-shadow(0 0 18px rgba(14,165,233,0.85));
+"
+>
 
         <div class="badge">
             Nonprofit Safety Technology
