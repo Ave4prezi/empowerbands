@@ -230,15 +230,30 @@ body{
     padding:50px 0 35px;
 }
 
-.logo-img{
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    object-fit:cover;
-    border:3px solid rgba(255,255,255,0.18);
-    box-shadow:0 0 40px rgba(14,165,233,0.35);
-    animation: logoPulse 2.8s infinite ease-in-out;
+.logo-box{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 18px;
+    border-radius:18px;
+
+    background:rgba(255,255,255,0.06);
+
+    border:2px solid rgba(255,255,255,0.18);
+
+    box-shadow:
+        0 0 18px rgba(59,130,246,0.35),
+        0 4px 18px rgba(0,0,0,0.25);
+
+    backdrop-filter:blur(10px);
 }
+
+.logo_img{
+    height:70px;
+    width:auto;
+    object-fit:contain;
+}
+
 @keyframes logoPulse{
     0%{
         box-shadow:0 0 20px rgba(14,165,233,0.35);
