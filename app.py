@@ -178,658 +178,442 @@ This person may need assistance.
 @app.route("/")
 def home():
     return """
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>EmpowerBands Worldwide</title>
 
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0f172a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="EmpowerBands">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <style>
-
 body{
     margin:0;
-    min-height:100vh;
     font-family:Arial,sans-serif;
-    background:
-        radial-gradient(circle at 20% 20%, rgba(0,255,255,0.35), transparent 30%),
-        radial-gradient(circle at 80% 10%, rgba(37,99,235,0.45), transparent 35%),
-        radial-gradient(circle at top,#1487d8 0%,#075c9e 45%,#030712 100%);
-    background-size:200% 200%;
-    animation:bgMove 12s ease-in-out infinite;
+    background:#020817;
     color:white;
-    overflow-x:hidden;
-}
-@keyframes bgMove{
-    0%{
-        background-position: 0% 50%;
-    }
-    50%{
-        background-position: 100% 50%;
-    }
-    100%{
-        background-position: 0% 50%;
-    }
 }
 
-
-.page{
-    max-width:1100px;
-    margin:auto;
-    padding:28px 20px 60px;
-}
-
-.hero{
-    text-align:center;
-    padding:50px 0 35px;
-}
-
-.logo-box{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:10px 18px;
-    border-radius:18px;
-    background:rgba(255,255,255,0.06);
-    border:2px solid rgba(255,255,255,0.18);
-
-    box-shadow:
-        0 0 18px rgba(59,130,246,0.35),
-        0 4px 18px rgba(0,0,0,0.25);
-
-    backdrop-filter:blur(10px);
-}
-
-.logo_img{
-    height:70px;
-    width:auto;
-    object-fit:contain;
-}
-
-@keyframes logoPulse{
-    0%{
-        box-shadow:0 0 20px rgba(14,165,233,0.35);
-        transform:scale(1);
-    } 
-
-    50%{
-        box-shadow:0 0 55px rgba(14,165,233,0.9);
-        transform:scale(1.04);
-    }
-
-    100%{
-        box-shadow:0 0 20px rgba(14,165,233,0.35);
-        transform:scale(1);
-    }
-}
-.float-glow{
-    width:170px;
-    height:170px;
-    margin:30px auto 0;
-    border-radius:50%;
-    background:radial-gradient(circle,#0ea5e9 0%,#1d4ed8 45%,rgba(15,23,42,0.1) 75%);
-    box-shadow:0 0 55px rgba(14,165,233,0.75);
-    animation: floatBand 4s ease-in-out infinite;
+.header{
     display:flex;
     align-items:center;
-    justify-content:center;
-    font-size:55px;
+    justify-content:space-between;
+    padding:18px 6%;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    background:#020817;
 }
 
-
-
-.badge{
-    display:inline-block;
-    margin-top:20px;
-    padding:8px 16px;
-    border-radius:999px;
-    background:rgba(14,165,233,0.14);
-    border:1px solid rgba(125,211,252,0.35);
-    color:#7dd3fc;
-    font-weight:bold;
-    font-size:13px;
-}
-
-h1{
-    font-size:46px;
-    margin:18px 0 10px;
-    line-height:1.05;
-}
-
-.lead{
-    max-width:760px;
-    margin:0 auto;
-    color:#cbd5e1;
-    font-size:18px;
-    line-height:1.6;
-}
-
-.btn-row{
-    margin-top:28px;
+.logo-wrap{
     display:flex;
-    justify-content:center;
+    align-items:center;
     gap:14px;
-    flex-wrap:wrap;
+}
+
+.logo-wrap img{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+    box-shadow:0 0 25px rgba(14,165,233,0.8);
+}
+
+.logo-text{
+    font-size:24px;
+    font-weight:900;
+}
+
+.logo-text span{
+    display:block;
+    color:#38bdf8;
+    font-size:16px;
+}
+
+.nav{
+    display:flex;
+    gap:28px;
+    align-items:center;
+}
+
+.nav a{
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.nav .active{
+    color:#38bdf8;
+    border-bottom:2px solid #38bdf8;
+    padding-bottom:8px;
+}
+
+.top-buttons{
+    display:flex;
+    gap:12px;
 }
 
 .btn{
     display:inline-block;
-    padding:15px 22px;
-    border-radius:16px;
+    padding:14px 22px;
+    border-radius:10px;
     text-decoration:none;
     color:white;
     font-weight:800;
     background:linear-gradient(135deg,#06b6d4,#2563eb);
+    box-shadow:0 0 25px rgba(37,99,235,0.4);
 }
 
 .btn.dark{
-    background:rgba(255,255,255,0.12);
-    border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.25);
+    box-shadow:none;
+}
+
+.hero{
+    padding:60px 6% 35px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:35px;
+    align-items:center;
+    background:
+        radial-gradient(circle at right,#0b4cff 0%,rgba(2,8,23,0.8) 35%,#020817 75%);
+}
+
+.hero h1{
+    font-size:66px;
+    line-height:1.05;
+    margin:0;
+}
+
+.hero h1 span{
+    display:block;
+    background:linear-gradient(135deg,#06b6d4,#4f46e5);
+    -webkit-background-clip:text;
+    color:transparent;
+}
+
+.hero h3{
+    color:#0ea5e9;
+    font-size:24px;
+    margin-bottom:12px;
+}
+
+.hero p{
+    color:#dbeafe;
+    line-height:1.6;
+    max-width:620px;
+}
+
+.hero-logo{
+    width:100%;
+    max-width:520px;
+    display:block;
+    margin-bottom:25px;
+    filter:drop-shadow(0 0 18px rgba(14,165,233,0.6));
+}
+
+.hero-visual{
+    text-align:center;
+}
+
+.hero-visual img{
+    width:100%;
+    max-width:460px;
+    border-radius:30px;
+    filter:drop-shadow(0 0 45px rgba(37,99,235,0.8));
 }
 
 .trust{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
     gap:14px;
-    margin:35px 0;
-}
-
-.trust-card,
-.card{
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.12);
-    border-radius:24px;
-    padding:22px;
-    backdrop-filter:blur(18px);
-    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    margin-top:28px;
 }
 
 .trust-card{
-    text-align:center;
-    font-weight:bold;
-    color:#e0f2fe;
+    border:1px solid rgba(56,189,248,0.25);
+    border-radius:10px;
+    padding:14px;
+    background:rgba(255,255,255,0.04);
 }
 
 .section{
-    margin-top:40px;
+    padding:30px 6%;
 }
 
 .section h2{
-    font-size:32px;
-    margin-bottom:12px;
-}
-
-.section p{
-    color:#cbd5e1;
-    line-height:1.6;
+    text-align:center;
+    font-size:34px;
+    margin-bottom:22px;
 }
 
 .grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
     gap:18px;
-    margin-top:20px;
+}
+
+.card{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(56,189,248,0.25);
+    border-radius:16px;
+    padding:24px;
+    text-align:center;
+    box-shadow:0 0 25px rgba(37,99,235,0.15);
+}
+
+.card .num{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:#2563eb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 14px;
+    font-weight:900;
+    box-shadow:0 0 20px rgba(37,99,235,0.8);
 }
 
 .card h3{
-    margin-top:0;
-    color:#7dd3fc;
+    margin:8px 0;
 }
 
 .card p{
-    color:#dbeafe;
-}
-
-.alert{
-    background:rgba(239,68,68,0.12);
-    border:1px solid rgba(248,113,113,0.35);
+    color:#cbd5e1;
+    line-height:1.5;
 }
 
 .cta{
-    margin-top:55px;
-    padding:30px 22px;
-    border-radius:28px;
-    background:rgba(15,23,42,0.72);
-    border:1px solid rgba(255,255,255,0.14);
-    box-shadow:0 20px 60px rgba(0,0,0,0.25);
-    backdrop-filter:blur(18px);
+    margin:30px 6%;
+    padding:28px;
+    border-radius:18px;
+    border:1px solid #2563eb;
+    box-shadow:0 0 35px rgba(37,99,235,0.4);
+    display:grid;
+    grid-template-columns:100px 1fr 1.3fr;
+    gap:25px;
+    align-items:center;
 }
 
-.cta-inner{
-    display:block;
-    text-align:center;
-}
-
-.cta-logo{
-    display:none;
-}
-
-.cta-text h2{
-    margin:0 0 14px;
-    font-size:34px;
-    line-height:1.15;
-}
-
-.cta-text p{
-    max-width:650px;
-    margin:0 auto 24px;
-    color:#cbd5e1;
-    line-height:1.6;
-    font-size:17px;
+.cta img{
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    box-shadow:0 0 30px rgba(14,165,233,0.8);
 }
 
 .cta-buttons{
     display:flex;
-    justify-content:center;
     gap:14px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.footer{
+    padding:30px 6%;
+    border-top:1px solid rgba(255,255,255,0.1);
+    color:#94a3b8;
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
     flex-wrap:wrap;
 }
 
-.cta-buttons .btn{
-    min-width:190px;
+.footer a{
+    color:#cbd5e1;
+    text-decoration:none;
+    margin:0 8px;
 }
 
-@media(max-width:600px){
-    .cta{
-        padding:28px 20px;
-        margin-top:45px;
-    }
-
-    .cta-text h2{
-        font-size:32px;
-    }
-
-    .cta-buttons{
+@media(max-width:850px){
+    .header,.nav,.top-buttons{
         flex-direction:column;
+        gap:16px;
     }
 
-    .cta-buttons .btn{
-        width:100%;
-        min-width:0;
-        box-sizing:border-box;
-    }
-}
-
-@media(max-width:800px){
-    .cta-inner{
+    .hero{
         grid-template-columns:1fr;
         text-align:center;
     }
 
-    .cta-logo{
+    .hero h1{
+        font-size:44px;
+    }
+
+    .hero-logo{
+        margin:0 auto 25px;
+    }
+
+    .cta{
+        grid-template-columns:1fr;
+        text-align:center;
+    }
+
+    .cta img{
         margin:auto;
     }
 
     .cta-buttons{
-        width:100%;
-    }
-}
-.support-section{
-    margin-top:60px;
-    padding:35px 25px;
-    text-align:center;
-    border-radius:28px;
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.14);
-    backdrop-filter:blur(18px);
-    box-shadow:0 20px 60px rgba(0,0,0,0.25);
-}
-
-.support-section h2{
-    font-size:38px;
-    line-height:1.1;
-    margin:0 0 18px;
-    color:white;
-}
-
-.support-section p{
-    max-width:680px;
-    margin:0 auto 28px;
-    color:#dbeafe;
-    font-size:18px;
-    line-height:1.6;
-}
-
-.support-buttons{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:16px;
-}
-
-.support-btn{
-    display:block;
-    padding:18px 20px;
-    border-radius:18px;
-    color:white;
-    text-decoration:none;
-    font-weight:800;
-    font-size:17px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.22);
-}
-
-.support-btn.donate{
-    background:linear-gradient(135deg,#ef4444,#dc2626);
-}
-
-.support-btn.partner{
-    background:linear-gradient(135deg,#06b6d4,#2563eb);
-}
-
-.support-btn.demo{
-    background:rgba(255,255,255,0.12);
-    border:1px solid rgba(255,255,255,0.18);
-}
-
-@media(max-width:600px){
-    .support-section h2{
-        font-size:32px;
-    }
-
-    .support-section p{
-        font-size:16px;
-    }
-}
-}
-
-.footer{
-    margin-top:45px;
-    text-align:center;
-    color:#94a3b8;
-    font-size:13px;
-    line-height:1.7;
-}
-
-.footer a{
-    color:#7dd3fc;
-    text-decoration:none;
-    font-weight:bold;
-}
-
-@media(max-width:600px){
-    h1{
-        font-size:36px;
-    }
-
-    .lead{
-        font-size:16px;
+        justify-content:center;
     }
 
     .btn{
         width:100%;
         box-sizing:border-box;
+        text-align:center;
     }
 }
-
-.bg-orb{
-    position:fixed;
-    border-radius:50%;
-    filter:blur(40px);
-    opacity:0.45;
-    z-index:-1;
-    animation:floatOrb 9s ease-in-out infinite;
-}
-
-.orb-one{
-    width:220px;
-    height:220px;
-    background:#00eaff;
-    top:12%;
-    left:-60px;
-}
-
-.orb-two{
-    width:260px;
-    height:260px;
-    background:#2563eb;
-    bottom:10%;
-    right:-80px;
-    animation-delay:2s;
-}
-
-.orb-three{
-    width:180px;
-    height:180px;
-    background:#38bdf8;
-    top:55%;
-    left:35%;
-    animation-delay:4s;
-}
-
-@keyframes floatOrb{
-    0%,100%{
-        transform:translateY(0) scale(1);
-    }
-    50%{
-        transform:translateY(-35px) scale(1.08);
-    }
-}
-
 </style>
 </head>
 
 <body>
-<div class="bg-orb orb-one"></div>
-<div class="bg-orb orb-two"></div>
-<div class="bg-orb orb-three"></div>
 
-<div class="page">
+<div class="header">
+    <div class="logo-wrap">
+        <img src="https://i.imgur.com/dE4kSOz.png">
+        <div class="logo-text">
+            EmpowerBands
+            <span>Worldwide</span>
+        </div>
+    </div>
 
-    <section class="hero">
+    <div class="nav">
+        <a class="active" href="/">Home</a>
+        <a href="#how">How It Works</a>
+        <a href="#about">About Us</a>
+        <a href="#mission">Mission</a>
+        <a href="mailto:support@empowerbands.org">Contact</a>
+    </div>
 
-<div class="logo-box">
-    <img src="{{ https://i.imgur.com/RpBUbHd.png }}" class="logo_img">
-    
+    <div class="top-buttons">
+        <a class="btn" href="/EB001">🚀 View Demo</a>
+        <a class="btn dark" href="/admin">🔒 Admin Login</a>
+    </div>
 </div>
 
-display:block;
-margin:0 auto 12px;
-border-radius:0;
-filter:drop-shadow(0 0 12px rgba(14,165,233,0.35));
-"
->
-        <div class="badge">
-            Nonprofit Safety Technology
-        </div>
+<section class="hero">
+    <div>
+        <img class="hero-logo" src="https://i.imgur.com/RpBUbHd.png">
 
-        <h1>EmpowerBands Worldwide</h1>
+        <h1>EmpowerBands <span>Worldwide</span></h1>
 
-        <p class="lead">
+        <h3>Smart Wearable Safety Technology</h3>
+
+        <p>
             Smart NFC and QR wearable safety technology designed to help children,
             seniors, caregivers, schools, and individuals with disabilities communicate
             faster during emergencies.
         </p>
 
-        <div class="btn-row">
+        <div style="margin-top:25px;">
             <a class="btn" href="/EB001">🚀 View Live Demo</a>
-            <a class="btn dark" href="/admin">🛡️ Admin Login</a>
-            <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Contact Us</a>
+            <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Support Our Mission</a>
+            <a class="btn dark" href="mailto:support@empowerbands.org">🛡️ Partner With Us</a>
         </div>
 
-    </section>
-
-    <div class="trust">
-        <div class="trust-card">📡 NFC + QR Access</div>
-        <div class="trust-card">♿ Accessibility Focused</div>
-        <div class="trust-card">❤️ Nonprofit Mission</div>
-        <div class="trust-card">🏫 School & Caregiver Ready</div>
+        <div class="trust">
+            <div class="trust-card">📡 NFC + QR Technology</div>
+            <div class="trust-card">♿ Accessibility Focused</div>
+            <div class="trust-card">❤️ Nonprofit Organization</div>
+            <div class="trust-card">🏫 School & Caregiver Ready</div>
+        </div>
     </div>
 
-    <section class="section">
-        <h2>How EmpowerBands Works</h2>
-        <p>
-            EmpowerBands helps make emergency support information easier to access
-            when communication may be difficult or time-sensitive.
-        </p>
+    <div class="hero-visual">
+        <img src="https://i.imgur.com/dE4kSOz.png">
+    </div>
+</section>
 
-        <div class="grid">
-            <div class="card">
-                <h3>1️⃣ Tap The Band</h3>
-                <p>A smartphone taps the NFC wearable or scans the QR code.</p>
-            </div>
-
-            <div class="card">
-                <h3>2️⃣ View Emergency Profile</h3>
-                <p>Important instructions, caregiver contacts, and support details appear instantly.</p>
-            </div>
-
-            <div class="card">
-                <h3>3️⃣ Send Alerts Fast</h3>
-                <p>Emergency contacts can receive alerts and GPS location sharing within seconds.</p>
-            </div>
-
-            <div class="card">
-                <h3>4️⃣ Improve Safety</h3>
-                <p>Supports schools, caregivers, seniors, disabilities, and emergency response situations.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <h2>Real-World Scenarios</h2>
-
-        <div class="grid">
-            <div class="card">
-                <h3>👦 Child With Autism</h3>
-                <p>
-                    A nonverbal child becomes separated during a field trip. Staff scan the band
-                    and instantly access caregiver instructions and emergency contacts.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>👵 Senior With Dementia</h3>
-                <p>
-                    A senior experiencing confusion can be safely identified and connected with
-                    family members quickly.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>🏫 School Safety Support</h3>
-                <p>
-                    Teachers and school staff can access emergency instructions during medical,
-                    behavioral, or communication-related situations.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>♿ Accessibility Support</h3>
-                <p>
-                    Individuals with visible or invisible disabilities can communicate essential
-                    support needs quickly and privately.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <h2>Why EmpowerBands Matters</h2>
-
-        <div class="grid">
-            <div class="card">
-                <h3>🔒 PIN-Protected Information</h3>
-                <p>Public instructions can be visible while sensitive medical notes remain protected.</p>
-            </div>
-
-            <div class="card">
-                <h3>📱 Mobile-Friendly Profiles</h3>
-                <p>Designed to open quickly on smartphones without requiring an app download.</p>
-            </div>
-
-            <div class="card">
-                <h3>📍 Location Alerts</h3>
-                <p>Emergency alerts can include GPS location when permission is granted.</p>
-            </div>
-
-            <div class="card">
-                <h3>🌎 Community Impact</h3>
-                <p>Built to support families, caregivers, schools, nonprofits, and vulnerable populations.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <div class="card">
-            <h2>About EmpowerBands Worldwide</h2>
-            <p>
-                EmpowerBands Worldwide is a registered nonprofit organization focused on
-                wearable safety technology, accessibility innovation, emergency communication,
-                and community empowerment.
-            </p>
-
-            <p>
-                Our mission is to improve safety, inclusion, and communication for individuals
-                and families through accessible technology solutions.
-            </p>
-        </div>
-    </section>
-
-    <section class="section">
-        <h2>Mission Disclaimer</h2>
-
-        <div class="card alert">
-            <p>
-                EmpowerBands is a supplemental safety and communication tool. It is not a
-                replacement for 911, emergency medical services, law enforcement, or professional
-                medical monitoring. In a life-threatening emergency, call 911 immediately.
-            </p>
-        </div>
-    </section>
-
-    <section class="section">
-    <h2>Support Our Mission</h2>
+<section class="section" id="how">
+    <h2>How EmpowerBands Works</h2>
 
     <div class="grid">
         <div class="card">
-            <h3>❤️ Donate</h3>
-            <p>
-                Help provide EmpowerBands to children, seniors, individuals with disabilities,
-                and families who need emergency support tools.
-            </p>
+            <div class="num">1</div>
+            <h3>Tap The Band</h3>
+            <p>A smartphone taps the NFC wearable or scans the QR code.</p>
         </div>
 
         <div class="card">
-            <h3>🏫 Sponsor A School</h3>
-            <p>
-                Support school safety programs by helping classrooms, special education teams,
-                and student support staff access wearable safety technology.
-            </p>
+            <div class="num">2</div>
+            <h3>View Emergency Profile</h3>
+            <p>Important instructions, caregiver contacts, and support details appear instantly.</p>
         </div>
 
         <div class="card">
-            <h3>🤝 Become A Partner</h3>
-            <p>
-                Partner with EmpowerBands Worldwide to expand accessibility, safety,
-                and emergency communication in your community.
-            </p>
+            <div class="num">3</div>
+            <h3>Send Alerts Fast</h3>
+            <p>Emergency contacts can receive alerts and GPS location sharing within seconds.</p>
+        </div>
+
+        <div class="card">
+            <div class="num">4</div>
+            <h3>Improve Safety</h3>
+            <p>Supports schools, caregivers, seniors, disabilities, and emergency response situations.</p>
         </div>
     </div>
-
-    
 </section>
-    
 
-    <div class="footer">
+<section class="section" id="mission">
+    <h2>Real-World Scenarios</h2>
+
+    <div class="grid">
+        <div class="card">
+            <h3>👦 Child With Autism</h3>
+            <p>A nonverbal child becomes separated. Staff scan the band and access caregiver instructions.</p>
+        </div>
+
+        <div class="card">
+            <h3>👵 Senior With Dementia</h3>
+            <p>A senior experiencing confusion can be identified and connected with family quickly.</p>
+        </div>
+
+        <div class="card">
+            <h3>🏫 School Safety Support</h3>
+            <p>Teachers and staff can access emergency instructions during medical or communication situations.</p>
+        </div>
+
+        <div class="card">
+            <h3>♿ Accessibility Support</h3>
+            <p>Individuals with visible or invisible disabilities can communicate support needs quickly.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <img src="https://i.imgur.com/dE4kSOz.png">
+
+    <div>
+        <h2>Ready To Support The Mission?</h2>
+        <p>Partner with EmpowerBands Worldwide to help build safer, more accessible communities.</p>
+    </div>
+
+    <div class="cta-buttons">
+        <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
+        <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
+        <a class="btn dark" href="/EB001">🚀 View Demo</a>
+    </div>
+</section>
+
+<div class="footer">
+    <div>
         <strong>EmpowerBands Worldwide</strong><br>
-        One Tap. One Network. Infinite Possibilities.<br>
-        Decatur, Alabama | support@empowerbands.org<br><br>
+        One Tap. One Voice. One World.
+    </div>
 
-        <a href="/privacy">Privacy Policy</a> |
-        <a href="/terms">Terms of Service</a> |
+    <div>
+        Decatur, Alabama<br>
+        support@empowerbands.org
+    </div>
+
+    <div>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
         <a href="/delete-request">Data Deletion Request</a>
     </div>
-
 </div>
 
 </body>
 </html>
-    """
+"""
 
 
 # ===============================
