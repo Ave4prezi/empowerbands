@@ -626,9 +626,7 @@ h1{
     <img src="{{ https://i.imgur.com/RpBUbHd.png }}" class="logo_img">
     
 </div>
-style="
-width:100%;
-max-width:520px;
+
 display:block;
 margin:0 auto 12px;
 border-radius:0;
