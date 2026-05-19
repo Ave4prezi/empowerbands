@@ -624,7 +624,8 @@ h1{
 
 <div class="logo-box">
     <img src="{{ https://i.imgur.com/RpBUbHd.png }}" class="logo_img">
-</div>"
+    
+</div>
 style="
 width:100%;
 max-width:520px;
