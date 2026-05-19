@@ -624,8 +624,9 @@ h1{
 
     <section class="hero">
 
-<img
-src="https://i.imgur.com/RpBUbHd.png"
+<div class="logo-box">
+    <img src="{{ https://i.imgur.com/RpBUbHd.png }}" class="logo_img">
+</div>"
 style="
 width:100%;
 max-width:520px;
