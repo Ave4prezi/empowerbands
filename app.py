@@ -95,7 +95,7 @@ def log_scan(band_id, name, scan_type, ip):
         writer.writerow([band_id, name, now, scan_type, ip])
 
 
-def send_alert_text(name, phones, band_id):
+def send_alert_text(name, phone, band_id, maps_link=None):d
     if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
         print("Twilio not configured.")
         return False
@@ -127,7 +127,7 @@ def send_alert_text(name, phones, band_id):
 
     return success
 
-def send_email_alert(name, email, band_id):
+def send_email_alert(name, email, band_id, maps_link=None):
 
     sender_email = os.environ.get("ALERT_EMAIL")
     sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
@@ -1790,20 +1790,25 @@ def profile(band_id):
                         </div>
 
                         <script>
-                        function sendAlertWithLocation(){{
-                            if (navigator.geolocation) {{
-                                navigator.geolocation.getCurrentPosition(function(pos){{
-                                    let lat = pos.coords.latitude;
-                                    let lon = pos.coords.longitude;
-                                    window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
-                                }}, function(){{
-                                    window.location.href = "/{band_id}?alert=yes";
-                                }});
-                            }} else {{
-                                window.location.href = "/{band_id}?alert=yes";
-                            }}
-                        }}
-                        </script>
+function sendAlertWithLocation(){{
+    if (navigator.geolocation) {{
+        navigator.geolocation.getCurrentPosition(function(pos){{
+            let lat = pos.coords.latitude;
+            let lon = pos.coords.longitude;
+
+            window.location.href =
+            "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+
+        }}, function(error){{
+            alert("GPS permission was denied or unavailable. Please allow location access.");
+            window.location.href = "/alert?band_id={band_id}";
+        }});
+    }} else {{
+        alert("This phone/browser does not support GPS location.");
+        window.location.href = "/alert?band_id={band_id}";
+    }}
+}}
+</script>
                     </body>
                     </html>
                     """
@@ -2267,7 +2272,6 @@ Protected — enter PIN to view
 <a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
 🚨 Activate Emergency Alert
 </a>
-
 <a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
 📞 Call Emergency Contact
 </a>
@@ -2565,8 +2569,8 @@ def alert_with_location():
                 email = row[2]
                 phone = row[3]
 
-                sms_success = send_alert_text(name, phone, band_id)
-                email_success = send_email_alert(name, email, band_id)
+                sms_success = send_alert_text(name, phone, band_id, maps_link)
+email_success = send_email_alert(name, email, band_id, maps_link)
 
                 print("SMS success:", sms_success)
                 print("Email success:", email_success)
