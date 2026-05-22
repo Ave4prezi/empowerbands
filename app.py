@@ -95,17 +95,19 @@ def log_scan(band_id, name, scan_type, ip):
         writer.writerow([band_id, name, now, scan_type, ip])
 
 
-def send_alert_text(name, phone, band_id, maps_link=None):d
+def send_alert_text(name, phones, band_id, maps_link=None):
     if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
         print("Twilio not configured.")
         return False
 
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    location_text = f"\nLocation: {maps_link}" if maps_link else ""
 
     message = (
         f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
         f"They may be lost, confused, or unable to communicate. "
         f"Profile: {BASE_URL}/{band_id}"
+        f"{location_text}"
     )
 
     phone_list = [p.strip() for p in phones.split(",") if p.strip()]
@@ -139,12 +141,15 @@ def send_email_alert(name, email, band_id, maps_link=None):
     subject = f"🚨 EmpowerBands Emergency Alert for {name}"
 
     body = f"""
-EmpowerBands Emergency Alert
+🚨 EmpowerBands Alert
 
 {name}'s emergency profile was accessed.
 
 Profile:
 {BASE_URL}/{band_id}
+
+Location:
+{maps_link if maps_link else "Not available"}
 
 This person may need assistance.
 """
@@ -2547,7 +2552,7 @@ def pro():
 
 # ===============================
 # GPS ALERT ROUTE
-# ===============================    
+# ===============================
 
 @app.route("/alert_with_location")
 def alert_with_location():
@@ -2563,17 +2568,30 @@ def alert_with_location():
         next(reader, None)
 
         for row in reader:
+
             if row[0].strip().upper() == band_id:
 
                 name = row[1]
                 email = row[2]
                 phone = row[3]
 
-                sms_success = send_alert_text(name, phone, band_id, maps_link)
-email_success = send_email_alert(name, email, band_id, maps_link)
+                sms_success = send_alert_text(
+                    name,
+                    phone,
+                    band_id,
+                    maps_link
+                )
+
+                email_success = send_email_alert(
+                    name,
+                    email,
+                    band_id,
+                    maps_link
+                )
 
                 print("SMS success:", sms_success)
                 print("Email success:", email_success)
+                print("MAP LINK:", maps_link)
 
                 return f"""
 <!DOCTYPE html>
