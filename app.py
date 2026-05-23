@@ -101,7 +101,9 @@ def send_alert_text(name, phones, band_id, maps_link=None):
         return False
 
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    location_text = f"\nLocation: {maps_link}" if maps_link else ""
+
+    maps_url = f"https://www.google.com/maps/search/?api=1&query={maps_link}" if maps_link else ""
+    location_text = f"\nLocation: {maps_url}" if maps_url else ""
 
     message = (
         f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
@@ -151,15 +153,15 @@ Profile:
 {BASE_URL}/{band_id}
 
 Location:
-{maps_link if maps_link else "Not available"}
+maps_url = maps_link if maps_link else "Not available"
 
 This person may need assistance.
 """
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = sender_email
-    msg["To"] = ", ".join(email_list)
+msg = MIMEText(body)
+msg["Subject"] = subject
+msg["From"] = sender_email
+msg["To"] = ", ".join(email_list)
 
 try:
     server = smtplib.SMTP("smtp.gmail.com", 587)
@@ -2568,9 +2570,14 @@ def alert_with_location():
 
     band_id = request.args.get("band_id", "").strip().upper()
     lat = request.args.get("lat")
-    lon = request.args.get("lon")
-
-    maps_link = f"https://maps.google.com/?q={lat},{lon}"
+    lon = request.args.get("lon")  
+    
+    
+if lat and lon:
+    maps_link = f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
+else:
+    maps_link = None
+    
 
     with open(file_name, "r", encoding="utf-8") as f:
         reader = csv.reader(f)
