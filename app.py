@@ -34,6 +34,8 @@ header = [
     "name",
     "email",
     "phone",
+    "emergency_phones",
+    "emergency_emails",
     "age_group",
     "condition",
     "instructions",
@@ -1457,6 +1459,19 @@ required
 
 <small class="helper-text">
 Separate multiple numbers with commas
+</small>
+<label class="form-label">
+Emergency Contact Emails
+</label>
+
+<input
+type="text"
+name="emergency_emails"
+placeholder="mom@email.com,dad@email.com"
+>
+
+<small class="helper-text">
+Separate multiple emails with commas
 </small>
 
 <input name="age_group" placeholder="Child / Adult / Senior">
