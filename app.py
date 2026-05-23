@@ -61,9 +61,10 @@ if not os.path.exists(file_name):
     "Jaden",
     "email@test.com",
     "+19382655364,+12566121274",
+    "mom@test.com,dad@test.com",
     "Child",
-    "Autism – Nonverbal",
-    "Please stay calm. I may not respond verbally. Call emergency contacts immediately.",
+    "Autism — Nonverbal",
+    "Please stay calm. I may not respond verbally.",
     "No allergies",
     "1234",
     "123 Hope Street, Decatur AL 35601",
@@ -1606,20 +1607,21 @@ def edit_profile(band_id):
     if request.method == "POST":
 
         updated_row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            request.form["photo_url"].strip()
-        ]
+    request.form["band_id"].strip().upper(),
+    request.form["name"].strip(),
+    request.form["email"].strip(),
+    request.form["emergency_phones"].strip(),
+    request.form.get("emergency_emails", "").strip(),
+    request.form["age_group"].strip(),
+    request.form["condition"].strip(),
+    request.form["instructions"].strip(),
+    request.form["medical_notes"].strip(),
+    request.form["pin"].strip(),
+    request.form["address"].strip(),
+    request.form["race"].strip(),
+    request.form["gender"].strip(),
+    request.form["photo_url"].strip()
+]
 
         new_rows = [header]
 
@@ -1720,14 +1722,22 @@ button{{
 <form method="POST">
 
 <input name="band_id" value="{found_row[0]}" required>
-<input name="name" value="{found_row[1]}" required>
-<input name="email" value="{found_row[2]}">
-<input name="phone" value="{found_row[3]}" required>
-<input name="age_group" value="{found_row[4]}">
-<input name="condition" value="{found_row[5]}">
 
-<textarea name="instructions">{found_row[6]}</textarea>
-<textarea name="medical_notes">{found_row[7]}</textarea>
+<input name="name" value="{found_row[1]}" required>
+
+input name="email" value="{found_row[2]}">
+
+input name="emergency_phones" value="{found_row[3]}" required>
+
+input name="emergency_emails" value="{found_row[4]}">
+
+input name="age_group" value="{found_row[5]}">
+
+input name="condition" value="{found_row[6]}">
+
+textarea name="instructions">{found_row[7]}</textarea>
+
+textarea name="medical_notes">{found_row[8]}</textarea>
 
 <input name="pin" value="{found_row[8]}" required>
 <input name="address" value="{found_row[9]}">
