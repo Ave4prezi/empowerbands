@@ -102,8 +102,7 @@ def send_alert_text(name, phones, band_id, maps_link=None):
 
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-    maps_url = f"https://www.google.com/maps/search/?api=1&query={maps_link}" if maps_link else ""
-    location_text = f"\nLocation: {maps_url}" if maps_url else ""
+    location_text = f"\nLocation: {maps_link}" if maps_link else ""
 
     message = (
         f"🚨 EmpowerBands Alert: {name}'s band was scanned in ALERT MODE. "
@@ -113,7 +112,6 @@ def send_alert_text(name, phones, band_id, maps_link=None):
     )
 
     phone_list = [p.strip() for p in phones.split(",") if p.strip()]
-
     success = False
 
     for phone in phone_list:
@@ -131,16 +129,22 @@ def send_alert_text(name, phones, band_id, maps_link=None):
 
     return success
 
-def send_email_alert(name, email, band_id, maps_link=None):
 
+def send_email_alert(name, email, band_id, maps_link=None):
     sender_email = os.environ.get("ALERT_EMAIL")
     sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
 
-    email_list = [email.strip() for email in ALERT_EMAILS.split(",")]
+    email_list = [e.strip() for e in ALERT_EMAILS.split(",") if e.strip()]
 
     if not sender_email or not sender_password:
         print("Email credentials missing")
         return False
+
+    if not email_list:
+        print("No recipient emails configured")
+        return False
+
+    maps_url = maps_link if maps_link else "Not available"
 
     subject = f"🚨 EmpowerBands Emergency Alert for {name}"
 
@@ -153,36 +157,36 @@ Profile:
 {BASE_URL}/{band_id}
 
 Location:
-maps_url = maps_link if maps_link else "Not available"
+{maps_url}
 
 This person may need assistance.
 """
 
-msg = MIMEText(body)
-msg["Subject"] = subject
-msg["From"] = sender_email
-msg["To"] = ", ".join(email_list)
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = ", ".join(email_list)
 
-try:
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
 
-    server.login(sender_email, sender_password)
+        server.login(sender_email, sender_password)
 
-    server.sendmail(
-        sender_email,
-        email_list,
-        msg.as_string()
-    )
+        server.sendmail(
+            sender_email,
+            email_list,
+            msg.as_string()
+        )
 
-    server.quit()
+        server.quit()
 
-    print("Email alert sent")
-    return True
+        print("Email alert sent")
+        return True
 
-except Exception as e:
-    print(f"Email failed: {e}")
-    return False
+    except Exception as e:
+        print(f"Email failed: {e}")
+        return False
 
 
 
