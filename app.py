@@ -2613,40 +2613,26 @@ def alert_with_location():
 
     band_id = request.args.get("band_id", "").strip().upper()
     lat = request.args.get("lat")
-    lon = request.args.get("lon")  
-    
-    
-if lat and lon:
-    maps_link = f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
-else:
-    maps_link = None
-    
+    lon = request.args.get("lon")
+
+    if lat and lon:
+        maps_link = f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
+    else:
+        maps_link = None
 
     with open(file_name, "r", encoding="utf-8") as f:
         reader = csv.reader(f)
         next(reader, None)
 
         for row in reader:
-
             if row[0].strip().upper() == band_id:
 
                 name = row[1]
                 email = row[2]
                 phone = row[3]
 
-                sms_success = send_alert_text(
-                    name,
-                    phone,
-                    band_id,
-                    maps_link
-                )
-
-                email_success = send_email_alert(
-                    name,
-                    email,
-                    band_id,
-                    maps_link
-                )
+                sms_success = send_alert_text(name, phone, band_id, maps_link)
+                email_success = send_email_alert(name, email, band_id, maps_link)
 
                 print("SMS success:", sms_success)
                 print("Email success:", email_success)
@@ -2656,79 +2642,45 @@ else:
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Alert Sent</title>
-
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            background: #f3f4f6;
-            text-align: center;
-            padding: 40px;
-        }}
-
-        .card {{
-            background: white;
-            padding: 30px;
-            border-radius: 18px;
-            max-width: 500px;
-            margin: auto;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }}
-
-        .home-btn {{
-            display:inline-block;
-            margin-top:20px;
-            padding:14px 24px;
-            background:#111827;
-            color:white;
-            text-decoration:none;
-            border-radius:12px;
-            font-weight:bold;
-            box-shadow:0 4px 12px rgba(0,0,0,0.25);
-            transition:0.3s;
-        }}
-
-        .home-btn:hover {{
-            transform:translateY(-2px);
-            background:#1f2937;
-        }}
-
-        .site-footer{{
-    margin-top:40px;
-    padding:25px 15px;
-    text-align:center;
-    color:rgba(255,255,255,0.75);
-    font-size:14px;
-    border-top:1px solid rgba(255,255,255,0.15);
-    background:rgba(0,0,0,0.18);
+<title>Alert Sent</title>
+<style>
+body {{
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    text-align: center;
+    padding: 40px;
 }}
-
-.site-footer p{{
-    margin:6px 0;
+.card {{
+    background: white;
+    padding: 30px;
+    border-radius: 18px;
+    max-width: 500px;
+    margin: auto;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }}
-    </style>
+.home-btn {{
+    display:inline-block;
+    margin-top:20px;
+    padding:14px 24px;
+    background:#111827;
+    color:white;
+    text-decoration:none;
+    border-radius:12px;
+    font-weight:bold;
+}}
+</style>
 </head>
-
 <body>
     <div class="card">
         <h1>✅ Alert Sent</h1>
         <p>Emergency contacts have been notified.</p>
-
         <a href="/" class="home-btn">🏠 Return Home</a>
     </div>
-
-    <footer class="site-footer">
-        <p><strong>EmpowerBands Worldwide</strong> © 2026</p>
-        <p>One Tap. One Network. Infinite Possibilities.</p>
-        <p>Emergency support profiles powered by NFC + QR access.</p>
-        <p>Decatur, Alabama | support@empowerbands.org</p>
-    </footer>
-
 </body>
 </html>
 """
 
-    return "<h1>Band not found</h1>"
+    return "Band ID not found", 404
 
 
 # ===============================
