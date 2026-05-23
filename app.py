@@ -162,25 +162,25 @@ This person may need assistance.
     msg["To"] = ", ".join(email_list)
 
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-server.starttls()
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
 
-server.login(sender_email, sender_password)
+    server.login(sender_email, sender_password)
 
-server.sendmail(
-    sender_email,
-    email_list,
-    msg.as_string()
-)
+    server.sendmail(
+        sender_email,
+        email_list,
+        msg.as_string()
+    )
 
-server.quit() 
+    server.quit()
 
-        print("Email alert sent")
-        return True
+    print("Email alert sent")
+    return True
 
-    except Exception as e:
-        print("Email error:", e)
-        return False
+except Exception as e:
+    print(f"Email failed: {e}")
+    return False
 
 
 
