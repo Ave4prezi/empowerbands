@@ -161,7 +161,7 @@ This person may need assistance.
     msg["From"] = sender_email
     msg["To"] = ", ".join(email_list)
 
-    try:
+try:
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
 
