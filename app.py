@@ -19,7 +19,7 @@ TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 
-ALERT_EMAIL = os.environ.get("ALERT_EMAIL")
+ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
 ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
 
 LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
@@ -134,6 +134,8 @@ def send_email_alert(name, email, band_id, maps_link=None):
     sender_email = os.environ.get("ALERT_EMAIL")
     sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
 
+    email_list = [email.strip() for email in ALERT_EMAILS.split(",")]
+
     if not sender_email or not sender_password:
         print("Email credentials missing")
         return False
@@ -157,14 +159,21 @@ This person may need assistance.
     msg = MIMEText(body)
     msg["Subject"] = subject
     msg["From"] = sender_email
-    msg["To"] = email
+    msg["To"] = ", ".join(email_list)
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, email, msg.as_string())
-        server.quit()
+server.starttls()
+
+server.login(sender_email, sender_password)
+
+server.sendmail(
+    sender_email,
+    email_list,
+    msg.as_string()
+)
+
+server.quit() 
 
         print("Email alert sent")
         return True
