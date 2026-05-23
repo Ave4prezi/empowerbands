@@ -1363,6 +1363,24 @@ button{
     cursor:pointer;
 }
 
+.form-label{
+    display:block;
+    margin-top:18px;
+    margin-bottom:8px;
+    color:white;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.4px;
+}
+
+.helper-text{
+    display:block;
+    margin-top:4px;
+    color:rgba(255,255,255,0.65);
+    font-size:12px;
+    line-height:1.4;
+}
+
 @media(max-width:480px){
     .band-row{
         flex-direction:column;
@@ -1410,11 +1428,32 @@ Generate
 
 </div>
 
-<input name="name" placeholder="Full Name" required>
+<label class="form-label">Full Name *</label>
+
+<input
+type="text"
+name="name"
+placeholder="John Smith"
+required
+>
 
 <input name="email" placeholder="Email">
 
-<input name="phone" placeholder="Emergency Contacts (comma separated)" required>
+<label class="form-label">
+Emergency Contact Numbers *
+</label>
+
+<input
+type="text"
+name="phone"
+placeholder="+12565551234,+12565559876"
+inputmode="tel"
+required
+>
+
+<small class="helper-text">
+Separate multiple numbers with commas
+</small>
 
 <input name="age_group" placeholder="Child / Adult / Senior">
 
