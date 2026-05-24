@@ -62,6 +62,7 @@ if not os.path.exists(file_name):
     "EB001",
     "Jaden",
     "email@test.com",
+    "+12565551234",        
     "+19382655364,+12566121274",
     "mom@test.com,dad@test.com",
     "Child",
@@ -1611,7 +1612,7 @@ def edit_profile(band_id):
 
     for row in data_rows:
         if row[0].strip().upper() == band_id:
-            while len(row) < 13:
+            while len(row) < 15:
                 row.append("")
             found_row = row
             break
@@ -1620,11 +1621,11 @@ def edit_profile(band_id):
         return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
 
     if request.method == "POST":
-
-        updated_row = [
+updated_row = [
     request.form["band_id"].strip().upper(),
     request.form["name"].strip(),
     request.form["email"].strip(),
+    request.form["phone"].strip(),
     request.form["emergency_phones"].strip(),
     request.form.get("emergency_emails", "").strip(),
     request.form["age_group"].strip(),
@@ -1740,25 +1741,31 @@ button{{
 
 <input name="name" value="{found_row[1]}" required>
 
-input name="email" value="{found_row[2]}">
+<input name="email" value="{found_row[2]}">
 
-input name="emergency_phones" value="{found_row[3]}" required>
+<input name="phone" value="{found_row[3]}" required>
 
-input name="emergency_emails" value="{found_row[4]}">
+<input name="emergency_phones" value="{found_row[4]}" required>
 
-input name="age_group" value="{found_row[5]}">
+<input name="emergency_emails" value="{found_row[4]}">
 
-input name="condition" value="{found_row[6]}">
+<input name="age_group" value="{found_row[5]}">
 
-textarea name="instructions">{found_row[7]}</textarea>
+<input name="condition" value="{found_row[6]}">
 
-textarea name="medical_notes">{found_row[8]}</textarea>
+<textarea name="instructions">{found_row[7]}</textarea>
 
-<input name="pin" value="{found_row[8]}" required>
-<input name="address" value="{found_row[9]}">
-<input name="race" value="{found_row[10]}">
-<input name="gender" value="{found_row[11]}">
-<input name="photo_url" value="{found_row[12]}" placeholder="Photo URL">
+<textarea name="medical_notes">{found_row[8]}</textarea>
+
+<input name="pin" value="{found_row[9]}" required>
+
+<input name="address" value="{found_row[10]}">
+
+<input name="race" value="{found_row[11]}">
+
+<input name="gender" value="{found_row[12]}">
+
+<input name="photo_url" value="{found_row[13]}" placeholder="Photo URL">
 
 <button type="submit">Save Changes</button>
 
@@ -1824,15 +1831,18 @@ def profile(band_id):
                 name = row[1]
                 email = row[2]
                 phone = row[3]
-                age_group = row[4]
-                condition = row[5]
-                instructions = row[6]
-                medical_notes = row[7]
-                pin = row[8] if row[8] else "1234"
-                address = row[9] if len(row) > 9 else ""
-                race = row[10] if len(row) > 10 else ""
-                gender = row[11] if len(row) > 11 else ""
-                photo_url = row[12] if len(row) > 12 else ""
+                emergency_phones = row[4] if len(row) > 4 else ""
+                emergency_emails = row[5] if len(row) > 5 else ""
+                age_group = row[6] if len(row) > 6 else ""
+                condition = row[7] if len(row) > 7 else ""
+                instructions = row[8] if len(row) > 8 else ""
+                medical_notes = row[9] if len(row) > 9 else ""
+                pin = row[10] if len(row) > 10 and row[10] else "1234"
+                address = row[11] if len(row) > 11 else ""
+                race = row[12] if len(row) > 12 else ""
+                gender = row[13] if len(row) > 13 else ""
+                photo_url = row[14] if len(row) > 14 else ""
+
 
                 visitor_ip = request.remote_addr
                 log_scan(
