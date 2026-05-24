@@ -1621,24 +1621,24 @@ def edit_profile(band_id):
         return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
 
     if request.method == "POST":
-updated_row = [
-    request.form["band_id"].strip().upper(),
-    request.form["name"].strip(),
-    request.form["email"].strip(),
-    request.form["phone"].strip(),
-    request.form["emergency_phones"].strip(),
-    request.form.get("emergency_emails", "").strip(),
-    request.form["age_group"].strip(),
-    request.form["condition"].strip(),
-    request.form["instructions"].strip(),
-    request.form["medical_notes"].strip(),
-    request.form["pin"].strip(),
-    request.form["address"].strip(),
-    request.form["race"].strip(),
-    request.form["gender"].strip(),
-    request.form["photo_url"].strip()
-]
 
+    updated_row = [
+        request.form["band_id"].strip().upper(),
+        request.form["name"].strip(),
+        request.form["email"].strip(),
+        request.form["phone"].strip(),
+        request.form["emergency_phones"].strip(),
+        request.form.get("emergency_emails", "").strip(),
+        request.form["age_group"].strip(),
+        request.form["condition"].strip(),
+        request.form["instructions"].strip(),
+        request.form["medical_notes"].strip(),
+        request.form["pin"].strip(),
+        request.form["address"].strip(),
+        request.form["race"].strip(),
+        request.form["gender"].strip(),
+        request.form["photo_url"].strip()
+    ]
         new_rows = [header]
 
         for row in data_rows:
