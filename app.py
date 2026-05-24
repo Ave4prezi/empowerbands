@@ -1621,6 +1621,7 @@ def edit_profile(band_id):
         return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
 
 if request.method == "POST":
+
     updated_row = [
         request.form["band_id"].strip().upper(),
         request.form["name"].strip(),
