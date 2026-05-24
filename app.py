@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect, session
+from werkzeug.utils import secure_filename
 from twilio.rest import Client
 import csv
 import os
@@ -8,7 +9,8 @@ from email.mime.text import MIMEText
 import qrcode
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
-
+UPLOAD_FOLDER = "static/uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 
 file_name = "customers.csv"
@@ -1226,12 +1228,25 @@ def add():
 
     if request.method == "POST":
         # save profile
-        
+
+        photo = request.files.get("photo")
+        photo_url = ""
+
+        if photo and photo.filename != "":
+            filename = secure_filename(photo.filename)
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+            photo.save(filepath)
+
+            photo_url = f"/static/uploads/{filename}"
+
         row = [
             request.form["band_id"].strip().upper(),
             request.form["name"].strip(),
             request.form["email"].strip(),
             request.form["phone"].strip(),
+            request.form.get("emergency_phones", "").strip(),
+            request.form.get("emergency_emails", "").strip(),
             request.form["age_group"].strip(),
             request.form["condition"].strip(),
             request.form["instructions"].strip(),
@@ -1240,7 +1255,7 @@ def add():
             request.form["address"].strip(),
             request.form["race"].strip(),
             request.form["gender"].strip(),
-            request.form["photo_url"].strip()
+            photo_url
         ]
 
         with open(file_name, "a", newline="", encoding="utf-8") as f:
@@ -1413,7 +1428,7 @@ button{
 Create a secure EmpowerBand emergency profile
 </div>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 
 <div class="band-row">
 
@@ -1495,7 +1510,7 @@ Separate multiple emails with commas
 
 <input name="gender" placeholder="Gender">
 
-<input name="photo_url" placeholder="Photo URL">
+<input type="file" name="photo">
 
 <label style="display:block; margin-top:15px; font-size:13px;">
     <input type="checkbox" name="agree_terms" required>
