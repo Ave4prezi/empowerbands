@@ -1234,7 +1234,7 @@ def add():
         photo_url = ""
 
         if photo and photo.filename != "":
-            filename = secure_filename(photo.filename)
+            filename = f"{int(time.time())}_{secure_filename(photo.filename)}"
             filepath = os.path.join(UPLOAD_FOLDER, filename)
 
             photo.save(filepath)
