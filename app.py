@@ -1622,6 +1622,10 @@ def edit_profile(band_id):
 
     if request.method == "POST":
 
+updated_row = [
+
+    if request.method == "POST":
+
     updated_row = [
         request.form["band_id"].strip().upper(),
         request.form["name"].strip(),
@@ -1639,21 +1643,22 @@ def edit_profile(band_id):
         request.form["gender"].strip(),
         request.form["photo_url"].strip()
     ]
-        new_rows = [header]
 
-        for row in data_rows:
-            if row[0].strip().upper() == band_id:
-                new_rows.append(updated_row)
-            else:
-                new_rows.append(row)
+    new_rows = [header]
 
-        with open(file_name, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerows(new_rows)
+    for row in data_rows:
+        if row[0].strip().upper() == band_id:
+            new_rows.append(updated_row)
+        else:
+            new_rows.append(row)
 
-        return redirect("/dashboard")
+    with open(file_name, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(new_rows)
 
-    return f"""
+    return redirect("/dashboard")
+
+return f"""
 <!DOCTYPE html>
 <html>
 <head>
