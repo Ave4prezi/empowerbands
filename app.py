@@ -1620,41 +1620,41 @@ def edit_profile(band_id):
     if not found_row:
         return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
 
-if request.method == "POST":
+    if request.method == "POST":
 
-    updated_row = [
-        request.form["band_id"].strip().upper(),
-        request.form["name"].strip(),
-        request.form["email"].strip(),
-        request.form["phone"].strip(),
-        request.form["emergency_phones"].strip(),
-        request.form.get("emergency_emails", "").strip(),
-        request.form["age_group"].strip(),
-        request.form["condition"].strip(),
-        request.form["instructions"].strip(),
-        request.form["medical_notes"].strip(),
-        request.form["pin"].strip(),
-        request.form["address"].strip(),
-        request.form["race"].strip(),
-        request.form["gender"].strip(),
-        request.form["photo_url"].strip()
-    ]
+        updated_row = [
+            request.form["band_id"].strip().upper(),
+            request.form["name"].strip(),
+            request.form["email"].strip(),
+            request.form["phone"].strip(),
+            request.form["emergency_phones"].strip(),
+            request.form.get("emergency_emails", "").strip(),
+            request.form["age_group"].strip(),
+            request.form["condition"].strip(),
+            request.form["instructions"].strip(),
+            request.form["medical_notes"].strip(),
+            request.form["pin"].strip(),
+            request.form["address"].strip(),
+            request.form["race"].strip(),
+            request.form["gender"].strip(),
+            request.form["photo_url"].strip()
+        ]
 
-    new_rows = [header]
+        new_rows = [header]
 
-    for row in data_rows:
-        if row[0].strip().upper() == band_id:
-            new_rows.append(updated_row)
-        else:
-            new_rows.append(row)
+        for row in data_rows:
+            if row[0].strip().upper() == band_id:
+                new_rows.append(updated_row)
+            else:
+                new_rows.append(row)
 
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerows(new_rows)
+        with open(file_name, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerows(new_rows)
 
-    return redirect("/dashboard")
+        return redirect("/dashboard")
 
-return f"""
+    return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -1748,25 +1748,25 @@ button{{
 
 <input name="emergency_phones" value="{found_row[4]}" required>
 
-<input name="emergency_emails" value="{found_row[4]}">
+<input name="emergency_emails" value="{found_row[5]}">
 
-<input name="age_group" value="{found_row[5]}">
+<input name="age_group" value="{found_row[6]}">
 
-<input name="condition" value="{found_row[6]}">
+<input name="condition" value="{found_row[7]}">
 
-<textarea name="instructions">{found_row[7]}</textarea>
+<textarea name="instructions">{found_row[8]}</textarea>
 
-<textarea name="medical_notes">{found_row[8]}</textarea>
+<textarea name="medical_notes">{found_row[9]}</textarea>
 
-<input name="pin" value="{found_row[9]}" required>
+<input name="pin" value="{found_row[10]}" required>
 
-<input name="address" value="{found_row[10]}">
+<input name="address" value="{found_row[11]}">
 
-<input name="race" value="{found_row[11]}">
+<input name="race" value="{found_row[12]}">
 
-<input name="gender" value="{found_row[12]}">
+<input name="gender" value="{found_row[13]}">
 
-<input name="photo_url" value="{found_row[13]}" placeholder="Photo URL">
+<input name="photo_url" value="{found_row[14]}" placeholder="Photo URL">
 
 <button type="submit">Save Changes</button>
 
