@@ -1468,7 +1468,7 @@ Emergency Contact Numbers *
 
 <input
 type="text"
-name="phone"
+name="emergency_phones"
 placeholder="+12565551234,+12565559876"
 inputmode="tel"
 required
