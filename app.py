@@ -1830,120 +1830,86 @@ def profile(band_id):
         next(reader, None)
 
         for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                age_group = row[6] if len(row) > 6 else ""
-                condition = row[7] if len(row) > 7 else ""
-                instructions = row[8] if len(row) > 8 else ""
-                medical_notes = row[9] if len(row) > 9 else ""
-                pin = row[10] if len(row) > 10 and row[10] else "1234"
-                address = row[11] if len(row) > 11 else ""
-                race = row[12] if len(row) > 12 else ""
-                gender = row[13] if len(row) > 13 else ""
-                photo_url = row[14] if len(row) > 14 else ""
 
+    if len(row) >= 9 and row[0].strip().upper() == band_id:
 
-                visitor_ip = request.remote_addr
-                log_scan(
-                    band_id,
-                    name,
-                    "PROFILE_VIEW",
-                    visitor_ip
-                )
+        name = row[1]
+        email = row[2]
+        phone = row[3]
 
-    
+        emergency_phones = row[4] if len(row) > 4 else ""
+        emergency_emails = row[5] if len(row) > 5 else ""
 
-                entered_pin = request.args.get("pin")
+        age_group = row[6] if len(row) > 6 else ""
+        condition = row[7] if len(row) > 7 else ""
+        instructions = row[8] if len(row) > 8 else ""
+        medical_notes = row[9] if len(row) > 9 else ""
 
-                if alert_mode:
+        pin = row[10] if len(row) > 10 and row[10] else "1234"
 
-                    success = send_alert_text(
-                        name,
-                        emergency_phones,
-                        band_id,
-                        maps_link=None
-                    )
+        address = row[11] if len(row) > 11 else ""
+        race = row[12] if len(row) > 12 else ""
+        gender = row[13] if len(row) > 13 else ""
+        photo_url = row[14] if len(row) > 14 else ""
 
-                    email_success = send_email_alert(
-                        name,
-                        emergency_emails,
-                        band_id,
-                        maps_link=None
-                    )
+        visitor_ip = request.remote_addr
 
-                    if success or email_success:
+        log_scan(
+            band_id,
+            name,
+            "PROFILE_VIEW",
+            visitor_ip
+        )
 
-                        return f"""
-                        <h1>✅ Alert Sent</h1>
-                        <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
-                        """
+        entered_pin = request.args.get("pin")
 
-                    else:
+        if alert_mode:
 
-                        return f"""
-                        <h1>❌ Alert Failed</h1>
-                        <p>There was a problem sending the alert.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
-                        """
+            success = send_alert_text(
+                name,
+                emergency_phones,
+                band_id,
+                maps_link=None
+            )
 
-                if confirm_alert:
+            email_success = send_email_alert(
+                name,
+                emergency_emails,
+                band_id,
+                maps_link=None
+            )
 
-                    return f"""
-                    <html>
-                    <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                    </head>
-                    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
-                        <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
-                            <h2>⚠️ Emergency Alert</h2>
-                            <p>This will notify the designated emergency contact(s) on file.</p>
+            if success or email_success:
 
-                            <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
-                                <strong>Important:</strong><br>
-                                This system does <b>NOT contact 911 or emergency services</b>.<br><br>
-                                If this is a life-threatening emergency, please call <b>911 immediately</b>.
-                            </div>
+                return f"""
+                <h1>✅ Alert Sent</h1>
+                <p>Emergency contact(s) have been notified.</p>
+                <p><a href="/{band_id}">Go Back</a></p>
+                """
 
-                            <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
-                                🚨 Send Alert With Location
-                            </button>
+            else:
 
-                            <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
-                                Cancel
-                            </a>
-                        </div>
+                return f"""
+                <h1>❌ Alert Failed</h1>
+                <p>There was a problem sending the alert.</p>
+                <p><a href="/{band_id}">Go Back</a></p>
+                """
 
-                        <script>
-function sendAlertWithLocation(){{
-    if (navigator.geolocation) {{
-        navigator.geolocation.getCurrentPosition(function(pos){{
-            let lat = pos.coords.latitude;
-            let lon = pos.coords.longitude;
+        if confirm_alert:
 
-            window.location.href =
-            "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+            return f"""
+            YOUR HTML HERE
+            """
 
-        }}, function(error){{
-            alert("GPS permission was denied or unavailable. Please allow location access.");
-            window.location.href = "/alert?band_id={band_id}";
-        }});
-    }} else {{
-        alert("This phone/browser does not support GPS location.");
-        window.location.href = "/alert?band_id={band_id}";
-    }}
-}}
-</script>
-                    </body>
-                    </html>
-                    """
+        if entered_pin == pin:
 
-                if entered_pin == pin:
-                    return f"""
+            return f"""
+            FULL PROFILE HTML
+            """
+
+        return f"""
+        PUBLIC PROFILE HTML
+        """
 <!DOCTYPE html>
 <html>
 <head>
