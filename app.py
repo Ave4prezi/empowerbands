@@ -2158,7 +2158,7 @@ GENDER
 </div>
 
 
-<a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
+<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">
 📞 Call Emergency Contact
 </a> 
 
@@ -2401,7 +2401,7 @@ Protected — enter PIN to view
 <a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
 🚨 Activate Emergency Alert
 </a>
-<a class="btn btn-blue" href="tel:{phone.split(',')[0].strip()}">
+<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">
 📞 Call Emergency Contact
 </a>
 <a class="btn btn-dark" href="/pro">
