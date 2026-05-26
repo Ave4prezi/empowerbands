@@ -140,7 +140,7 @@ def send_email_alert(name, email, band_id, maps_link=None):
     sender_email = os.environ.get("ALERT_EMAIL")
     sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
 
-    email_list = [e.strip() for e in ALERT_EMAILS.split(",") if e.strip()]
+    email_list = [e.strip() for e in email.split(",") if e.strip()]
 
     if not sender_email or not sender_password:
         print("Email credentials missing")
@@ -1693,7 +1693,7 @@ h1{{
     text-align:center;
 }}
 
-input, textarea{{
+input, textarea{ 
     width:100%;
     box-sizing:border-box;
     padding:15px;
@@ -1704,7 +1704,9 @@ input, textarea{{
     color:white;
     margin-bottom:14px;
     font-size:16px;
-}}
+    overflow-x:auto;
+    white-space:nowrap;
+}
 
 textarea{{
     min-height:90px;
@@ -1856,22 +1858,38 @@ def profile(band_id):
     
 
                 entered_pin = request.args.get("pin")
-                if alert_mode:
-                    success = send_alert_text(name, phone, band_id)
-                    email_success = send_email_alert(name, email, band_id)
 
-                    if success or email_success:
-                        return f"""
-                        <h1>✅ Alert Sent</h1>
-                        <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
-                        """
-                    else:
-                        return f"""
-                        <h1>❌ Alert Failed</h1>
-                        <p>There was a problem sending the alert.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
-                        """
+if alert_mode:
+
+    success = send_alert_text(
+        name,
+        emergency_phones,
+        band_id,
+        maps_link=None
+    )
+
+    email_success = send_email_alert(
+        name,
+        emergency_emails,
+        band_id,
+        maps_link=None
+    )
+
+    if success or email_success:
+
+        return f"""
+        <h1>✅ Alert Sent</h1>
+        <p>Emergency contact(s) have been notified.</p>
+        <p><a href="/{band_id}">Go Back</a></p>
+        """
+
+    else:
+
+        return f"""
+        <h1>❌ Alert Failed</h1>
+        <p>There was a problem sending the alert.</p>
+        <p><a href="/{band_id}">Go Back</a></p>
+        """
 
                 if confirm_alert:
                     return f"""
@@ -2679,11 +2697,17 @@ def alert_with_location():
             if row[0].strip().upper() == band_id:
 
                 name = row[1]
-                email = row[2]
                 phone = row[3]
+                emergency_emails = row[5] if len(row) > 5 else ""
 
                 sms_success = send_alert_text(name, phone, band_id, maps_link)
-                email_success = send_email_alert(name, email, band_id, maps_link)
+
+                email_success = send_email_alert(
+                    name,
+                    emergency_emails,
+                    band_id,
+                    maps_link
+                )
 
                 print("SMS success:", sms_success)
                 print("Email success:", email_success)
