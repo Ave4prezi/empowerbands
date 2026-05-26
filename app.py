@@ -2698,7 +2698,7 @@ def alert_with_location():
             if row[0].strip().upper() == band_id:
 
                 name = row[1]
-                phone = row[3]
+                phone = row[4] if len(row) > 4 else ""
                 emergency_emails = row[5] if len(row) > 5 else ""
 
                 sms_success = send_alert_text(name, phone, band_id, maps_link)
