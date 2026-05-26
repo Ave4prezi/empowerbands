@@ -1857,43 +1857,43 @@ def profile(band_id):
 
     
 
-entered_pin = request.args.get("pin")
+                entered_pin = request.args.get("pin")
 
-if alert_mode:
+                if alert_mode:
 
-    success = send_alert_text(
-        name,
-        emergency_phones,
-        band_id,
-        maps_link=None
-    )
+                    success = send_alert_text(
+                        name,
+                        emergency_phones,
+                        band_id,
+                        maps_link=None
+                    )
 
-    email_success = send_email_alert(
-        name,
-        emergency_emails,
-        band_id,
-        maps_link=None
-    )
+                    email_success = send_email_alert(
+                        name,
+                        emergency_emails,
+                        band_id,
+                        maps_link=None
+                    )
 
-    if success or email_success:
+                    if success or email_success:
 
-        return f"""
-        <h1>✅ Alert Sent</h1>
-        <p>Emergency contact(s) have been notified.</p>
-        <p><a href="/{band_id}">Go Back</a></p>
-        """
+                        return f"""
+                        <h1>✅ Alert Sent</h1>
+                        <p>Emergency contact(s) have been notified.</p>
+                        <p><a href="/{band_id}">Go Back</a></p>
+                        """
 
-    else:
+                    else:
 
-        return f"""
-        <h1>❌ Alert Failed</h1>
-        <p>There was a problem sending the alert.</p>
-        <p><a href="/{band_id}">Go Back</a></p>
-        """
+                        return f"""
+                        <h1>❌ Alert Failed</h1>
+                        <p>There was a problem sending the alert.</p>
+                        <p><a href="/{band_id}">Go Back</a></p>
+                        """
 
-if confirm_alert:
+                if confirm_alert:
 
-    return f"""
+                    return f"""
                     <html>
                     <head>
                         <meta name="viewport" content="width=device-width, initial-scale=1">
