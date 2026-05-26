@@ -1818,115 +1818,97 @@ def delete_profile(band_id):
 # ===============================
 # BAND PROFILE
 # ===============================
-
 @app.route("/customer/<band_id>")
 def profile(band_id):
     band_id = band_id.strip().upper()
     confirm_alert = request.args.get("confirm_alert") == "yes"
-    alert_mode = request.args.get("alert") == "yes"
+    entered_pin = request.args.get("pin")
 
     with open(file_name, "r", encoding="utf-8") as f:
         reader = csv.reader(f)
         next(reader, None)
 
         for row in reader:
+            if len(row) >= 9 and row[0].strip().upper() == band_id:
 
-    if len(row) >= 9 and row[0].strip().upper() == band_id:
+                name = row[1]
+                email = row[2]
+                phone = row[3]
+                emergency_phones = row[4] if len(row) > 4 else ""
+                emergency_emails = row[5] if len(row) > 5 else ""
+                age_group = row[6] if len(row) > 6 else ""
+                condition = row[7] if len(row) > 7 else ""
+                instructions = row[8] if len(row) > 8 else ""
+                medical_notes = row[9] if len(row) > 9 else ""
+                pin = row[10] if len(row) > 10 and row[10] else "1234"
+                address = row[11] if len(row) > 11 else ""
+                race = row[12] if len(row) > 12 else ""
+                gender = row[13] if len(row) > 13 else ""
+                photo_url = row[14] if len(row) > 14 else ""
 
-        name = row[1]
-        email = row[2]
-        phone = row[3]
+                visitor_ip = request.remote_addr
+                log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
 
-        emergency_phones = row[4] if len(row) > 4 else ""
-        emergency_emails = row[5] if len(row) > 5 else ""
+                if confirm_alert:
+                    return f"""
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
+<div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
+<h2>⚠️ Emergency Alert</h2>
+<p>This will notify the designated emergency contact(s) on file.</p>
 
-        age_group = row[6] if len(row) > 6 else ""
-        condition = row[7] if len(row) > 7 else ""
-        instructions = row[8] if len(row) > 8 else ""
-        medical_notes = row[9] if len(row) > 9 else ""
+<div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
+<strong>Important:</strong><br>
+This system does <b>NOT contact 911 or emergency services</b>.<br><br>
+If this is a life-threatening emergency, please call <b>911 immediately</b>.
+</div>
 
-        pin = row[10] if len(row) > 10 and row[10] else "1234"
+<button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
+🚨 Send Alert With Location
+</button>
 
-        address = row[11] if len(row) > 11 else ""
-        race = row[12] if len(row) > 12 else ""
-        gender = row[13] if len(row) > 13 else ""
-        photo_url = row[14] if len(row) > 14 else ""
+<a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+Cancel
+</a>
+</div>
 
-        visitor_ip = request.remote_addr
+<script>
+function sendAlertWithLocation(){{
+    if (navigator.geolocation) {{
+        navigator.geolocation.getCurrentPosition(function(pos){{
+            let lat = pos.coords.latitude;
+            let lon = pos.coords.longitude;
+            window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+        }}, function(error){{
+            alert("GPS permission was denied or unavailable. Please allow location access.");
+        }});
+    }} else {{
+        alert("This phone/browser does not support GPS location.");
+    }}
+}}
+</script>
+</body>
+</html>
+"""
 
-        log_scan(
-            band_id,
-            name,
-            "PROFILE_VIEW",
-            visitor_ip
-        )
-
-        entered_pin = request.args.get("pin")
-
-        if alert_mode:
-
-            success = send_alert_text(
-                name,
-                emergency_phones,
-                band_id,
-                maps_link=None
-            )
-
-            email_success = send_email_alert(
-                name,
-                emergency_emails,
-                band_id,
-                maps_link=None
-            )
-
-            if success or email_success:
-
-                return f"""
-                <h1>✅ Alert Sent</h1>
-                <p>Emergency contact(s) have been notified.</p>
-                <p><a href="/{band_id}">Go Back</a></p>
-                """
-
-            else:
-
-                return f"""
-                <h1>❌ Alert Failed</h1>
-                <p>There was a problem sending the alert.</p>
-                <p><a href="/{band_id}">Go Back</a></p>
-                """
-
-        if confirm_alert:
-
-            return f"""
-            YOUR HTML HERE
-            """
-
-        if entered_pin == pin:
-
-            return f"""
-            FULL PROFILE HTML
-            """
-
-        return f"""
-        PUBLIC PROFILE HTML
-        """
+                if entered_pin == pin:
+                    return f"""
 <!DOCTYPE html>
 <html>
 <head>
 <title>Full Emergency Info</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-
 body {{
     margin:0;
     font-family:Arial,sans-serif;
-    background:
-    radial-gradient(circle at top,#22c55e 0%,#07111f 28%,#030712 100%);
+    background:radial-gradient(circle at top,#22c55e 0%,#07111f 28%,#030712 100%);
     min-height:100vh;
     color:white;
 }}
-
 .page {{
     min-height:100vh;
     display:flex;
@@ -1934,7 +1916,6 @@ body {{
     align-items:center;
     padding:24px;
 }}
-
 .card {{
     width:100%;
     max-width:560px;
@@ -1943,52 +1924,19 @@ body {{
     border:1px solid rgba(255,255,255,0.15);
     border-radius:28px;
     padding:30px;
-    box-shadow:0 25px 80px rgba(0,0,0,.55);
 }}
-
-.badge {{
-    display:inline-block;
-    background:rgba(34,197,94,.15);
-    color:#86efac;
-    padding:8px 14px;
-    border-radius:999px;
-    font-size:13px;
-    font-weight:bold;
-    margin-bottom:18px;
-}}
-
-h1 {{
-    margin:0;
-    font-size:36px;
-    font-weight:800;
-}}
-
-.info {{
-    color:#cbd5e1;
-    margin-top:8px;
-    margin-bottom:22px;
-}}
-
 .section {{
     margin-top:18px;
     padding:16px;
     border-radius:18px;
     background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,255,255,.1);
 }}
-
 .section-title {{
     color:#67e8f9;
     font-size:13px;
     font-weight:bold;
     margin-bottom:7px;
 }}
-
-.section-text {{
-    color:#e5e7eb;
-    line-height:1.6;
-}}
-
 .btn {{
     display:block;
     width:100%;
@@ -1999,175 +1947,92 @@ h1 {{
     margin-top:16px;
     text-decoration:none;
     font-weight:700;
-    font-size:16px;
 }}
-
 .btn-blue {{
     background:linear-gradient(135deg,#06b6d4,#2563eb);
     color:white;
 }}
-
+.btn-red {{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;
+}}
 .btn-dark {{
     background:rgba(255,255,255,.12);
     color:white;
-    border:1px solid rgba(255,255,255,.15);
 }}
-
-a[href^="tel"] {{
-    color:white;
-    text-decoration:none;
-}}
-
-.footer {{
-    margin-top:25px;
-    text-align:center;
-    color:#94a3b8;
-    font-size:12px;
-}}
-
 </style>
 </head>
-
 <body>
-
 <div class="page">
-
 <div class="card">
 
-<div class="badge">
-Unlocked Full Emergency Info
-</div>
-
 <h1>{name}</h1>
+<p>{age_group} • ID: {band_id}</p>
 
-<div class="info">
-{age_group} • ID: {band_id}
+<div class="section">
+<div class="section-title">EMAIL</div>
+<div>{email}</div>
 </div>
 
 <div class="section">
-<div class="section-title">
-EMAIL
-</div>
-
-<div class="section-text">
-{email}
-</div>
+<div class="section-title">EMERGENCY CONTACT</div>
+<div>{emergency_phones}</div>
 </div>
 
 <div class="section">
-<div class="section-title">
-EMERGENCY CONTACT
-</div>
-
-<div class="section-text">
-{phone}
-</div>
+<div class="section-title">CONDITION</div>
+<div>{condition}</div>
 </div>
 
 <div class="section">
-<div class="section-title">
-CONDITION
-</div>
-
-<div class="section-text">
-{condition}
-</div>
+<div class="section-title">INSTRUCTIONS</div>
+<div>{instructions}</div>
 </div>
 
 <div class="section">
-<div class="section-title">
-INSTRUCTIONS
-</div>
-
-<div class="section-text">
-{instructions}
-</div>
+<div class="section-title">PRIVATE MEDICAL NOTES</div>
+<div>{medical_notes}</div>
 </div>
 
 <div class="section">
-<div class="section-title">
-PRIVATE MEDICAL NOTES
-</div>
-
-<div class="section-text">
-{medical_notes}
-</div>
-</div>
-<div class="section">
-<div class="section-title">
-ADDRESS
-</div>
-
-<div class="section-text">
-{address}
-</div>
+<div class="section-title">ADDRESS</div>
+<div>{address}</div>
 </div>
 
 <div class="section">
-<div class="section-title">
-RACE
-</div>
-
-<div class="section-text">
-{race}
-</div>
+<div class="section-title">RACE</div>
+<div>{race}</div>
 </div>
 
 <div class="section">
-<div class="section-title">
-GENDER
+<div class="section-title">GENDER</div>
+<div>{gender}</div>
 </div>
 
-<div class="section-text">
-{gender}
-</div>
-</div>
-
-
-<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">
-📞 Call Emergency Contact
-</a> 
-
-<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
-    🚨 Send Alert
-</a>
-<p style="font-size:12px; color:#ffcccc; margin-top:10px;">
-    EmpowerBands is not 911. In a life-threatening emergency, call 911 immediately.
-</p>
-
-<a class="btn btn-dark" href="/{band_id}">
-Back to Public View
-</a>
-
-<div class="footer">
-PIN verified • EmpowerBands Emergency Response System
-</div>
+<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
+<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">🚨 Send Alert</a>
+<a class="btn btn-dark" href="/{band_id}">Back to Public View</a>
 
 </div>
-
 </div>
-
 </body>
 </html>
 """
+
                 return f"""
 <!DOCTYPE html>
 <html>
 <head>
 <title>EmpowerBand {band_id}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-
 body {{
     margin:0;
     font-family:Arial,sans-serif;
-    background:
-    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
     min-height:100vh;
     color:white;
 }}
-
 .page {{
     min-height:100vh;
     display:flex;
@@ -2175,7 +2040,6 @@ body {{
     align-items:center;
     padding:24px;
 }}
-
 .card {{
     width:100%;
     max-width:520px;
@@ -2184,56 +2048,7 @@ body {{
     border:1px solid rgba(255,255,255,0.15);
     border-radius:28px;
     padding:30px;
-    box-shadow:0 25px 80px rgba(0,0,0,.55);
 }}
-
-.badge {{
-    display:inline-block;
-    background:rgba(56,189,248,.12);
-    color:#7dd3fc;
-    padding:8px 14px;
-    border-radius:999px;
-    font-size:13px;
-    font-weight:bold;
-    margin-bottom:18px;
-}}
-
-h1 {{
-    margin:0;
-    font-size:38px;
-    font-weight:800;
-}}
-
-.info {{
-    color:#cbd5e1;
-    margin-top:8px;
-    margin-bottom:25px;
-}}
-
-.alert-box {{
-    background:rgba(250,204,21,.12);
-    border:1px solid rgba(250,204,21,.35);
-    border-radius:18px;
-    padding:18px;
-    margin-bottom:20px;
-}}
-
-.section {{
-    margin-top:22px;
-}}
-
-.section-title {{
-    color:#67e8f9;
-    font-size:14px;
-    font-weight:bold;
-    margin-bottom:8px;
-}}
-
-.section-text {{
-    color:#e5e7eb;
-    line-height:1.6;
-}}
-
 .btn {{
     display:block;
     width:100%;
@@ -2244,40 +2059,31 @@ h1 {{
     margin-top:16px;
     text-decoration:none;
     font-weight:700;
-    font-size:16px;
 }}
-
 .btn-red {{
     background:linear-gradient(135deg,#ef4444,#dc2626);
     color:white;
 }}
-
 .btn-blue {{
     background:linear-gradient(135deg,#06b6d4,#2563eb);
     color:white;
 }}
-
-.pin-box {{
-    margin-top:25px;
+.btn-dark {{
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:1px solid rgba(255,255,255,.15);
 }}
-
 input {{
     width:100%;
     box-sizing:border-box;
     padding:15px;
     border:none;
-    outline:none;
     border-radius:16px;
     background:rgba(255,255,255,.1);
     color:white;
-    margin-bottom:14px;
+    margin-top:20px;
     font-size:16px;
 }}
-
-input::placeholder {{
-    color:#cbd5e1;
-}}
-
 .unlock-btn {{
     width:100%;
     padding:15px;
@@ -2287,144 +2093,63 @@ input::placeholder {{
     color:white;
     font-weight:bold;
     font-size:16px;
-    cursor:pointer;
+    margin-top:12px;
 }}
-
-a[href^="tel"] {{ 
-    color:white;
-    text-decoration:none;
-}}
-
-.footer {{
-    margin-top:25px;
-    text-align:center;
-    color:#94a3b8;
-    font-size:12px;
-}}
-
 </style>
 </head>
-
 <body>
-
 <div class="page">
-
 <div class="card">
 
-<div class="badge">
-EmpowerBands Emergency Profile
-</div>
-
-<img
-src="{photo_url if photo_url else LOGO_URL}"
-style="
-width:120px;
-height:120px;
-border-radius:50%;
-object-fit:cover;
-border:4px solid rgba(255,255,255,.15);
-margin-bottom:20px;
-"
->
+<img src="{photo_url if photo_url else LOGO_URL}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.15);">
 
 <h1>{name}</h1>
-<img src="/qr/{band_id}" style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
 
+<img src="/qr/{band_id}" style="width:180px;border-radius:14px;background:white;padding:10px;margin-top:20px;">
 <p>Scan QR backup if NFC is unavailable.</p>
 
-<a class="btn btn-blue" href="/qr/{band_id}" download="{band_id}-qr.png">
-    ⬇️ Download QR Code
-</a>
+<a class="btn btn-blue" href="/qr/{band_id}" download="{band_id}-qr.png">⬇️ Download QR Code</a>
 
-<div class="info">
-{age_group} • ID: {band_id}
-</div>
+<p>{age_group} • ID: {band_id}</p>
 
-<div class="alert-box">
+<div style="background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.35);border-radius:18px;padding:18px;margin-top:20px;">
 ⚠️ <strong>{condition}</strong>
 </div>
 
-<div class="section">
-<div class="section-title">
-WHAT TO DO
-</div>
+<h3 style="color:#67e8f9;">WHAT TO DO</h3>
+<p>{instructions}</p>
 
-<div class="section-text">
-{instructions}
-</div>
-</div>
+<h3 style="color:#67e8f9;">MEDICAL NOTES</h3>
+<p>Protected — enter PIN to view</p>
 
-<div class="section">
-<div class="section-title">
-MEDICAL NOTES
-</div>
-
-<div class="section-text">
-Protected — enter PIN to view
-</div>
-</div>
-
-<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
-🚨 Activate Emergency Alert
+<a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
+<a class="btn btn-dark" href="/customer/{band_id}">
+Back to Public View
 </a>
-<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">
-📞 Call Emergency Contact
-</a>
-<a class="btn btn-dark" href="/pro">
-    🔒 Explore EmpowerBands Pro
-</a>
+<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
+<a class="btn btn-dark" href="/pro">🔒 Explore EmpowerBands Pro</a>
 
-
-
-<div class="pin-box">
-
-<form method="GET" action="/{band_id}">
-
-<input
-type="password"
-name="pin"
-placeholder="Enter PIN to unlock full info"
-required
->
-
-<button class="unlock-btn" type="submit">
-Unlock Full Info
-</button>
-
+<form method="GET" action="/customer/{band_id}">
+<input type="password" name="pin" placeholder="Enter PIN to unlock full info" required>
+<button class="unlock-btn" type="submit">Unlock Full Info</button>
 </form>
 
-</div>
-
-<div class="footer">
-    EmpowerBands Emergency Response System
-</div>
-
-<footer style="text-align:center; padding:20px; font-size:13px; opacity:0.8;">
-    <p>
-        <a href="/privacy">Privacy Policy</a> |
-        <a href="/terms">Terms of Service</a> |
-        <a href="/delete-request">Data Deletion Request</a>
-    </p>
-
-    <p>
-        EmpowerBands is not a replacement for 911, EMS, or professional medical monitoring.
-    </p>
-</footer>
+<p style="font-size:12px;opacity:.8;margin-top:20px;">
+EmpowerBands is not a replacement for 911, EMS, or professional medical monitoring.
+</p>
 
 </div>
-
 </div>
-
 </body>
 </html>
 """
-
 
     return """
     <h1>Band Not Found</h1>
     <p>This band ID has not been added yet.</p>
     <p><a href="/admin">Admin Login</a></p>
     """
+
 
 @app.route("/qr/<band_id>")
 def qr_code(band_id):
