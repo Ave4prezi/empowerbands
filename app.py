@@ -1857,7 +1857,7 @@ def profile(band_id):
 
     
 
-                entered_pin = request.args.get("pin")
+entered_pin = request.args.get("pin")
 
 if alert_mode:
 
@@ -1891,8 +1891,9 @@ if alert_mode:
         <p><a href="/{band_id}">Go Back</a></p>
         """
 
-                if confirm_alert:
-                    return f"""
+if confirm_alert:
+
+    return f"""
                     <html>
                     <head>
                         <meta name="viewport" content="width=device-width, initial-scale=1">
