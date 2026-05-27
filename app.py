@@ -2017,7 +2017,7 @@ body {{
 
 <a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
 <a class="btn btn-red" href="/{band_id}?confirm_alert=yes">🚨 Send Alert</a>
-<a class="btn btn-dark" href="/{band_id}">Back to Public View</a>
+
 
 </div>
 </div>
@@ -2131,6 +2131,7 @@ input {{
 <a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
 <a class="btn btn-dark" href="/customer/{band_id}">
 Back to Public View
+</a>
 </a>
 <a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
 <a class="btn btn-dark" href="/pro">🔒 Explore EmpowerBands Pro</a>
