@@ -1461,6 +1461,7 @@ required
 >
 
 <input name="email" placeholder="Email">
+<input name="phone" placeholder="Primary Phone">
 
 <label class="form-label">
 Emergency Contact Numbers *
@@ -1637,7 +1638,7 @@ def edit_profile(band_id):
             request.form["address"].strip(),
             request.form["race"].strip(),
             request.form["gender"].strip(),
-            request.form["photo_url"].strip()
+            request.form.get("photo_url", "").strip()
         ]
 
         new_rows = [header]
@@ -1693,7 +1694,7 @@ h1{{
     text-align:center;
 }}
 
-input, textarea{ 
+input, textarea{{
     width:100%;
     box-sizing:border-box;
     padding:15px;
