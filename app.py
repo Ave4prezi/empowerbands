@@ -1981,6 +1981,11 @@ body {{
 </div>
 
 <div class="section">
+<div class="section-title">EMERGENCY EMAILS</div>
+<div>{emergency_emails}</div>
+</div>
+
+<div class="section">
 <div class="section-title">CONDITION</div>
 <div>{condition}</div>
 </div>
