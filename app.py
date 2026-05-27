@@ -1707,7 +1707,7 @@ input, textarea{{
     font-size:16px;
     overflow-x:auto;
     white-space:nowrap;
-}
+}}
 
 textarea{{
     min-height:90px;
