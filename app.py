@@ -622,7 +622,7 @@ body{
 <div class="footer">
     <div>
         <strong>EmpowerBands Worldwide</strong><br>
-        Protect What Matters Most.
+        "Protect What Matters Most"
     </div>
 
     <div>
