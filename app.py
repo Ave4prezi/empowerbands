@@ -2122,6 +2122,10 @@ input {{
 ⚠️ <strong>{condition}</strong>
 </div>
 
+<a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">
+🚨 Activate Emergency Alert
+</a>
+
 <h3 style="color:#67e8f9;">WHAT TO DO</h3>
 <p>{instructions}</p>
 
