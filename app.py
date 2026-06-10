@@ -24,6 +24,8 @@ TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
 ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
 
+
+
 LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 
 
@@ -139,6 +141,8 @@ def send_alert_text(name, phones, band_id, maps_link=None):
 def send_email_alert(name, email, band_id, maps_link=None):
     sender_email = os.environ.get("ALERT_EMAIL")
     sender_password = os.environ.get("ALERT_EMAIL_PASSWORD")
+
+    print("Sender Email:", sender_email)
 
     email_list = [e.strip() for e in email.split(",") if e.strip()]
 
@@ -2433,6 +2437,8 @@ def alert_with_location():
                 phone = row[4] if len(row) > 4 else ""
                 emergency_emails = row[5] if len(row) > 5 else ""
 
+                print("Emergency Emails:", emergency_emails)
+
                 sms_success = send_alert_text(name, phone, band_id, maps_link)
 
                 email_success = send_email_alert(
@@ -2445,7 +2451,6 @@ def alert_with_location():
                 print("SMS success:", sms_success)
                 print("Email success:", email_success)
                 print("MAP LINK:", maps_link)
-
                 return f"""
 <!DOCTYPE html>
 <html>
