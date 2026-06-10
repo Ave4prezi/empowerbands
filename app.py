@@ -2115,6 +2115,9 @@ input {{
 🚨 Activate Emergency Alert
 </a>
 
+<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
+<a class="btn btn-dark" href="/pro">🔒 Explore EmpowerBands Pro</a>
+
 <img src="/qr/{band_id}" style="width:180px;border-radius:14px;background:white;padding:10px;margin-top:20px;">
 <p>Scan QR backup if NFC is unavailable.</p>
 
