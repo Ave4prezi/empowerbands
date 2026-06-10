@@ -207,8 +207,20 @@ def home():
 <!DOCTYPE html>
 <html>
 <head>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>EmpowerBands Worldwide</title>
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#07111f">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EmpowerBands">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <style>
 body{
@@ -2467,113 +2479,38 @@ body {{
 
 
 # ===============================
-# APP MANIFEST
+# PWA APP ICON + MANIFEST
 # ===============================
 
-<!DOCTYPE html>
-<html lang="en">
+from flask import send_from_directory
 
-<head>
+@app.route("/apple-touch-icon.png")
+def apple_icon():
+    return send_from_directory("static", "apple-touch-icon.png")
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- PWA SETUP -->
-<link rel="manifest" href="/manifest.json">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EmpowerBands">
-
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  background: #07111f;
-  font-family: Arial, sans-serif;
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
-}
-</style>
-
-</head>
-
-<body>
-
-<!-- SPLASH SCREEN -->
-<div id="splash-screen" style="
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:#07111f;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  z-index:99999;
-  transition:opacity 0.6s ease;
-">
-
-  <img src="/apple-touch-icon.png" style="width:120px; height:120px; border-radius:24px;" />
-
-  <div style="margin-top:18px; color:white; font-size:18px;">
-    EmpowerBands
-  </div>
-
-</div>
-
-<!-- INSTALL BANNER -->
-<div id="install-banner" style="display:none; position:fixed; bottom:20px; left:20px; right:20px; background:#07111f; color:white; padding:14px; border-radius:12px; z-index:9999; text-align:center;">
-  Install EmpowerBands → Safari → Share → Add to Home Screen
-
-  <button onclick="this.parentElement.style.display='none'"
-    style="margin-top:10px; background:#0a58ca; color:white; border:none; padding:8px 12px; border-radius:8px;">
-    Got it
-  </button>
-</div>
-
-<!-- YOUR APP CONTENT -->
-<div style="padding:20px; color:white;">
-  <h1>EmpowerBands</h1>
-  <p>Your content goes here.</p>
-</div>
-
-<script>
-function isIOS() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-
-function isStandalone() {
-  return window.navigator.standalone === true ||
-    window.matchMedia('(display-mode: standalone)').matches;
-}
-
-// Show install banner
-if (isIOS() && !isStandalone()) {
-  document.getElementById('install-banner').style.display = 'block';
-}
-
-// Splash behavior
-window.addEventListener("load", function () {
-  const splash = document.getElementById("splash-screen");
-
-  if (isStandalone()) {
-    setTimeout(() => {
-      splash.style.opacity = "0";
-      setTimeout(() => splash.remove(), 600);
-    }, 900);
-  } else {
-    splash.remove();
-  }
-});
-</script>
-
-</body>
-</html>
+@app.route("/manifest.json")
+def manifest():
+    return {
+        "name": "EmpowerBands",
+        "short_name": "EmpowerBands",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#07111f",
+        "theme_color": "#07111f",
+        "icons": [
+            {
+                "src": "/apple-touch-icon.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "/apple-touch-icon.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    }
                 
 # ===============================
 # PRIVACY POLICY
