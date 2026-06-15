@@ -502,10 +502,17 @@ body{
         box-sizing:border-box;
         text-align:center;
     }
+
+<style>
+html,
+body{
+    margin:0;
+    padding:0;
+    width:100%;
+    overflow-x:hidden;
 }
 </style>
 </head>
-
 <body>
 
 <div class="header">
@@ -526,10 +533,7 @@ body{
     <a href="#partners">Partners</a>
     <a href="#contact">Contact</a>
 </div>
-    margin:0;
-    padding:0;
-    width:100%;
-    overflow-x:hidden;
+    
 }
     <div class="top-buttons">
         <a class="btn" href="/EB001">🚀 View Demo</a>
