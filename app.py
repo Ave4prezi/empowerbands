@@ -525,7 +525,6 @@ body{
     </div>
 
 <div class="nav">
-    <a class="active" href="/">Home</a>
     <a href="#our-mission">Mission</a>
     <a href="#membership">Membership</a>
     <a href="#team">Team</a>
