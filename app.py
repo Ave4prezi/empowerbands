@@ -540,25 +540,8 @@ body{
         <h3>Smart Wearable Safety Technology</h3>
 
         <p>
-           <section class="cta">
-    <img src="https://i.imgur.com/dE4kSOz.png">
-
-    <div>
-        <h2 OUR MISSION</h2>
-        <p>
-            EmpowerBands is a nonprofit organization focused on safety, communication, 
-            and emergency response for individuals with disabilities, seniors, children, 
-            and vulnerable adults. EmpowerBands wearable technology bridges the gap 
-            when seconds count most.
+            EmpowerBands is a wearable safety system using NFC and QR technology to instantly connect children, seniors, caregivers, schools, and individuals with disabilities to critical emergency information and support.
         </p>
-    </div>
-
-    <div class="cta-buttons">
-        <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
-        <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
-        <a class="btn dark" href="/EB001">🚀 View Demo</a>
-    </div>
-</section>
 
         <div style="margin-top:25px;">
             <a class="btn" href="/EB001">🚀 View Live Demo</a>
@@ -638,16 +621,14 @@ body{
 <section class="cta">
     <img src="https://i.imgur.com/dE4kSOz.png">
 
-    <div>
-        <h2>Ready To Support The Mission?</h2>
-        <p>
-            EmpowerBands is a nonprofit organization focused on safety, communication, 
-            and emergency response for individuals with disabilities, seniors, children, 
-            and vulnerable adults. EmpowerBands wearable technology bridges the gap 
-            when seconds count most.
-        </p>
-    </div>
+   <div>
+    <h2>Support the Mission</h2>
 
+    <p>
+        EmpowerBands exists to help individuals and families stay connected during emergencies
+        through fast, reliable safety alerts, emergency communication tools, and caregiver support.
+    </p>
+</div>
     <div class="cta-buttons">
         <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
         <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
