@@ -624,26 +624,20 @@ body{
    <section class="cta">
     <img src="https://i.imgur.com/dE4kSOz.png">
 
-    <section class="section" style="display:flex; justify-content:center; align-items:center; padding:60px 6%;">
-    <div style="
-        max-width:800px;
-        text-align:center;
-        background:rgba(255,255,255,0.04);
-        border:1px solid rgba(56,189,248,0.25);
-        border-radius:18px;
-        padding:40px;
-        box-shadow:0 0 30px rgba(37,99,235,0.2);
-    ">
-        <h2 style="font-size:34px; margin-bottom:18px;">
-            Our Mission
-        </h2>
-
-        <p style="font-size:18px; line-height:1.7; color:#dbeafe;">
+    <div>
+        <h2>Our Mission</h2>
+        <p>
             EmpowerBands is a nonprofit dedicated to enhancing safety and communication 
             during emergencies for individuals with disabilities, seniors, children, 
             and vulnerable adults. Our wearable technology bridges the gap when 
             seconds count most.
         </p>
+    </div>
+
+    <div class="cta-buttons">
+        <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
+        <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
+        <a class="btn dark" href="/EB001">🚀 View Demo</a>
     </div>
 </section>
 
