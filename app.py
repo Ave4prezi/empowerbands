@@ -2575,36 +2575,88 @@ def privacy():
 
         <p>
         Contact: support@empowerbands.org
-        </p>
+</p>
 
-        
+<a href="/" style="color:#7dd3fc;">Back to Home</a>
 
-        <a href="/" style="color:#7dd3fc;">Back to Home</a>
+<script src="https://katrix.app/widget.js"
+        data-bot-key="lvFQm7U2nehGtyErGSvW5TwyxXq3rfZL7xc4AIEHEOh39kyAZn8YHZl3DhKTZ3aG"
+        defer>
+</script>
 
-    </body>
-    </html>
-    """
+</body>
+</html>
+"""
 
 
 @app.route("/terms")
 def terms():
     return """
-    <h1>Terms of Service</h1>
-    <p>EmpowerBands is a supplemental safety and communication tool.</p>
-    <p>EmpowerBands is not a replacement for 911, emergency medical services, law enforcement, or professional healthcare monitoring.</p>
-    <p>Users are responsible for keeping their emergency profile information accurate and updated.</p>
-    <p>By using EmpowerBands, users agree to receive emergency-related communication when their band or profile is activated.</p>
-    <p><a href="/">Back Home</a></p>
-    """
+<!DOCTYPE html>
+<html>
+<head>
+<title>EmpowerBands Terms</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0f172a;
+    color:white;
+    padding:30px;
+}
+
+.card{
+    max-width:650px;
+    margin:auto;
+    background:rgba(255,255,255,0.08);
+    padding:28px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,0.18);
+}
+a{color:#93c5fd;}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <h1>Terms of Service</h1>
+
+    <p>EmpowerBands is a supplemental safety and communication tool.</p>
+    <p>It is not a replacement for emergency services or medical care.</p>
+    <p>Users are responsible for keeping information accurate.</p>
+
+    <p><a href="/">Back Home</a></p>
+</div>
+
+<script src="https://katrix.app/widget.js"
+        data-bot-key="lvFQm7U2nehGtyErGSvW5TwyxXq3rfZL7xc4AIEHEOh39kyAZn8YHZl3DhKTZ3aG"
+        defer></script>
+
+</body>
+</html>
+"""
 @app.route("/delete-request")
 def delete_request():
     return """
-    <h1>Data Deletion Request</h1>
-    <p>To request removal of your EmpowerBands profile, emergency contact information, scan logs, or related data, contact EmpowerBands support.</p>
+    <h1>Account Deletion Request</h1>
+
+    <p>If you would like to request deletion of your EmpowerBands account and associated data, please contact support.</p>
+
     <p>Email: support@empowerbands.org</p>
-    <p>Please include your Band ID so we can locate your profile.</p>
+
+    <p>Please include the email or phone number associated with your account so we can verify your request.</p>
+
+    <p>Processing time may vary depending on verification requirements.</p>
+
     <p><a href="/">Back Home</a></p>
+
+    <script src="https://katrix.app/widget.js"
+            data-bot-key="lvFQm7U2nehGtyErGSvW5TwyxXq3rfZL7xc4AIEHEOh39kyAZn8YHZl3DhKTZ3aG"
+            defer></script>
+
     """
 
 @app.route("/sms-opt-in")
