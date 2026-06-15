@@ -534,7 +534,7 @@ body{
     <a href="#contact">Contact</a>
 </div>
     
-}
+
     <div class="top-buttons">
         <a class="btn" href="/EB001">🚀 View Demo</a>
         <a class="btn dark" href="/admin">🔒 Admin Login</a>
