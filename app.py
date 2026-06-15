@@ -540,9 +540,7 @@ body{
         <h3>Smart Wearable Safety Technology</h3>
 
         <p>
-            Smart NFC and QR wearable safety technology designed to help children,
-            seniors, caregivers, schools, and individuals with disabilities communicate
-            faster during emergencies.
+            EmpowerBands is a wearable safety system using NFC and QR technology to instantly connect children, seniors, caregivers, schools, and individuals with disabilities to critical emergency information and support.
         </p>
 
         <div style="margin-top:25px;">
@@ -552,9 +550,9 @@ body{
         </div>
 
         <div class="trust">
-            <div class="trust-card">📡 NFC + QR Technology</div>
-            <div class="trust-card">♿ Accessibility Focused</div>
-            <div class="trust-card">❤️ Nonprofit Organization</div>
+            <div class="trust-card">📡 NFC + QR Emergency Access</div>
+            <div class="trust-card">♿ Accessibility-Focused Design</div>
+            <div class="trust-card">🛡️ Emergency Communication Platform</div>
             <div class="trust-card">🏫 School & Caregiver Ready</div>
         </div>
     </div>
@@ -623,11 +621,14 @@ body{
 <section class="cta">
     <img src="https://i.imgur.com/dE4kSOz.png">
 
-    <div>
-        <h2>Ready To Support The Mission?</h2>
-        <p>Partner with EmpowerBands Worldwide to help build safer, more accessible communities.</p>
-    </div>
+   <div>
+    <h2>Support the Mission</h2>
 
+    <p>
+        EmpowerBands exists to help individuals and families stay connected during emergencies
+        through fast, reliable safety alerts, emergency communication tools, and caregiver support.
+    </p>
+</div>
     <div class="cta-buttons">
         <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
         <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
