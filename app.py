@@ -672,7 +672,14 @@ if ('serviceWorker' in navigator) {
         });
     });
 }
+}
 </script>
+
+<script src="https://katrix.app/widget.js"
+        data-bot-key="lvFQm7U2nehGtyErGSvW5TwyxXq3rfZL7xc4AIEHEOh39kyAZn8YHZl3DhKTZ3aG"
+        defer>
+</script>
+
 </body>
 </html>
 """
