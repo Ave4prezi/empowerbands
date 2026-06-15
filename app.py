@@ -622,11 +622,13 @@ body{
     <img src="https://i.imgur.com/dE4kSOz.png">
 
    <div>
-    <h2>Support the Mission</h2>
+    <h2>OUR MISSION</h2>
 
     <p>
-        EmpowerBands exists to help individuals and families stay connected during emergencies
-        through fast, reliable safety alerts, emergency communication tools, and caregiver support.
+        EmpowerBands is a nonprofit dedicated to enhancing safety and communication 
+            during emergencies for individuals with disabilities, seniors, children, 
+            and vulnerable adults. Our wearable technology bridges the gap when 
+            seconds count most.
     </p>
 </div>
     <div class="cta-buttons">
