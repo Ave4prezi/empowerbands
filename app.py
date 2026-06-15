@@ -519,12 +519,15 @@ body{
 
     <div class="nav">
         <a class="active" href="/">Home</a>
-        <a href="#how">How It Works</a>
-        <a href="#about">About Us</a>
-        <a href="#mission">Mission</a>
-        <a href="mailto:support@empowerbands.org">Contact</a>
-    </div>
-
+        <div class="nav">
+    <a class="active" href="/">Home</a>
+    <a href="#mission">Mission</a>
+    <a href="#membership">Membership</a>
+    <a href="#team">Team</a>
+    <a href="#volunteer">Volunteer</a>
+    <a href="#partners">Partners</a>
+    <a href="#contact">Contact</a>
+</div>
     <div class="top-buttons">
         <a class="btn" href="/EB001">🚀 View Demo</a>
         <a class="btn dark" href="/admin">🔒 Admin Login</a>
@@ -618,28 +621,56 @@ body{
     </div>
 </section>
 
-<section class="section" style="display:flex; justify-content:center; align-items:center; padding:60px 6%;">
-    <div style="
-        max-width:800px;
-        text-align:center;
-        background:rgba(255,255,255,0.04);
-        border:1px solid rgba(56,189,248,0.25);
-        border-radius:18px;
-        padding:40px;
-        box-shadow:0 0 30px rgba(37,99,235,0.2);
-    ">
-        <h2 style="font-size:34px; margin-bottom:18px;">
-            Our Mission
-        </h2>
+<section id="mission" class="section">
+    <div class="card" style="max-width:900px; margin:auto; text-align:center;">
+        <h2>Our Mission</h2>
 
-        <p style="font-size:18px; line-height:1.7; color:#dbeafe;">
-            EmpowerBands is a nonprofit dedicated to enhancing safety and communication 
-            during emergencies for individuals with disabilities, seniors, children, 
-            and vulnerable adults. Our wearable technology bridges the gap when 
-            seconds count most.
+        <p style="font-size:18px; line-height:1.8;">
+            EmpowerBands Worldwide is a nonprofit organization dedicated to advancing
+            safety, inclusion, communication, and equality for people of all abilities,
+            seniors, children, and vulnerable adults. Our mission is to create a world
+            where individuals can be quickly identified, supported, and connected to the
+            help they need through accessible technology and community partnerships.
         </p>
     </div>
 </section>
+
+<section id="membership" class="section">
+    <h2>Membership</h2>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Join Our Community</h3>
+            <p>Become a member and support the growth of accessible safety technology.</p>
+        </div>
+    </div>
+</section>
+
+<section id="team" class="section">
+    <h2>Our Team</h2>
+
+    <div class="card">
+        <p>Meet the leaders, advisors, and volunteers helping advance the EmpowerBands mission.</p>
+    </div>
+</section>
+
+<section id="volunteer" class="section">
+    <h2>Volunteer</h2>
+
+    <div class="card">
+        <p>Join our volunteer network and help make communities safer and more inclusive.</p>
+    </div>
+</section>
+
+<section id="partners" class="section">
+    <h2>Partnerships</h2>
+
+    <div class="card">
+        <p>Partner with EmpowerBands Worldwide to expand accessibility, safety, and community impact.</p>
+    </div>
+</section>
+
+
 
 <div class="footer">
     <div>
