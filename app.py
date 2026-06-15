@@ -517,17 +517,20 @@ body{
         </div>
     </div>
 
-    <div class="nav">
-        <a class="active" href="/">Home</a>
-        <div class="nav">
+<div class="nav">
     <a class="active" href="/">Home</a>
-    <a href="#mission">Mission</a>
+    <a href="#our-mission">Mission</a>
     <a href="#membership">Membership</a>
     <a href="#team">Team</a>
     <a href="#volunteer">Volunteer</a>
     <a href="#partners">Partners</a>
     <a href="#contact">Contact</a>
 </div>
+    margin:0;
+    padding:0;
+    width:100%;
+    overflow-x:hidden;
+}
     <div class="top-buttons">
         <a class="btn" href="/EB001">🚀 View Demo</a>
         <a class="btn dark" href="/admin">🔒 Admin Login</a>
@@ -621,7 +624,7 @@ body{
     </div>
 </section>
 
-<section id="mission" class="section">
+<section id="our-mission" class="section">
     <div class="card" style="max-width:900px; margin:auto; text-align:center;">
         <h2>Our Mission</h2>
 
