@@ -1848,6 +1848,19 @@ EmpowerBands is not a replacement for 911, EMS, or professional medical monitori
     <p><a href="/admin">Admin Login</a></p>
     """
 
+
+    @app.route("/test_sms")
+def test_sms():
+    try:
+        message = client.messages.create(
+            body="Test SMS from EmpowerBands",
+            from_=TWILIO_PHONE_NUMBER,
+            to="+19382655364"
+        )
+        return f"Sent: {message.sid}"
+    except Exception as e:
+        return str(e)
+
 @app.route("/qr/<band_id>")
 def qr_code(band_id):
     band_id = band_id.strip().upper()
