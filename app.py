@@ -1849,7 +1849,7 @@ EmpowerBands is not a replacement for 911, EMS, or professional medical monitori
     """
 
 
-    @app.route("/test_sms")
+@app.route("/test_sms")
 def test_sms():
     try:
         message = client.messages.create(
