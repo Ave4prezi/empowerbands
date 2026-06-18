@@ -28,10 +28,17 @@ TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 client = None
 if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN:
     client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
-ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
+    print("TWILIO SID:", bool(TWILIO_ACCOUNT_SID))
+    print("TWILIO TOKEN:", bool(TWILIO_AUTH_TOKEN))
+    print("TWILIO NUMBER:", TWILIO_PHONE_NUMBER)
+EMAIL_USER = os.environ.get("ALERT_EMAIL")
+EMAIL_PASS = os.environ.get("ALERT_EMAIL_PASSWORD")
 
 def send_full_alert(name, phones, emails, band_id, maps_link=None):
+
+    success_sms = False
+    success_email = False
+
     location_text = f"\nLocation: {maps_link}" if maps_link else ""
 
     message = (
@@ -41,12 +48,7 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
         f"{location_text}"
     )
 
-    success_sms = False
-    success_email = False
-
-    # =========================
-    # SMS (Twilio)
-    # =========================
+    # SMS
     phone_list = [p.strip() for p in str(phones).split(",") if p.strip()]
 
     if client and TWILIO_PHONE_NUMBER:
@@ -62,34 +64,37 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
             except Exception as e:
                 print("SMS failed:", e)
 
-    # =========================
-    # EMAIL (SMTP)
-    # =========================
+    # EMAIL
     email_list = [e.strip() for e in str(emails).split(",") if e.strip()]
 
-    if ALERT_EMAIL_PASSWORD and email_list:
+    if EMAIL_USER and EMAIL_PASS and email_list:
         try:
             msg = MIMEText(message)
             msg["Subject"] = f"Emergency Alert: {name}"
-            msg["From"] = ALERT_EMAILS
+            msg["From"] = EMAIL_USER
             msg["To"] = ", ".join(email_list)
 
             server = smtplib.SMTP("smtp.gmail.com", 587)
             server.starttls()
-            server.login(ALERT_EMAILS, ALERT_EMAIL_PASSWORD)
+            server.login(EMAIL_USER, EMAIL_PASS)
 
-            server.sendmail(ALERT_EMAILS, email_list, msg.as_string())
+            server.sendmail(EMAIL_USER, email_list, msg.as_string())
             server.quit()
 
             print("Emails sent")
             success_email = True
+
         except Exception as e:
             print("Email failed:", e)
 
-    print("Alert result -> SMS:", success_sms, "EMAIL:", success_email)
+    print("Alert result -> SMS:", success_sms)
+    print("Alert result -> EMAIL:", success_email)
+
     return success_sms or success_email
 
-LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
+LOGO_URL = "https://i.imgur.com/dE4kSOz.png"    
+
+    
 
 # ===============================
 # CREATE FILES
@@ -1710,8 +1715,13 @@ body {{
 <div class="section-title">GENDER</div>
 <div>{gender}</div>
 </div>
-<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
-<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">🚨 Send Alert</a>
+first_phone = ""
+
+if emergency_phones:
+    first_phone = emergency_phones.split(",")[0].strip() href="tel:{first_phone}">📞 Call Emergency Contact</a>
+<a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">
+🚨 Send Alert
+</a>
 </div>
 </div>
 </body>
@@ -1803,7 +1813,7 @@ input {{
 <h1>{name}</h1>
 <a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
 <a class="btn btn-dark" href="/alert_manual?band_id={band_id}">🚨 Send Emergency Alert (No GPS)</a>
-<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
+<a class="btn btn-blue" href="tel:{first_phone}">📞 Call Emergency Contact</a>
 <a class="btn btn-dark" href="/pro">🔒 Explore EmpowerBands Pro</a>
 <img src="/qr/{band_id}" style="width:180px;border-radius:14px;background:white;padding:10px;margin-top:20px;">
 <p>Scan QR backup if NFC is unavailable.</p>
@@ -1818,7 +1828,7 @@ input {{
 <p>Protected — enter PIN to view</p>
 <a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
 <a class="btn btn-dark" href="/customer/{band_id}">Back to Public View</a>
-<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">📞 Call Emergency Contact</a>
+<a class="btn btn-blue" href="tel:{first_phone}">📞 Call Emergency Contact</a>
 <a class="btn btn-dark" href="/pro">🔒 Explore EmpowerBands Pro</a>
 <form method="GET" action="/customer/{band_id}">
 <input type="password" name="pin" placeholder="Enter PIN to unlock full info" required>
