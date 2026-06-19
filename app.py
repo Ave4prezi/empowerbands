@@ -1547,40 +1547,46 @@ def profile(band_id):
         reader = csv.reader(f)
         next(reader, None)
 
-for row in reader:
-    if not row or len(row) < 9:
-        continue
+        for row in reader:
+            if not row or len(row) < 9:
+                continue
 
-    if row[0].strip().upper() == band_id:
-        name = row[1]
-        email = row[2]
-        phone = row[3]
-        emergency_phones = row[4] if len(row) > 4 else ""
-        emergency_emails = row[5] if len(row) > 5 else ""
-        age_group = row[6] if len(row) > 6 else ""
-        condition = row[7] if len(row) > 7 else ""
-        instructions = row[8] if len(row) > 8 else ""
-        medical_notes = row[9] if len(row) > 9 else ""
-        pin = row[10] if len(row) > 10 and row[10] else "1234"
-        address = row[11] if len(row) > 11 else ""
-        race = row[12] if len(row) > 12 else ""
-        gender = row[13] if len(row) > 13 else ""
-        photo_url = row[14] if len(row) > 14 else ""
+            if row[0].strip().upper() == band_id:
+                name = row[1]
+                email = row[2]
+                phone = row[3]
 
-        visitor_ip = request.remote_addr
-        log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
+                emergency_phones = row[4] if len(row) > 4 else ""
+                emergency_emails = row[5] if len(row) > 5 else ""
+                age_group = row[6] if len(row) > 6 else ""
+                condition = row[7] if len(row) > 7 else ""
+                instructions = row[8] if len(row) > 8 else ""
+                medical_notes = row[9] if len(row) > 9 else ""
+                pin = row[10] if len(row) > 10 and row[10] else "1234"
 
-        if confirm_alert:
-            return f"""
-            <html>
-            <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            </head>
-            <body>
-            <h2>⚠️ Emergency Alert</h2>
-            </body>
-            </html>
-            """
+                visitor_ip = request.remote_addr
+                log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
+
+                # PIN CHECK (must be HERE)
+                if entered_pin and entered_pin == pin:
+                    return "<h1>Unlocked Profile</h1>"
+
+                # ALERT SCREEN (must be HERE too)
+                if confirm_alert:
+                    return "<h1>Emergency Alert Page</h1>"
+
+    return "Band Not Found"
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<h2>Emergency Alert</h2>
+<p>Confirm before sending alert.</p>
+<a href="/alert_with_location?band_id={band_id}">Send Alert</a>
+</body>
+</html>
+"""
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
