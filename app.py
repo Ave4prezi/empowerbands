@@ -1549,7 +1549,10 @@ def profile(band_id):
 
         for row in reader:
     if not row:
-    continue
+        continue
+
+    if len(row) < 9:
+        continue
 
     if row[0].strip().upper() == band_id:
         name = row[1]
@@ -1568,13 +1571,10 @@ def profile(band_id):
         photo_url = row[14] if len(row) > 14 else ""
 
         visitor_ip = request.remote_addr
-    try:
-    log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
-except Exception as e:
-    print("log_scan failed:", e)
+        log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
 
         if confirm_alert:
-            return f"""
+            return "Band Not Found"
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
