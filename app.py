@@ -111,6 +111,25 @@ body{
 }
 
 h1,h2,h3{color:#e0f2fe;}
+
+.footer{
+    margin-top:60px;
+    padding-top:30px;
+    border-top:1px solid rgba(255,255,255,0.1);
+    text-align:center;
+    font-size:14px;
+    color:#94a3b8;
+}
+
+.footer a{
+    color:#38bdf8;
+    text-decoration:none;
+    margin:0 12px;
+}
+
+.footer a:hover{
+    text-decoration:underline;
+}
 </style>
 """
 
@@ -278,6 +297,25 @@ def home():
 <h1>Smart Wearable Safety System</h1>
 <p>Instant emergency access through NFC and QR technology.</p>
 
+<div class="section">
+    <h2>Protect What Matters Most</h2>
+    
+    <div class="card">
+        <h3>🛡️ Emergency Safety</h3>
+        <p>Your loved ones are protected 24/7 with instant medical alert capabilities.</p>
+    </div><br>
+    
+    <div class="card">
+        <h3>⚡ Instant Access</h3>
+        <p>First responders get critical information in seconds, not minutes.</p>
+    </div><br>
+    
+    <div class="card">
+        <h3>🔐 Privacy First</h3>
+        <p>Medical data is encrypted and only accessible with PIN verification.</p>
+    </div>
+</div>
+
 <div class="section" id="how">
     <h2>How It Works</h2>
 
@@ -313,6 +351,31 @@ def home():
     <div class="card">
         <h3>School Safety</h3>
         <p>Emergency instructions accessible during incidents.</p>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Live Demo</h2>
+    
+    <div class="card">
+        <p>Try EmpowerBands now with our demo profile:</p>
+        <a class="btn" href="/customer/EB001" style="margin-top:15px;">View Demo Profile</a>
+    </div>
+</div>
+
+<div class="section">
+    <div style="text-align:center;">
+        <a class="btn" href="/admin">Admin Login</a>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2024 EmpowerBands Worldwide. Emergency Safety Technology.</p>
+    <div>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/sms-opt-in">SMS Opt-In</a>
+        <a href="/delete-request">Delete Your Data</a>
     </div>
 </div>
 
@@ -455,8 +518,9 @@ def admin():
 <title>EmpowerBands Admin</title>
 <style>
 body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);min-height:100vh;color:white;display:flex;justify-content:center;align-items:center;}
-.card{width:100%;max-width:460px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:35px;box-shadow:0 25px 80px rgba(0,0,0,0.3);}
+.card{width:100%;max-width:460px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:35px;box-shadow:0 25px 80px rgba(0,0,0,0.5);}
 input{width:100%;box-sizing:border-box;padding:16px;border:none;border-radius:16px;margin-bottom:16px;font-size:16px;background:rgba(255,255,255,0.12);color:white;}
+input::placeholder{color:rgba(255,255,255,0.5);}
 .btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:17px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}
 </style>
 </head>
@@ -716,7 +780,7 @@ button{{width:100%;padding:15px;background:#06b6d4;color:white;border:none;borde
         <input name="race" value="{found_row[12]}">
         <input name="gender" value="{found_row[13]}">
         <input name="photo_url" value="{found_row[14]}" placeholder="Photo URL">
-        <button type="submit">Save Structural Changes</button>
+        <button type="submit">Save Changes</button>
     </form>
     <a style="display:block; text-align:center; margin-top:15px; color:#38bdf8; text-decoration:none;" href="/dashboard">Back to Dashboard</a>
 </div>
@@ -791,7 +855,8 @@ def profile(band_id):
 <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
 <strong>Important:</strong> This tool does <b>NOT</b> dial local emergency services (911). Dial emergency responders manually if required.
 </div>
-<button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;cursor:pointer;">Send Alert With Location</button>
+<button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;cursor:pointer;">📍 Send Alert With GPS Location</button>
+<a href="/alert_manual?band_id={band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#6b7280;color:white;text-decoration:none;font-weight:bold;">Send Alert Without GPS</a>
 <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">Cancel</a>
 </div>
 <script>
@@ -800,10 +865,10 @@ function sendAlertWithLocation(){{
         navigator.geolocation.getCurrentPosition(function(pos){{
             window.location.href = "/alert_with_location?band_id={band_id}&lat=" + pos.coords.latitude + "&lon=" + pos.coords.longitude;
         }}, function(error){{
-            alert("GPS location failed. Please use the 'Send Alert Without GPS' alternative option.");
+            alert("GPS location failed. Please use the 'Send Alert Without GPS' option.");
         }});
     }} else {{
-        alert("Geolocation unsupported by this mobile engine framework.");
+        alert("Geolocation unsupported by this browser.");
     }}
 }}
 </script>
