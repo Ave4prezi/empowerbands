@@ -455,7 +455,7 @@ def admin():
 <title>EmpowerBands Admin</title>
 <style>
 body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);min-height:100vh;color:white;display:flex;justify-content:center;align-items:center;}
-.card{width:100%;max-width:460px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:35px;box-shadow:0 25px 80px rgba(0,0,0,0.4);}
+.card{width:100%;max-width:460px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:35px;box-shadow:0 25px 80px rgba(0,0,0,0.3);}
 input{width:100%;box-sizing:border-box;padding:16px;border:none;border-radius:16px;margin-bottom:16px;font-size:16px;background:rgba(255,255,255,0.12);color:white;}
 .btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:17px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}
 </style>
@@ -791,7 +791,7 @@ def profile(band_id):
 <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
 <strong>Important:</strong> This tool does <b>NOT</b> dial local emergency services (911). Dial emergency responders manually if required.
 </div>
-<button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;cursor:pointer;">Send Alert With GPS</button>
+<button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;cursor:pointer;">Send Alert With Location</button>
 <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">Cancel</a>
 </div>
 <script>
