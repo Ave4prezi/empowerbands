@@ -376,6 +376,26 @@ def privacy():
 """
     return render_page("Privacy Policy", content)
 
+@app.route("/terms")
+def terms():
+    content = """
+<h2>Terms of Service</h2>
+
+<div class="card">
+<p>By using EmpowerBands, you agree to our terms and conditions.</p>
+
+<ul>
+<li>Emergency alerts are provided on an as-available basis</li>
+<li>Users are responsible for maintaining accurate contact information</li>
+<li>EmpowerBands is not a substitute for professional emergency services</li>
+<li>Always call 911 for life-threatening emergencies</li>
+</ul>
+
+<p>For full terms, contact support@empowerbands.org</p>
+</div>
+"""
+    return render_page("Terms of Service", content)
+
 @app.route("/delete-request")
 def delete_request():
     content = """
@@ -405,6 +425,7 @@ def delete_submit():
         <a class="btn" href="/">Return Home</a>
     </div>
     """)
+
 # ===============================
 # SHORT LINK REDIRECT
 # ===============================
@@ -434,7 +455,7 @@ def admin():
 <title>EmpowerBands Admin</title>
 <style>
 body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);min-height:100vh;color:white;display:flex;justify-content:center;align-items:center;}
-.card{width:100%;max-width:460px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:35px;box-shadow:0 25px 80px rgba(0,0,0,.55);box-sizing:border-box;}
+.card{width:100%;max-width:460px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:35px;box-shadow:0 25px 80px rgba(0,0,0,0.4);}
 input{width:100%;box-sizing:border-box;padding:16px;border:none;border-radius:16px;margin-bottom:16px;font-size:16px;background:rgba(255,255,255,0.12);color:white;}
 .btn{width:100%;padding:16px;border:none;border-radius:16px;font-size:17px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}
 </style>
@@ -491,7 +512,7 @@ def dashboard():
             <div>
                 <a style="background:#2563eb; color:white; padding:8px 14px; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px;" href="/customer/{band_id}">Profile</a>
                 <a style="background:#0f766e; color:white; padding:8px 14px; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px; margin-left:6px;" href="/edit/{band_id}">Edit</a>
-                <a style="background:#dc2626; color:white; padding:8px 14px; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px; margin-left:6px;" href="/delete/{band_id}" onclick="return confirm('Delete permanently?')">Delete</a>
+                <a style="background:#dc2626; color:white; padding:8px 14px; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px; margin-left:6px;" href="/delete/{band_id}">Delete</a>
             </div>
         </div>
         """
@@ -770,7 +791,7 @@ def profile(band_id):
 <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
 <strong>Important:</strong> This tool does <b>NOT</b> dial local emergency services (911). Dial emergency responders manually if required.
 </div>
-<button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;cursor:pointer;">🚨 Send Alert With Location</button>
+<button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;cursor:pointer;">Send Alert With GPS</button>
 <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">Cancel</a>
 </div>
 <script>
@@ -857,7 +878,7 @@ input {{width:100%;box-sizing:border-box;padding:14px;border-radius:12px;border:
 
     <form method="GET" action="/customer/{band_id}">
         <input type="password" name="pin" placeholder="Enter security PIN for clinical files" required>
-        <button style="width:100%; padding:14px; margin-top:8px; border-radius:12px; border:none; background:#22c55e; color:white; font-weight:bold; cursor:pointer;" type="submit">Unlock Extended Profiles</button>
+        <button style="width:100%; padding:14px; margin-top:8px; border-radius:12px; border:none; background:#22c55e; color:white; font-weight:bold; cursor:pointer;" type="submit">Unlock Extended Records</button>
     </form>
 </div>
 </body>
@@ -991,21 +1012,9 @@ def alert_manual():
 # ===============================
 # COMPLIANCE LEGAL ENDPOINTS
 # ===============================
-@app.route("/privacy")
-def privacy():
-    return "<h1>Privacy Policy</h1><p>EmpowerBands details are kept strictly on matching secure storage arrays.</p><a href='/'>Home</a>"
 
-@app.route("/terms")
-def terms():
-    return "<h1>Terms of Service</h1><p>System operational boundaries are informational metrics aids only.</p><a href='/'>Home</a>"
-
-@app.route("/delete-request")
-def delete_request():
-    return "<h1>Account Deletion Portal</h1><p>Contact legal processing queues via: support@empowerbands.org</p><a href='/'>Home</a>"
-
-@app.route("/sms-opt-in")
-def sms_opt_in():
-    return "<h1>SMS Agreement Node</h1><p>Users maintain active processing permissions toggles under regulatory frameworks.</p><a href='/'>Home</a>"
+# Note: Full implementations are defined above with proper render_page styling
+# These are already included in the routes above
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
