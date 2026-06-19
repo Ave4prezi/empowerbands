@@ -1574,7 +1574,7 @@ def profile(band_id):
         log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
 
         if confirm_alert:
-            return "Band Not Found"
+    return f"""
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1582,19 +1582,25 @@ def profile(band_id):
 <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
 <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
 <h2>⚠️ Emergency Alert</h2>
+
 <p>This will notify the designated emergency contact(s) on file.</p>
+
 <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
 <strong>Important:</strong><br>
 This system does <b>NOT contact 911 or emergency services</b>.<br><br>
 If this is a life-threatening emergency, please call <b>911 immediately</b>.
 </div>
+
 <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
 🚨 Send Alert With Location
 </button>
-<a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+
+<a href="/customer/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
 Cancel
 </a>
+
 </div>
+
 <script>
 function sendAlertWithLocation(){{
     if (navigator.geolocation) {{
@@ -1603,13 +1609,14 @@ function sendAlertWithLocation(){{
             let lon = pos.coords.longitude;
             window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
         }}, function(error){{
-            alert("GPS permission was denied or unavailable. Please allow location access.");
+            alert("GPS permission was denied or unavailable.");
         }});
     }} else {{
-        alert("This phone/browser does not support GPS location.");
+        alert("This browser does not support GPS.");
     }}
 }}
 </script>
+
 </body>
 </html>
 """
