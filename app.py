@@ -11,6 +11,127 @@ from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
+# =========================
+# HEAD (GLOBAL SEO + PWA)
+# =========================
+BASE_HEAD = """
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#07111f">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EmpowerBands">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+"""
+
+# =========================
+# PREMIUM STYLE (GLOBAL)
+# =========================
+BASE_STYLE = """
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+    color:white;
+}
+
+.page{
+    padding:30px;
+    max-width:1100px;
+    margin:auto;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.logo-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo-wrap img{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+}
+
+.logo-text{
+    font-size:22px;
+    font-weight:900;
+}
+
+.logo-text span{
+    display:block;
+    font-size:14px;
+    color:#38bdf8;
+}
+
+.nav a{
+    color:white;
+    margin:0 10px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.btn{
+    padding:12px 16px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+    display:inline-block;
+}
+
+.btn.dark{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2);
+}
+
+.section{
+    margin-top:40px;
+}
+
+.card{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:18px;
+    padding:20px;
+}
+
+h1,h2,h3{color:#e0f2fe;}
+</style>
+"""
+
+# =========================
+# RENDER ENGINE (FIXED)
+# =========================
+def render_page(title, content):
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+{BASE_HEAD.format(title=title)}
+{BASE_STYLE}
+</head>
+<body>
+<div class="page">
+{content}
+</div>
+</body>
+</html>
+"""
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
@@ -135,120 +256,155 @@ def count_rows(file_path):
 # ===============================
 @app.route("/")
 def home():
-    return """
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EmpowerBands Worldwide</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#07111f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="EmpowerBands">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<style>
-body{margin:0;font-family:Arial,sans-serif;background:#020817;color:white;}
-.header{display:flex;align-items:center;justify-content:space-between;padding:18px 6%;border-bottom:1px solid rgba(255,255,255,0.1);background:#020817;}
-.logo-wrap{display:flex;align-items:center;gap:14px;}
-.logo-wrap img{width:70px;height:70px;border-radius:50%;object-fit:cover;box-shadow:0 0 25px rgba(14,165,233,0.8);}
-.logo-text{font-size:24px;font-weight:900;}
-.logo-text span{display:block;color:#38bdf8;font-size:16px;}
-.nav{display:flex;gap:28px;align-items:center;}
-.nav a{color:white;text-decoration:none;font-weight:bold;}
-.top-buttons{display:flex;gap:12px;}
-.btn{display:inline-block;padding:14px 22px;border-radius:10px;text-decoration:none;color:white;font-weight:800;background:linear-gradient(135deg,#06b6d4,#2563eb);box-shadow:0 0 25px rgba(37,99,235,0.4);}
-.btn.dark{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.25);box-shadow:none;}
-.hero{padding:60px 6% 35px;display:grid;grid-template-columns:1fr 1fr;gap:35px;align-items:center;background:radial-gradient(circle at right,#0b4cff 0%,rgba(2,8,23,0.8) 35%,#020817 75%);}
-.hero h1{font-size:66px;line-height:1.05;margin:0;}
-.hero h1 span{display:block;background:linear-gradient(135deg,#06b6d4,#4f46e5);-webkit-background-clip:text;color:transparent;}
-.hero h3{color:#0ea5e9;font-size:24px;margin-bottom:12px;}
-.hero p{color:#dbeafe;line-height:1.6;max-width:620px;}
-.hero-logo{width:100%;max-width:520px;display:block;margin-bottom:25px;filter:drop-shadow(0 0 18px rgba(14,165,233,0.6));}
-.hero-visual{text-align:center;}
-.hero-visual img{width:100%;max-width:460px;border-radius:30px;filter:drop-shadow(0 0 45px rgba(37,99,235,0.8));}
-.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:28px;}
-.trust-card{border:1px solid rgba(56,189,248,0.25);border-radius:10px;padding:14px;background:rgba(255,255,255,0.04);}
-.section{padding:30px 6%;}
-.section h2{text-align:center;font-size:34px;margin-bottom:22px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;}
-.card{background:rgba(255,255,255,0.04);border:1px solid rgba(56,189,248,0.25);border-radius:16px;padding:24px;text-align:center;}
-.card .num{width:45px;height:45px;border-radius:50%;background:#2563eb;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-weight:900;}
-.footer{padding:30px 6%;border-top:1px solid rgba(255,255,255,0.1);color:#94a3b8;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;}
-.footer a{color:#cbd5e1;text-decoration:none;margin:0 8px;}
-@media(max-width:850px){
-    .header,.nav,.top-buttons{flex-direction:column;gap:16px;}
-    .hero{grid-template-columns:1fr;text-align:center;}
-    .hero h1{font-size:44px;}
-    .hero-logo{margin:0 auto 25px;}
-    .btn{width:100%;box-sizing:border-box;text-align:center;}
-}
-html,body{margin:0;padding:0;width:100%;overflow-x:hidden;}
-</style>
-</head>
-<body>
+    content = """
 
 <div class="header">
     <div class="logo-wrap">
         <img src="https://i.imgur.com/dE4kSOz.png">
         <div class="logo-text">EmpowerBands<span>Worldwide</span></div>
     </div>
+
     <div class="nav">
-        <a href="#our-mission">Mission</a>
-        <a href="#membership">Membership</a>
-        <a href="#team">Team</a>
-        <a href="#volunteer">Volunteer</a>
-        <a href="#partners">Partners</a>
+        <a href="#mission">Mission</a>
+        <a href="#how">How It Works</a>
+        <a href="#scenarios">Scenarios</a>
     </div>
-    <div class="top-buttons">
-        <a class="btn" href="/EB001">🚀 View Demo</a>
-        <a class="btn dark" href="/admin">🔒 Admin Login</a>
+
+    <div>
+        <a class="btn" href="/sms-opt-in">Get Alerts</a>
     </div>
 </div>
 
-<section class="hero">
-    <div>
-        <img class="hero-logo" src="https://i.imgur.com/RpBUbHd.png">
-        <h1>EmpowerBands <span>Worldwide</span></h1>
-        <h3>Smart Wearable Safety Technology</h3>
-        <p>EmpowerBands is a wearable safety system using NFC and QR technology to instantly connect individuals to critical emergency profiles.</p>
-        <div style="margin-top:25px;">
-            <a class="btn" href="/EB001">🚀 View Live Demo</a>
-        </div>
-        <div class="trust">
-            <div class="trust-card">📡 NFC + QR Emergency Access</div>
-            <div class="trust-card">🛡️ Emergency Communication Platform</div>
-        </div>
-    </div>
-    <div class="hero-visual">
-        <img src="https://i.imgur.com/dE4kSOz.png">
-    </div>
-</section>
+<h1>Smart Wearable Safety System</h1>
+<p>Instant emergency access through NFC and QR technology.</p>
 
-<div class="footer">
-    <div><strong>EmpowerBands Worldwide</strong><br>"Protect What Matters Most"</div>
-    <div>Decatur, Alabama<br>support@empowerbands.org</div>
-    <div>
-        <a href="/sms-opt-in">SMS Opt-In</a> |
-        <a href="/privacy">Privacy Policy</a> |
-        <a href="/terms">Terms of Service</a> |
-        <a href="/delete-request">Data Deletion Request</a>
+<div class="section" id="how">
+    <h2>How It Works</h2>
+
+    <div class="card">
+        <h3>1. Tap or Scan</h3>
+        <p>NFC or QR opens emergency profile instantly.</p>
+    </div><br>
+
+    <div class="card">
+        <h3>2. View Profile</h3>
+        <p>Medical info and contacts display immediately.</p>
+    </div><br>
+
+    <div class="card">
+        <h3>3. Send Alert</h3>
+        <p>SMS/email alert sent with location.</p>
     </div>
 </div>
 
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/static/sw.js')
-        .then(function(reg) { console.log('Service Worker registered'); })
-        .catch(function(err) { console.log('Registration failed', err); });
-    });
-}
-</script>
-</body>
-</html>
+<div class="section" id="scenarios">
+    <h2>Real World Scenarios</h2>
+
+    <div class="card">
+        <h3>Autism Safety</h3>
+        <p>First responders access caregiver instructions instantly.</p>
+    </div><br>
+
+    <div class="card">
+        <h3>Dementia Support</h3>
+        <p>Missing seniors are identified quickly.</p>
+    </div><br>
+
+    <div class="card">
+        <h3>School Safety</h3>
+        <p>Emergency instructions accessible during incidents.</p>
+    </div>
+</div>
+
 """
+    return render_page("EmpowerBands Worldwide", content)
 
+@app.route("/sms-opt-in")
+def sms_opt_in():
+    content = """
+<h2>SMS Opt-In</h2>
+
+<div class="card">
+<p>By subscribing, you agree to receive emergency alerts and safety notifications.</p>
+
+<form method="POST" action="/subscribe">
+    <input name="phone" placeholder="Phone Number" required style="padding:12px;width:100%;margin:10px 0;">
+    <button class="btn" type="submit">Subscribe</button>
+</form>
+
+<p style="margin-top:10px;font-size:14px;">
+Message frequency varies. Reply STOP to opt out. HELP for support.
+</p>
+</div>
+"""
+    return render_page("SMS Opt-In", content)
+
+
+@app.route("/subscribe", methods=["POST"])
+def subscribe():
+    phone = request.form.get("phone")
+
+    # NOTE: prevents Twilio formatting rejection issues
+    if not phone:
+        return "Missing phone", 400
+
+    # placeholder success flow (replace with CSV or DB)
+    return render_page("Subscribed", f"""
+    <div class="card">
+        <h2>Success</h2>
+        <p>{phone} subscribed successfully.</p>
+        <a class="btn" href="/">Return Home</a>
+    </div>
+    """)
+
+@app.route("/privacy")
+def privacy():
+    content = """
+<h2>Privacy Policy</h2>
+
+<div class="card">
+<p>EmpowerBands collects only essential information needed for emergency safety services.</p>
+
+<ul>
+<li>Contact information for alerts</li>
+<li>Emergency profile data</li>
+<li>Optional location data during alerts</li>
+</ul>
+
+<p>We do not sell personal data.</p>
+</div>
+"""
+    return render_page("Privacy Policy", content)
+
+@app.route("/delete-request")
+def delete_request():
+    content = """
+<h2>Data Deletion Request</h2>
+
+<div class="card">
+<p>Request removal of your data from EmpowerBands systems.</p>
+
+<form method="POST" action="/delete-submit">
+    <input name="phone" placeholder="Phone or Email" required style="padding:12px;width:100%;margin:10px 0;">
+    <button class="btn" type="submit">Submit Request</button>
+</form>
+</div>
+"""
+    return render_page("Data Deletion", content)
+
+
+@app.route("/delete-submit", methods=["POST"])
+def delete_submit():
+    identifier = request.form.get("phone")
+
+    return render_page("Request Received", f"""
+    <div class="card">
+        <h2>Request Submitted</h2>
+        <p>Your deletion request for <b>{identifier}</b> has been received.</p>
+        <p>Processing time: 24–72 hours</p>
+        <a class="btn" href="/">Return Home</a>
+    </div>
+    """)
 # ===============================
 # SHORT LINK REDIRECT
 # ===============================
