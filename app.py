@@ -1548,10 +1548,7 @@ def profile(band_id):
         next(reader, None)
 
 for row in reader:
-    if not row:
-        continue
-
-    if len(row) < 9:
+    if not row or len(row) < 9:
         continue
 
     if row[0].strip().upper() == band_id:
@@ -1574,8 +1571,16 @@ for row in reader:
         log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
 
         if confirm_alert:
-    return f"""
-<html>
+            return f"""
+            <html>
+            <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            </head>
+            <body>
+            <h2>⚠️ Emergency Alert</h2>
+            </body>
+            </html>
+            """
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
