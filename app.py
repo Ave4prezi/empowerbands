@@ -1547,7 +1547,7 @@ def profile(band_id):
         reader = csv.reader(f)
         next(reader, None)
 
-        for row in reader:
+for row in reader:
     if not row:
         continue
 
