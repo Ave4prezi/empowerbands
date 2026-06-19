@@ -851,5 +851,6 @@ def delete_request():
 def sms_opt_in():
     return "<h1>SMS Agreement Node</h1><p>Users maintain active processing permissions toggles under regulatory frameworks.</p><a href='/'>Home</a>"
 
+# ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000,
+    app.run(host="0.0.0.0", port=5000, debug=False)
