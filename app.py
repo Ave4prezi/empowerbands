@@ -34,6 +34,9 @@ EMAIL_USER = os.environ.get("ALERT_EMAIL")
 EMAIL_PASS = os.environ.get("ALERT_EMAIL_PASSWORD")
 
 def send_full_alert(name, phones, emails, band_id, maps_link=None):
+    print("CLIENT:", client)
+    print("TWILIO NUMBER:", TWILIO_PHONE_NUMBER)
+    print("PHONES:", phones)
 
     success_sms = False
     success_email = False
@@ -1545,27 +1548,33 @@ def profile(band_id):
         next(reader, None)
 
         for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                age_group = row[6] if len(row) > 6 else ""
-                condition = row[7] if len(row) > 7 else ""
-                instructions = row[8] if len(row) > 8 else ""
-                medical_notes = row[9] if len(row) > 9 else ""
-                pin = row[10] if len(row) > 10 and row[10] else "1234"
-                address = row[11] if len(row) > 11 else ""
-                race = row[12] if len(row) > 12 else ""
-                gender = row[13] if len(row) > 13 else ""
-                photo_url = row[14] if len(row) > 14 else ""
+    if not row:
+    continue
 
-                visitor_ip = request.remote_addr
-                log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
+    if row[0].strip().upper() == band_id:
+        name = row[1]
+        email = row[2]
+        phone = row[3]
+        emergency_phones = row[4] if len(row) > 4 else ""
+        emergency_emails = row[5] if len(row) > 5 else ""
+        age_group = row[6] if len(row) > 6 else ""
+        condition = row[7] if len(row) > 7 else ""
+        instructions = row[8] if len(row) > 8 else ""
+        medical_notes = row[9] if len(row) > 9 else ""
+        pin = row[10] if len(row) > 10 and row[10] else "1234"
+        address = row[11] if len(row) > 11 else ""
+        race = row[12] if len(row) > 12 else ""
+        gender = row[13] if len(row) > 13 else ""
+        photo_url = row[14] if len(row) > 14 else ""
 
-                if confirm_alert:
-                    return f"""
+        visitor_ip = request.remote_addr
+    try:
+    log_scan(band_id, name, "PROFILE_VIEW", visitor_ip)
+except Exception as e:
+    print("log_scan failed:", e)
+
+        if confirm_alert:
+            return f"""
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1715,7 +1724,6 @@ body {{
 <div>{gender}</div>
 </div>
 first_phone = ""
-
 if emergency_phones:
     first_phone = emergency_phones.split(",")[0].strip() href="tel:{first_phone}">📞 Call Emergency Contact</a>
 <a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">
@@ -1808,7 +1816,7 @@ input {{
 <body>
 <div class="page">
 <div class="card">
-<img src="{photo_url if photo_url else LOGO_URL}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.15);">
+<img src="{photo_url if photo_url else LOGO_URL}" style="width:120px;height:120px;border-radius:50%;">;object-fit:cover;border:4px solid rgba(255,255,255,.15);">
 <h1>{name}</h1>
 <a class="btn btn-red" href="/customer/{band_id}?confirm_alert=yes">🚨 Activate Emergency Alert</a>
 <a class="btn btn-dark" href="/alert_manual?band_id={band_id}">🚨 Send Emergency Alert (No GPS)</a>
@@ -1886,8 +1894,9 @@ def scans():
             for row in reader:
                 scans.append(row)
         scans.reverse()
-    except:
-        scans = []
+    except Exception as e:
+    print("scan log error:", e)
+    scans = []
 
     rows_html = ""
     for scan in scans:
