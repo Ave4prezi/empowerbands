@@ -3,43 +3,39 @@ eventlet.monkey_patch()
 
 import os
 import time
+import json
 import sqlite3
-from flask import (
-    Flask,
-    request,
-    jsonify,
-    render_template_string
-)
-from flask_socketio import SocketIO, emit
+
+from flask import Flask, request, jsonify, render_template_string
+from flask_socketio import SocketIO
 from twilio.rest import Client
 import smtplib
 from email.mime.text import MIMEText
-import redis
-import json
-
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 
 # =========================
 # APP SETUP
 # =========================
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get(
-    "SECRET_KEY",
-    "empowerbands-secret"
-)socketio = SocketIO(
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "empowerbands-secret")
+
+socketio = SocketIO(
     app,
     cors_allowed_origins="*",
     async_mode="eventlet"
 )
 
+# =========================
+# STORAGE (SQLite + optional Redis-ready hook)
+# =========================
+
 DB = "empowerbands.db"
-data = redis_client.get("live:" + band_id)
-if data:
-    data = json.loads(data)
+active_alerts = {}  # replace later with Redis if scaling
+
 # =========================
 # ENV CONFIG
 # =========================
+
 TWILIO_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE = os.environ.get("TWILIO_PHONE_NUMBER")
@@ -50,56 +46,60 @@ ALERT_EMAIL_PASS = os.environ.get("ALERT_EMAIL_PASSWORD")
 BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.org")
 
 # =========================
-# DATABASE INIT
+# DATABASE
 # =========================
+
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = db()
     c = conn.cursor()
 
     c.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        band_id TEXT PRIMARY KEY,
-        name TEXT,
-        email TEXT,
-        phone TEXT
-    )
+        CREATE TABLE IF NOT EXISTS users (
+            band_id TEXT PRIMARY KEY,
+            name TEXT,
+            email TEXT,
+            phone TEXT
+        )
     """)
 
     c.execute("""
-    CREATE TABLE IF NOT EXISTS locations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        band_id TEXT,
-        lat REAL,
-        lon REAL,
-        ts INTEGER,
-        alert INTEGER DEFAULT 0
-    )
+        CREATE TABLE IF NOT EXISTS locations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            band_id TEXT,
+            lat REAL,
+            lon REAL,
+            ts INTEGER,
+            alert INTEGER DEFAULT 0
+        )
     """)
 
     c.execute("""
-    CREATE TABLE IF NOT EXISTS alerts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        band_id TEXT,
-        lat REAL,
-        lon REAL,
-        ts INTEGER,
-        type TEXT
-    )
+        CREATE TABLE IF NOT EXISTS alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            band_id TEXT,
+            lat REAL,
+            lon REAL,
+            ts INTEGER,
+            type TEXT
+        )
     """)
 
     conn.commit()
     conn.close()
 
+
 init_db()
 
 # =========================
-# CORE FUNCTIONS
+# NOTIFICATIONS
 # =========================
+
 def send_sms(phone, message):
     try:
         client = Client(TWILIO_SID, TWILIO_TOKEN)
@@ -111,6 +111,7 @@ def send_sms(phone, message):
     except:
         pass
 
+
 def send_email(to_email, subject, body):
     try:
         msg = MIMEText(body)
@@ -118,17 +119,18 @@ def send_email(to_email, subject, body):
         msg["From"] = ALERT_EMAIL
         msg["To"] = to_email
 
-        s = smtplib.SMTP("smtp.gmail.com", 587)
-        s.starttls()
-        s.login(ALERT_EMAIL, ALERT_EMAIL_PASS)
-        s.sendmail(ALERT_EMAIL, to_email, msg.as_string())
-        s.quit()
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()
+        server.login(ALERT_EMAIL, ALERT_EMAIL_PASS)
+        server.sendmail(ALERT_EMAIL, to_email, msg.as_string())
+        server.quit()
     except:
         pass
 
 # =========================
-# SOS HANDLER (PRODUCTION CORE)
+# CORE SOS FUNCTION
 # =========================
+
 def trigger_sos(band_id, lat, lon):
     conn = db()
     c = conn.cursor()
@@ -154,7 +156,6 @@ def trigger_sos(band_id, lat, lon):
         "type": "SOS"
     }
 
-    # realtime push to admin
     socketio.emit("sos_event", payload)
 
     msg = f"EMERGENCY ALERT\n{BASE_URL}/{band_id}\nLocation: {lat},{lon}"
@@ -166,8 +167,9 @@ def trigger_sos(band_id, lat, lon):
             send_email(user["email"], "EMERGENCY ALERT", msg)
 
 # =========================
-# LOCATION UPDATE (REAL-TIME)
+# LIVE TRACKING ENDPOINT
 # =========================
+
 @app.route("/track", methods=["POST"])
 def track():
     data = request.json
@@ -205,6 +207,9 @@ def track():
 
     return jsonify({"ok": True})
 
+# =========================
+# ALERT WITH LOCATION (FIXED ROUTE)
+# =========================
 
 @app.route("/alert_with_location")
 def alert_with_location():
@@ -223,44 +228,38 @@ def alert_with_location():
     })
 
 # =========================
-# SOS ENDPOINT
+# LIVE LOCATION (REALTIME PUSH)
 # =========================
-@app.route("/sos", methods=["POST"])
-def sos():
-    data = request.json
-    band_id = data.get("band_id")
-    lat = data.get("lat")
-    lon = data.get("lon")
 
-    trigger_sos(band_id, lat, lon)
-
-    return jsonify({"ok": True})
-    
 @app.route("/live_location", methods=["POST"])
 def live_location():
     data = request.json
+
     band_id = data.get("band_id")
     lat = data.get("lat")
     lon = data.get("lon")
 
-    if band_id:
-        active_alerts[band_id] = {
-            "band_id": band_id,
-            "lat": lat,
-            "lon": lon,
-            "time": time.time()
-        }
+    if not band_id:
+        return jsonify({"ok": False}), 400
 
-        socketio.emit("update_location", active_alerts[band_id], broadcast=True)
+    active_alerts[band_id] = {
+        "band_id": band_id,
+        "lat": lat,
+        "lon": lon,
+        "time": time.time()
+    }
+
+    socketio.emit("update_location", active_alerts[band_id])
 
     return jsonify({"ok": True})
 
 # =========================
-# ADMIN DASHBOARD (LIVE)
+# ADMIN DASHBOARD
 # =========================
+
 @app.route("/admin")
 def admin():
-    html = """
+    return render_template_string("""
 <!DOCTYPE html>
 <html>
 <head>
@@ -270,48 +269,49 @@ def admin():
 <body style="background:#0b1220;color:white;font-family:Arial;">
 
 <h1>Live Tracking Dashboard</h1>
-
 <div id="events"></div>
 
 <script>
 const socket = io();
 
 socket.on("location_update", (data) => {
-    let div = document.createElement("div");
+    const div = document.createElement("div");
     div.style.padding = "10px";
     div.style.margin = "10px";
     div.style.background = "#111827";
-    div.innerHTML = `
-        <b>${data.band_id}</b><br>
-        Lat: ${data.lat}<br>
-        Lon: ${data.lon}<br>
-        Time: ${new Date(data.ts*1000).toLocaleTimeString()}
-    `;
+
+    div.innerHTML =
+        "<b>" + data.band_id + "</b><br>" +
+        "Lat: " + data.lat + "<br>" +
+        "Lon: " + data.lon + "<br>" +
+        new Date(data.ts * 1000).toLocaleTimeString();
+
     document.getElementById("events").prepend(div);
 });
 
 socket.on("sos_event", (data) => {
-    let div = document.createElement("div");
+    const div = document.createElement("div");
     div.style.padding = "12px";
     div.style.margin = "10px";
     div.style.background = "#7f1d1d";
-    div.innerHTML = `
-        <b>🚨 SOS: ${data.band_id}</b><br>
-        ${data.lat}, ${data.lon}<br>
-        ${new Date(data.ts*1000).toLocaleTimeString()}
-    `;
+
+    div.innerHTML =
+        "<b>🚨 SOS: " + data.band_id + "</b><br>" +
+        data.lat + ", " + data.lon + "<br>" +
+        new Date(data.ts * 1000).toLocaleTimeString();
+
     document.getElementById("events").prepend(div);
 });
 </script>
 
 </body>
 </html>
-"""
-    return html
+""")
 
 # =========================
-# PROFILE PAGE
+# PROFILE (TRACKING CLIENT)
 # =========================
+
 @app.route("/<band_id>")
 def profile(band_id):
     return f"""
@@ -323,12 +323,12 @@ def profile(band_id):
 setInterval(() => {{
     navigator.geolocation.getCurrentPosition(pos => {{
         fetch("/track", {{
-            method:"POST",
-            headers:{{"Content-Type":"application/json"}},
-            body:JSON.stringify({{
-                band_id:"{band_id}",
-                lat:pos.coords.latitude,
-                lon:pos.coords.longitude
+            method: "POST",
+            headers: {{ "Content-Type": "application/json" }},
+            body: JSON.stringify({{
+                band_id: "{band_id}",
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude
             }})
         }});
     }});
@@ -340,7 +340,12 @@ setInterval(() => {{
 """
 
 # =========================
-# RUN SERVER
+# RUN
 # =========================
+
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    socketio.run(
+        app,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+)
