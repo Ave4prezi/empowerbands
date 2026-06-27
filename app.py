@@ -1,307 +1,290 @@
-from flask import Flask, request, redirect, session, jsonify
-from twilio.rest import Client
-import csv
 import os
 import time
+import sqlite3
+from flask import Flask, request, jsonify, render_template_string
+from flask_socketio import SocketIO, emit
+from twilio.rest import Client
 import smtplib
 from email.mime.text import MIMEText
-import qrcode
-from io import BytesIO
-from werkzeug.utils import secure_filename
-from threading import Lock
 
+# =========================
+# APP SETUP
+# =========================
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
+socketio = SocketIO(app, cors_allowed_origins="*")
 
-file_name = "customers.csv"
-scan_log_file = "scan_log.csv"
+DB = "empowerbands.db"
+
+# =========================
+# ENV CONFIG
+# =========================
+TWILIO_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE = os.environ.get("TWILIO_PHONE_NUMBER")
+
+ALERT_EMAIL = os.environ.get("ALERT_EMAILS")
+ALERT_EMAIL_PASS = os.environ.get("ALERT_EMAIL_PASSWORD")
 
 BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.org")
 
-TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+# =========================
+# DATABASE INIT
+# =========================
+def db():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
-ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
+def init_db():
+    conn = db()
+    c = conn.cursor()
 
-UPLOAD_FOLDER = "static/uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        band_id TEXT PRIMARY KEY,
+        name TEXT,
+        email TEXT,
+        phone TEXT
+    )
+    """)
 
-# ===============================
-# LIVE TRACKING STORE
-# ===============================
-active_locations = {}
-lock = Lock()
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS locations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        band_id TEXT,
+        lat REAL,
+        lon REAL,
+        ts INTEGER,
+        alert INTEGER DEFAULT 0
+    )
+    """)
 
-# ===============================
-# FILE SETUP
-# ===============================
-header = [
-    "band_id","name","email","phone","emergency_phones",
-    "emergency_emails","age_group","condition","instructions",
-    "medical_notes","pin","address","race","gender","photo_url"
-]
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS alerts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        band_id TEXT,
+        lat REAL,
+        lon REAL,
+        ts INTEGER,
+        type TEXT
+    )
+    """)
 
-if not os.path.exists(file_name):
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        csv.writer(f).writerow(header)
+    conn.commit()
+    conn.close()
 
-if not os.path.exists(scan_log_file):
-    with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
-        csv.writer(f).writerow(["BandID","Name","Time","Type","IP"])
+init_db()
 
-# ===============================
-# SOS UI
-# ===============================
-SOS_STYLE = """
-<style>
-#sosBtn{
-    position:fixed;bottom:22px;right:22px;width:72px;height:72px;
-    border-radius:50%;background:radial-gradient(circle,#ef4444,#991b1b);
-    color:white;font-weight:900;font-size:12px;z-index:9999;
-    display:flex;align-items:center;justify-content:center;
-    animation:pulse 1.5s infinite;cursor:pointer;
-}
-@keyframes pulse{0%{box-shadow:0 0 10px rgba(239,68,68,.4)}
-50%{box-shadow:0 0 35px rgba(239,68,68,.9)}100%{box-shadow:0 0 10px rgba(239,68,68,.4)}}
-#sosOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);
-display:none;align-items:center;justify-content:center;z-index:10000;}
-#sosBox{background:#0b1220;padding:22px;border-radius:18px;width:90%;max-width:420px;text-align:center;}
-</style>
-"""
-
-SOS_HTML = """
-<div id="sosBtn"
-onmousedown="holdStart()" ontouchstart="holdStart()"
-onmouseup="holdEnd()" ontouchend="holdEnd()"
-onclick="openSOS()">SOS<br>ALERT</div>
-
-<div id="sosOverlay">
-<div id="sosBox">
-<h2 style="color:#ef4444;">Emergency</h2>
-<button onclick="triggerSOS()" style="width:100%;padding:14px;border:0;border-radius:12px;background:#dc2626;color:white;">SEND SOS</button>
-<button onclick="closeSOS()" style="width:100%;padding:14px;border:0;border-radius:12px;background:#111827;color:white;margin-top:10px;">Cancel</button>
-</div>
-</div>
-"""
-
-SOS_SCRIPT = """
-<script>
-let currentBandId = window.location.pathname.split("/").pop();
-let sosArmed = false;
-let holdTimer = null;
-
-function openSOS(){document.getElementById("sosOverlay").style.display="flex";}
-function closeSOS(){document.getElementById("sosOverlay").style.display="none";}
-
-function triggerSOS(){
-    if(!sosArmed){
-        sosArmed=true;
-        alert("Confirm again");
-        setTimeout(()=>sosArmed=false,3000);
-        return;
-    }
-    sendSOS();
-}
-
-function holdStart(){
-    holdTimer=setTimeout(()=>sendSOS(),3000);
-}
-function holdEnd(){
-    clearTimeout(holdTimer);
-}
-
-function sendSOS(){
-    navigator.geolocation.getCurrentPosition(function(pos){
-        fetch("/track_update",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({
-                band_id:currentBandId,
-                lat:pos.coords.latitude,
-                lon:pos.coords.longitude,
-                ts:Date.now(),
-                alert:true
-            })
-        }).then(()=> {
-            window.location.href="/alert_with_location?band_id="+currentBandId+
-            "&lat="+pos.coords.latitude+"&lon="+pos.coords.longitude;
-        });
-    },function(){
-        window.location.href="/"+currentBandId+"?alert=yes";
-    });
-}
-</script>
-"""
-
-def inject(html):
-    return html.replace("</body>", SOS_STYLE + SOS_HTML + SOS_SCRIPT + "</body>")
-
-# ===============================
-# ALERT SYSTEM
-# ===============================
-def send_full_alert(name, phones, emails, band_id, maps_link=None):
-    msg = f"EmpowerBands ALERT\n{name}\nhttps://empowerbands.org/{band_id}\n{maps_link or ''}"
+# =========================
+# CORE FUNCTIONS
+# =========================
+def send_sms(phone, message):
     try:
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-        for p in str(phones).split(","):
-            if p.strip():
-                client.messages.create(body=msg, from_=TWILIO_PHONE_NUMBER, to=p)
+        client = Client(TWILIO_SID, TWILIO_TOKEN)
+        client.messages.create(
+            body=message,
+            from_=TWILIO_PHONE,
+            to=phone
+        )
     except:
         pass
 
+def send_email(to_email, subject, body):
     try:
-        m = MIMEText(msg)
-        m["Subject"] = f"ALERT {name}"
-        m["From"] = ALERT_EMAILS
-        m["To"] = emails
-        s = smtplib.SMTP("smtp.gmail.com",587)
+        msg = MIMEText(body)
+        msg["Subject"] = subject
+        msg["From"] = ALERT_EMAIL
+        msg["To"] = to_email
+
+        s = smtplib.SMTP("smtp.gmail.com", 587)
         s.starttls()
-        s.login(ALERT_EMAILS,ALERT_EMAIL_PASSWORD)
-        s.sendmail(ALERT_EMAILS,emails,m.as_string())
+        s.login(ALERT_EMAIL, ALERT_EMAIL_PASS)
+        s.sendmail(ALERT_EMAIL, to_email, msg.as_string())
         s.quit()
     except:
         pass
 
-# ===============================
-# TRACKING ENDPOINT
-# ===============================
-@app.route("/track_update", methods=["POST"])
-def track_update():
+# =========================
+# SOS HANDLER (PRODUCTION CORE)
+# =========================
+def trigger_sos(band_id, lat, lon):
+    conn = db()
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM users WHERE band_id=?", (band_id,))
+    user = c.fetchone()
+
+    ts = int(time.time())
+
+    c.execute("""
+        INSERT INTO alerts (band_id, lat, lon, ts, type)
+        VALUES (?, ?, ?, ?, ?)
+    """, (band_id, lat, lon, ts, "SOS"))
+
+    conn.commit()
+    conn.close()
+
+    payload = {
+        "band_id": band_id,
+        "lat": lat,
+        "lon": lon,
+        "ts": ts,
+        "type": "SOS"
+    }
+
+    # realtime push to admin
+    socketio.emit("sos_event", payload)
+
+    msg = f"EMERGENCY ALERT\n{BASE_URL}/{band_id}\nLocation: {lat},{lon}"
+
+    if user:
+        if user["phone"]:
+            send_sms(user["phone"], msg)
+        if user["email"]:
+            send_email(user["email"], "EMERGENCY ALERT", msg)
+
+# =========================
+# LOCATION UPDATE (REAL-TIME)
+# =========================
+@app.route("/track", methods=["POST"])
+def track():
+    data = request.json
+
+    band_id = data.get("band_id")
+    lat = data.get("lat")
+    lon = data.get("lon")
+    alert = data.get("alert", 0)
+
+    ts = int(time.time())
+
+    conn = db()
+    c = conn.cursor()
+
+    c.execute("""
+        INSERT INTO locations (band_id, lat, lon, ts, alert)
+        VALUES (?, ?, ?, ?, ?)
+    """, (band_id, lat, lon, ts, alert))
+
+    conn.commit()
+    conn.close()
+
+    payload = {
+        "band_id": band_id,
+        "lat": lat,
+        "lon": lon,
+        "ts": ts,
+        "alert": alert
+    }
+
+    socketio.emit("location_update", payload)
+
+    if alert:
+        trigger_sos(band_id, lat, lon)
+
+    return jsonify({"ok": True})
+
+# =========================
+# SOS ENDPOINT
+# =========================
+@app.route("/sos", methods=["POST"])
+def sos():
     data = request.json
     band_id = data.get("band_id")
+    lat = data.get("lat")
+    lon = data.get("lon")
 
-    if not band_id:
-        return jsonify({"ok":False})
+    trigger_sos(band_id, lat, lon)
 
-    with lock:
-        active_locations[band_id] = {
-            "lat": data.get("lat"),
-            "lon": data.get("lon"),
-            "ts": data.get("ts"),
-            "alert": data.get("alert", False)
-        }
+    return jsonify({"ok": True})
 
-    return jsonify({"ok":True})
-
-# ===============================
-# ADMIN LOGIN SIMPLE
-# ===============================
+# =========================
+# ADMIN DASHBOARD (LIVE)
+# =========================
 @app.route("/admin")
 def admin():
     html = """
+<!DOCTYPE html>
 <html>
-<body style="background:#020817;color:white;font-family:Arial;">
-<h1>Admin Live Dashboard</h1>
-<div id="list"></div>
+<head>
+<title>Live Dashboard</title>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body style="background:#0b1220;color:white;font-family:Arial;">
+
+<h1>Live Tracking Dashboard</h1>
+
+<div id="events"></div>
 
 <script>
-async function load(){
-    let res = await fetch("/admin_data");
-    let data = await res.json();
+const socket = io();
 
-    let html = "";
-    for(let id in data){
-        let d = data[id];
-        html += `<div style='padding:10px;margin:10px;background:#111827;border-radius:10px'>
-        <b>${id}</b><br>
-        Lat: ${d.lat}<br>
-        Lon: ${d.lon}<br>
-        Alert: ${d.alert}<br>
-        </div>`;
-    }
-    document.getElementById("list").innerHTML = html;
-}
+socket.on("location_update", (data) => {
+    let div = document.createElement("div");
+    div.style.padding = "10px";
+    div.style.margin = "10px";
+    div.style.background = "#111827";
+    div.innerHTML = `
+        <b>${data.band_id}</b><br>
+        Lat: ${data.lat}<br>
+        Lon: ${data.lon}<br>
+        Time: ${new Date(data.ts*1000).toLocaleTimeString()}
+    `;
+    document.getElementById("events").prepend(div);
+});
 
-setInterval(load,3000);
-load();
+socket.on("sos_event", (data) => {
+    let div = document.createElement("div");
+    div.style.padding = "12px";
+    div.style.margin = "10px";
+    div.style.background = "#7f1d1d";
+    div.innerHTML = `
+        <b>🚨 SOS: ${data.band_id}</b><br>
+        ${data.lat}, ${data.lon}<br>
+        ${new Date(data.ts*1000).toLocaleTimeString()}
+    `;
+    document.getElementById("events").prepend(div);
+});
 </script>
+
 </body>
 </html>
 """
-    return inject(html)
+    return html
 
-@app.route("/admin_data")
-def admin_data():
-    return jsonify(active_locations)
-
-# ===============================
-# HOME
-# ===============================
-@app.route("/")
-def home():
-    return inject("""
-<html><body style="background:#020817;color:white;">
-<h1>EmpowerBands</h1>
-<a href="/admin">Admin Dashboard</a>
-</body></html>
-""")
-
-# ===============================
+# =========================
 # PROFILE PAGE
-# ===============================
+# =========================
 @app.route("/<band_id>")
 def profile(band_id):
-    band_id = band_id.upper()
-
-    with open(file_name,"r",encoding="utf-8") as f:
-        r = csv.reader(f)
-        next(r,None)
-        for row in r:
-            if row and row[0]==band_id:
-                name=row[1]
-                email=row[2]
-                phone=row[3]
-
-                html=f"""
+    return f"""
 <html>
 <body style="background:#0b1220;color:white;">
-<h1>{name}</h1>
-<p>{email}</p>
-<p>{phone}</p>
-
-<p>Live tracking active...</p>
+<h1>{band_id}</h1>
 
 <script>
-setInterval(()=>{
-    navigator.geolocation.getCurrentPosition(pos=>{
-        fetch("/track_update",{
+setInterval(() => {{
+    navigator.geolocation.getCurrentPosition(pos => {{
+        fetch("/track", {{
             method:"POST",
             headers:{{"Content-Type":"application/json"}},
             body:JSON.stringify({{
                 band_id:"{band_id}",
                 lat:pos.coords.latitude,
-                lon:pos.coords.longitude,
-                ts:Date.now()
+                lon:pos.coords.longitude
             }})
-        });
-    });
-},5000);
+        }});
+    }});
+}}, 5000);
 </script>
 
-</body></html>
+</body>
+</html>
 """
-                return inject(html)
 
-    return "Not found"
-
-# ===============================
-# ALERT ROUTE
-# ===============================
-@app.route("/alert_with_location")
-def alert_with_location():
-    band_id = request.args.get("band_id","")
-    lat = request.args.get("lat")
-    lon = request.args.get("lon")
-
-    link = f"https://maps.google.com/?q={lat},{lon}"
-
-    send_full_alert("User","", "", band_id, link)
-
-    return "Alert Sent"
-
+# =========================
+# RUN SERVER
+# =========================
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
