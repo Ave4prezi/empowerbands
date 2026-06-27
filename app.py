@@ -19,11 +19,14 @@ app.config["SECRET_KEY"] =
 os.environ.get("SECRET_KEY", 
 "empowerbands-secret")
 
-socketio = SocketIO(app, 
-cors_allowed_origins="*")
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="eventlet"
+)
 
 DB = "empowerbands.db"
-
+active_alerts = {}
 # =========================
 # ENV CONFIG
 # =========================
@@ -192,6 +195,23 @@ def track():
 
     return jsonify({"ok": True})
 
+
+@app.route("/alert_with_location")
+def alert_with_location():
+    band_id = request.args.get("band_id")
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+
+    if not band_id or not lat or not lon:
+        return jsonify({"error": "missing data"}), 400
+
+    trigger_sos(band_id, float(lat), float(lon))
+
+    return jsonify({
+        "status": "alert sent",
+        "band_id": band_id
+    })
+
 # =========================
 # SOS ENDPOINT
 # =========================
@@ -203,6 +223,25 @@ def sos():
     lon = data.get("lon")
 
     trigger_sos(band_id, lat, lon)
+
+    return jsonify({"ok": True})
+    
+@app.route("/live_location", methods=["POST"])
+def live_location():
+    data = request.json
+    band_id = data.get("band_id")
+    lat = data.get("lat")
+    lon = data.get("lon")
+
+    if band_id:
+        active_alerts[band_id] = {
+            "band_id": band_id,
+            "lat": lat,
+            "lon": lon,
+            "time": time.time()
+        }
+
+        socketio.emit("update_location", active_alerts[band_id], broadcast=True)
 
     return jsonify({"ok": True})
 
