@@ -5979,7 +5979,7 @@ a{color:#93c5fd;}
     </p>
 
     <p>
-        <a href="/privacy">Privacy Policy</a> |
+        <a href="/privacy">Privacy Policy</a> 
         <a href="/terms">Terms of Service</a>
     </p>
 </div>
@@ -5989,4 +5989,4 @@ a{color:#93c5fd;}
 """
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000, debug=False) 
