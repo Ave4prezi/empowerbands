@@ -590,7 +590,7 @@ body{
 <div class="footer">
     <div>
         <strong>EmpowerBands Worldwide</strong><br>
-        One Tap. One Voice. One World.
+        Protect What Matters Most
     </div>
 
     <div>
