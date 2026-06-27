@@ -2082,6 +2082,7 @@ body {{
     radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
     min-height:100vh;
     color:white;
+    padding-top:95px
 }}
 
 .page {{
@@ -2196,6 +2197,7 @@ input {{
     font-size:16px;
 }}
 
+
 input::placeholder {{
     color:#cbd5e1;
 }}
@@ -2217,6 +2219,7 @@ a[href^="tel"] {{
     text-decoration:none;
 }}
 
+
 .footer {{
     margin-top:25px;
     text-align:center;
@@ -2224,13 +2227,45 @@ a[href^="tel"] {{
     font-size:12px;
 }}
 
+.sticky-alert{{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:9999;
+    background:white;
+    padding:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+}}
+
+.sticky-alert button{{
+    width:100%;
+    background:#dc2626;
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+    padding:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}}
+
+body{{
+    padding-top:95px;
+}}
 </style>
 </head>
 
 <body>
 
-<div class="page">
+<div class="sticky-alert">
+<form action="/{band_id}" method="GET">
+    <input type="hidden" name="confirm_alert" value="yes">
+    <button type="submit">🚨 SEND EMERGENCY ALERT</button>
+</form>
+</div>
 
+<div class="page">
 <div class="card">
 
 <div class="badge">
