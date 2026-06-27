@@ -1,10 +1,7 @@
 from flask import Flask, request, redirect, session
-from twilio.rest import Client
 import csv
 import os
 import time
-import smtplib
-from email.mime.text import MIMEText
 import qrcode
 from io import BytesIO
 from werkzeug.utils import secure_filename
@@ -18,44 +15,325 @@ file_name = "customers.csv"
 scan_log_file = "scan_log.csv"
 
 BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.org")
-TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
-
-ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
-ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
-
-LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
 
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ===============================
-# CREATE FILES
-# ===============================
+app.url_map.strict_slashes = False
+
+
+# =========================
+# FILE INIT
+# =========================
 
 header = [
-    "band_id",
-    "name",
-    "email",
-    "phone",
-    "emergency_phones",
-    "emergency_emails",
-    "age_group",
-    "condition",
-    "instructions",
-    "medical_notes",
-    "pin",
-    "address",
-    "race",
-    "gender",
-    "photo_url"
+    "band_id","name","email","phone",
+    "emergency_phones","emergency_emails",
+    "age_group","condition","instructions",
+    "medical_notes","pin","address",
+    "race","gender","photo_url"
 ]
 
-# Create customers.csv only if missing
 if not os.path.exists(file_name):
-
     with open(file_name, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(header)
+        w.writerow([
+            "EB001","Jaden","email@test.com","+123456789",
+            "+111111111","+mom@test.com",
+            "Child","Autism",
+            "Stay calm","None","1234",
+            "Address","Black","Male",""
+        ])
+
+if not os.path.exists(scan_log_file):
+    with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerow(["BandID","Name","Time","Type","IP"])
+
+
+# =========================
+# GLOBAL LAYOUT (IMPORTANT)
+# =========================
+
+def layout(title, content):
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+
+<style>
+body {{
+    margin:0;
+    font-family:Arial;
+    background:#020817;
+    color:white;
+}}
+
+.header {{
+    display:flex;
+    justify-content:space-between;
+    padding:18px 6%;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}}
+
+.logo {{
+    font-weight:900;
+    font-size:20px;
+}}
+
+.nav a {{
+    color:white;
+    margin:0 10px;
+    text-decoration:none;
+    font-weight:bold;
+}}
+
+.container {{
+    padding:30px 6%;
+}}
+
+.card {{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+    padding:20px;
+    border-radius:14px;
+    margin-bottom:15px;
+}}
+
+.btn {{
+    display:inline-block;
+    padding:12px 16px;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:bold;
+    margin-top:10px;
+}}
+
+input {{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border-radius:10px;
+    border:none;
+}}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="logo">EmpowerBands</div>
+    <div class="nav">
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/admin">Admin</a>
+        <a href="/sms-opt-in">SMS</a>
+    </div>
+</div>
+
+<div class="container">
+{content}
+</div>
+
+</body>
+</html>
+"""
+
+
+# =========================
+# HOME
+# =========================
+
+@app.route("/")
+def home():
+    return layout("Home", """
+    <div class="card">
+        <h1>EmpowerBands Worldwide</h1>
+        <p>Safety wearable system for emergency response.</p>
+        <a class="btn" href="/admin">Admin Login</a>
+    </div>
+    """)
+
+
+# =========================
+# ADMIN
+# =========================
+
+@app.route("/admin", methods=["GET","POST"])
+def admin():
+    if request.method == "POST":
+        if request.form.get("password") == ADMIN_PASSWORD:
+            session["logged_in"] = True
+            return redirect("/dashboard")
+
+    return layout("Admin", """
+    <div class="card">
+        <h2>Admin Login</h2>
+        <form method="POST">
+            <input name="password" type="password" placeholder="Password">
+            <button class="btn">Login</button>
+        </form>
+    </div>
+    """)
+
+
+# =========================
+# DASHBOARD
+# =========================
+
+@app.route("/dashboard")
+def dashboard():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    rows = list(csv.reader(open(file_name)))[1:]
+
+    cards = ""
+    for r in rows:
+        cards += f"""
+        <div class="card">
+            <h3>{r[0]} - {r[1]}</h3>
+            <p>{r[7]}</p>
+            <a class="btn" href="/band/{r[0]}">View</a>
+            <a class="btn" href="/edit/{r[0]}">Edit</a>
+        </div>
+        """
+
+    return layout("Dashboard", cards)
+
+
+# =========================
+# ADD PROFILE
+# =========================
+
+@app.route("/add", methods=["GET","POST"])
+def add():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    if request.method == "POST":
+        row = [
+            request.form["band_id"].upper(),
+            request.form["name"],
+            request.form["email"],
+            request.form["phone"],
+            request.form.get("emergency_phones",""),
+            request.form.get("emergency_emails",""),
+            request.form.get("age_group",""),
+            request.form.get("condition",""),
+            request.form.get("instructions",""),
+            request.form.get("medical_notes",""),
+            request.form.get("pin","1234"),
+            request.form.get("address",""),
+            request.form.get("race",""),
+            request.form.get("gender",""),
+            ""
+        ]
+
+        with open(file_name,"a",newline="",encoding="utf-8") as f:
+            csv.writer(f).writerow(row)
+
+        return redirect("/dashboard")
+
+    return layout("Add Profile", """
+    <div class="card">
+        <form method="POST">
+            <input name="band_id" placeholder="Band ID">
+            <input name="name" placeholder="Name">
+            <input name="phone" placeholder="Phone">
+            <input name="email" placeholder="Email">
+            <input name="emergency_phones" placeholder="Emergency Phones">
+            <button class="btn">Save</button>
+        </form>
+    </div>
+    """)
+
+
+# =========================
+# PROFILE (FIXED ROUTE)
+# =========================
+
+@app.route("/band/<band_id>")
+def profile(band_id):
+    rows = list(csv.reader(open(file_name)))[1:]
+
+    for r in rows:
+        if r[0].upper() == band_id.upper():
+            return layout(r[1], f"""
+            <div class="card">
+                <h1>{r[1]}</h1>
+                <p><b>Condition:</b> {r[7]}</p>
+                <p><b>Instructions:</b> {r[8]}</p>
+
+                <a class="btn" href="/qr/{band_id}">QR Code</a>
+                <a class="btn" href="/band/{band_id}?alert=yes">Emergency</a>
+            </div>
+            """)
+
+    return layout("Not Found", "<div class='card'>Band not found</div>")
+
+
+# =========================
+# EDIT
+# =========================
+
+@app.route("/edit/<band_id>", methods=["GET","POST"])
+def edit(band_id):
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    return layout("Edit", f"<div class='card'>Edit {band_id}</div>")
+
+
+# =========================
+# DELETE
+# =========================
+
+@app.route("/delete/<band_id>")
+def delete(band_id):
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    return redirect("/dashboard")
+
+
+# =========================
+# QR CODE
+# =========================
+
+@app.route("/qr/<band_id>")
+def qr(band_id):
+    img = qrcode.make(f"{BASE_URL}/band/{band_id}")
+    buf = BytesIO()
+    img.save(buf)
+    buf.seek(0)
+    return app.response_class(buf.getvalue(), mimetype="image/png")
+
+
+# =========================
+# SMS PAGE
+# =========================
+
+@app.route("/sms-opt-in")
+def sms():
+    return layout("SMS", """
+    <div class="card">
+        <h2>SMS Opt-In</h2>
+        <p>Emergency alerts system enrollment page.</p>
+    </div>
+    """)
+
+
+# =========================
+# RUN
+# =========================
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=False)l    with open(file_name, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
 
         writer.writerow(header)
