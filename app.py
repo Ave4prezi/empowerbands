@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, session
+from flask import Flask, request, redirect, session, Response
 from twilio.rest import Client
 import csv
 import os
@@ -7,8 +7,6 @@ import smtplib
 from email.mime.text import MIMEText
 import qrcode
 from io import BytesIO
-from werkzeug.utils import secure_filename
-
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
