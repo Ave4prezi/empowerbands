@@ -203,6 +203,7 @@ def track():
     }
 
     socketio.emit("location_update", payload)
+    socketio.sleep(0)
 
     if alert:
         trigger_sos(band_id, lat, lon)
