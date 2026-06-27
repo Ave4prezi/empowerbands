@@ -24,11 +24,10 @@ redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 # APP SETUP
 # =========================
 app = Flask(__name__)
-app.config["SECRET_KEY"] = 
-os.environ.get("SECRET_KEY", 
-"empowerbands-secret")
-
-socketio = SocketIO(
+app.config["SECRET_KEY"] = os.environ.get(
+    "SECRET_KEY",
+    "empowerbands-secret"
+)socketio = SocketIO(
     app,
     cors_allowed_origins="*",
     async_mode="eventlet"
