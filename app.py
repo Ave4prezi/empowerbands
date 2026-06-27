@@ -1,7 +1,11 @@
+import eventlet
+eventlet.monkey_patch()
+
 import os
 import time
 import sqlite3
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify,
+render_template_string
 from flask_socketio import SocketIO, emit
 from twilio.rest import Client
 import smtplib
@@ -11,9 +15,12 @@ from email.mime.text import MIMEText
 # APP SETUP
 # =========================
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "empowerbands-secret")
+app.config["SECRET_KEY"] = 
+os.environ.get("SECRET_KEY", 
+"empowerbands-secret")
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, 
+cors_allowed_origins="*")
 
 DB = "empowerbands.db"
 
