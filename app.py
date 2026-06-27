@@ -10,6 +10,11 @@ from flask_socketio import SocketIO, emit
 from twilio.rest import Client
 import smtplib
 from email.mime.text import MIMEText
+import redis
+import json
+
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 
 # =========================
 # APP SETUP
@@ -26,7 +31,9 @@ socketio = SocketIO(
 )
 
 DB = "empowerbands.db"
-active_alerts = {}
+data = redis_client.get("live:" + band_id)
+if data:
+    data = json.loads(data)
 # =========================
 # ENV CONFIG
 # =========================
