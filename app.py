@@ -22,7 +22,9 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "empowerbands-secret")
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
-    async_mode="eventlet"
+    async_mode="eventlet",
+    logger=False,
+    engineio_logger=False
 )
 
 # =========================
@@ -347,5 +349,7 @@ if __name__ == "__main__":
     socketio.run(
         app,
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000))
-)
+        port=int(os.environ.get("PORT", 5000)),
+        debug=False,
+        use_reloader=False
+    )
