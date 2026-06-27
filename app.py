@@ -4,8 +4,12 @@ eventlet.monkey_patch()
 import os
 import time
 import sqlite3
-from flask import Flask, request, jsonify,
-render_template_string
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    render_template_string
+)
 from flask_socketio import SocketIO, emit
 from twilio.rest import Client
 import smtplib
