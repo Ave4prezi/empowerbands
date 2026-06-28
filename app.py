@@ -614,7 +614,9 @@ body{
 
 </body>
 </html>
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
+    
 
 
 # ===============================
@@ -853,6 +855,7 @@ EmpowerBands Emergency System
 
 </body>
 </html>
+   <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
 # ===============================
@@ -1184,7 +1187,8 @@ function filterBands(){{
 
 </body>
 
-</html>
+</html
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>.
 """
 
 # ===============================
@@ -1681,6 +1685,7 @@ button{{
 </div>
 </body>
 </html>
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
 
@@ -2372,6 +2377,7 @@ Unlock Full Info
 
 </body>
 </html>
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
 
@@ -2545,6 +2551,7 @@ td{{
 
 </body>
 </html>
+   <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
 # ===============================
