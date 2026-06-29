@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, session
+from flask import Flask, request, redirect, session, send_file, jsonify
 from twilio.rest import Client
 import csv
 import os
@@ -2391,7 +2391,7 @@ def qr_code(band_id):
     img.save(buffer, format="PNG")
     buffer.seek(0)
 
-    return app.response_class(buffer.getvalue(), mimetype="image/png")
+    return send_file(buffer, mimetype="image/png")
 
 # ===============================
 # SCAN LOGS PAGE
@@ -2707,22 +2707,123 @@ def alert_with_location():
 
 @app.route("/manifest.json")
 def manifest():
-    return { 
+    return jsonify({
         "name": "EmpowerBands Worldwide",
         "short_name": "EmpowerBands",
         "start_url": "/",
         "display": "standalone",
-        "background_color": "#ffffff",
-        "theme_color": "#0a58ca",
+        "background_color": "#07111f",
+        "theme_color": "#07111f",
         "icons": [
             {
                 "src": LOGO_URL,
                 "sizes": "192x192",
-                            "type": "image/png"
-        }
-    ]
-} 
+                "type": "image/png",
+                "purpose": "any maskable"
+            },
+            {
+                "src": LOGO_URL,
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "any maskable"
+            }
+        ]
+    }) 
                 
+
+# ===============================
+# EDIT HISTORY PAGE
+# ===============================
+
+@app.route("/history")
+def edit_history():
+    import urllib.request
+    import json as _json
+    gh_token = os.environ.get("GITHUB_PERSONAL_ACCESS_TOKEN", "")
+    repo = "Ave4prezi/Empowerbands"
+    commits_html = ""
+    try:
+        req = urllib.request.Request(
+            f"https://api.github.com/repos/{repo}/commits?per_page=30",
+            headers={
+                "Authorization": f"token {gh_token}",
+                "Accept": "application/vnd.github.v3+json",
+                "User-Agent": "EmpowerBands-App"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            commits = _json.loads(resp.read().decode())
+        for c in commits:
+            sha = c.get("sha","")[:7]
+            msg = c.get("commit",{}).get("message","").split("\n")[0]
+            author = c.get("commit",{}).get("author",{}).get("name","")
+            date_raw = c.get("commit",{}).get("author",{}).get("date","")
+            date = date_raw[:10] if date_raw else ""
+            url = c.get("html_url","#")
+            commits_html += f"""
+            <div class="commit">
+                <div class="commit-msg">{msg}</div>
+                <div class="commit-meta">
+                    <span class="sha"><a href="{url}" target="_blank">{sha}</a></span>
+                    <span>{author}</span>
+                    <span>{date}</span>
+                </div>
+            </div>"""
+    except Exception as e:
+        commits_html = f'<p style="color:#f87171;">Could not load history: {e}</p>'
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit History — EmpowerBands</title>
+    <style>
+        body {{
+            margin:0;
+            font-family:Arial,sans-serif;
+            background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+            color:white;
+            min-height:100vh;
+            padding:30px 20px;
+        }}
+        .page {{ max-width:720px; margin:auto; }}
+        h1 {{ font-size:32px; margin-bottom:6px; }}
+        .subtitle {{ color:#94a3b8; margin-bottom:28px; font-size:14px; }}
+        .commit {{
+            background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.12);
+            border-radius:16px;
+            padding:16px 20px;
+            margin-bottom:12px;
+        }}
+        .commit-msg {{ font-size:15px; font-weight:600; margin-bottom:8px; }}
+        .commit-meta {{ display:flex; gap:18px; font-size:12px; color:#94a3b8; }}
+        .sha a {{ color:#67e8f9; text-decoration:none; font-family:monospace; }}
+        .back {{
+            display:inline-block;
+            margin-bottom:24px;
+            padding:10px 18px;
+            border-radius:12px;
+            background:rgba(255,255,255,0.1);
+            color:white;
+            text-decoration:none;
+            font-size:14px;
+        }}
+    </style>
+</head>
+<body>
+<div class="page">
+    <a class="back" href="/">← Back to Home</a>
+    <h1>Edit History</h1>
+    <p class="subtitle">Last 30 changes to the EmpowerBands codebase</p>
+    {commits_html}
+</div>
+</body>
+</html>
+"""
+
 # ===============================
 # PRIVACY POLICY
 # ===============================
