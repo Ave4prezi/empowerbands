@@ -640,6 +640,7 @@ body{
     </div>
 
     <div>
+        <a href="/blessing-boxes">💛 Blessing Boxes</a> |
         <a href="/sms-opt-in">SMS Opt-In</a> |
         <a href="/privacy">Privacy Policy</a> |
         <a href="/terms">Terms of Service</a> |
@@ -3164,6 +3165,250 @@ def github_webhook():
             print(f"Webhook email error: {e}")
 
     return "OK", 200
+
+
+# ===============================
+# BLESSING BOXES PAGE
+# ===============================
+
+@app.route("/blessing-boxes")
+def blessing_boxes():
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blessing Boxes — EmpowerBands</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{
+            font-family:Arial,sans-serif;
+            background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+            color:white;
+            min-height:100vh;
+        }
+        .hero{
+            text-align:center;
+            padding:60px 20px 40px;
+        }
+        .hero h1{
+            font-size:38px;
+            font-weight:900;
+            margin-bottom:14px;
+        }
+        .hero h1 span{color:#67e8f9;}
+        .hero p{
+            font-size:17px;
+            color:#cbd5e1;
+            max-width:600px;
+            margin:0 auto;
+            line-height:1.7;
+        }
+        .page{max-width:760px;margin:0 auto;padding:0 20px 60px;}
+        .card{
+            background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.13);
+            border-radius:20px;
+            padding:28px;
+            margin-bottom:22px;
+        }
+        .card h2{
+            font-size:20px;
+            font-weight:800;
+            margin-bottom:12px;
+            color:#67e8f9;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .card p,.card li{
+            color:#cbd5e1;
+            line-height:1.75;
+            font-size:15px;
+        }
+        .card ul{
+            padding-left:20px;
+            margin-top:8px;
+        }
+        .card li{margin-bottom:6px;}
+        .location-badge{
+            display:inline-block;
+            background:rgba(14,165,233,0.18);
+            border:1px solid rgba(103,232,249,0.3);
+            border-radius:10px;
+            padding:8px 16px;
+            font-size:14px;
+            color:#e0f2fe;
+            margin:6px 6px 0 0;
+        }
+        .needs-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+            gap:12px;
+            margin-top:14px;
+        }
+        .need-item{
+            background:rgba(255,255,255,0.07);
+            border-radius:12px;
+            padding:14px;
+            text-align:center;
+            font-size:14px;
+            color:#e5e7eb;
+        }
+        .need-item span{display:block;font-size:26px;margin-bottom:6px;}
+        .btn{
+            display:inline-block;
+            padding:15px 28px;
+            border-radius:14px;
+            text-decoration:none;
+            font-weight:700;
+            font-size:15px;
+            margin:8px 8px 0 0;
+        }
+        .btn-cyan{background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}
+        .btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;}
+        .btn-outline{
+            background:rgba(255,255,255,0.1);
+            border:1px solid rgba(255,255,255,0.2);
+            color:white;
+        }
+        .partner-box{
+            background:rgba(37,99,235,0.15);
+            border:1px solid rgba(96,165,250,0.3);
+            border-radius:16px;
+            padding:22px;
+            margin-top:14px;
+        }
+        .partner-box p{color:#bfdbfe;font-size:15px;line-height:1.7;}
+        .back{
+            display:inline-block;
+            margin:24px 0 0;
+            padding:10px 18px;
+            border-radius:12px;
+            background:rgba(255,255,255,0.1);
+            color:white;
+            text-decoration:none;
+            font-size:14px;
+        }
+        footer{
+            text-align:center;
+            padding:30px 20px;
+            color:#475569;
+            font-size:13px;
+            border-top:1px solid rgba(255,255,255,0.07);
+        }
+        footer a{color:#67e8f9;text-decoration:none;}
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <img src="https://i.imgur.com/RpBUbHd.png" alt="EmpowerBands Logo" style="width:70px;margin-bottom:20px;border-radius:50%;">
+    <h1>Community <span>Blessing Boxes</span></h1>
+    <p>
+        Free essentials — no questions asked. Our Blessing Boxes are stocked by neighbors
+        for neighbors, keeping food, hygiene products, and daily necessities within reach
+        for anyone who needs them.
+    </p>
+</div>
+
+<div class="page">
+    <a class="back" href="/">← Back to Home</a>
+
+    <!-- WHERE ARE THE BOXES -->
+    <div class="card" style="margin-top:20px;">
+        <h2>📍 Where to Find a Box</h2>
+        <p>We currently have Blessing Boxes set up in:</p>
+        <br>
+        <span class="location-badge">📦 Downtown Hartselle, AL</span>
+        <br><br>
+        <p>
+            We are actively looking to partner with local businesses to host additional
+            boxes throughout the community. If you own or manage a business and would
+            like to host a box, see the partnership section below.
+        </p>
+    </div>
+
+    <!-- WHAT'S NEEDED -->
+    <div class="card">
+        <h2>🛒 What's Needed</h2>
+        <p>The boxes accept any gently used or new items. Most-needed items include:</p>
+        <div class="needs-grid">
+            <div class="need-item"><span>🥫</span>Canned Food</div>
+            <div class="need-item"><span>🍞</span>Shelf-Stable Snacks</div>
+            <div class="need-item"><span>🧴</span>Shampoo & Conditioner</div>
+            <div class="need-item"><span>🪥</span>Toothbrush & Toothpaste</div>
+            <div class="need-item"><span>🧼</span>Soap & Body Wash</div>
+            <div class="need-item"><span>🧻</span>Toilet Paper</div>
+            <div class="need-item"><span>👕</span>Socks & Underwear</div>
+            <div class="need-item"><span>🩹</span>First Aid Supplies</div>
+            <div class="need-item"><span>🌡️</span>Cold Medicine</div>
+            <div class="need-item"><span>👶</span>Baby Supplies</div>
+            <div class="need-item"><span>🐾</span>Pet Food</div>
+            <div class="need-item"><span>📦</span>Other Essentials</div>
+        </div>
+    </div>
+
+    <!-- HOW TO HELP -->
+    <div class="card">
+        <h2>🤝 How You Can Help</h2>
+        <p>There are three simple ways to make a difference:</p>
+        <ul>
+            <li><strong>Drop off supplies</strong> — Visit any box location and leave items you can spare.</li>
+            <li><strong>Volunteer</strong> — Help us restock, organize, and maintain the boxes.</li>
+            <li><strong>Donate</strong> — A financial gift helps us purchase the items the boxes need most.</li>
+        </ul>
+        <br>
+        <a class="btn btn-green" href="mailto:support@empowerbands.org?subject=Blessing Box Volunteer">✋ Volunteer Sign Up</a>
+        <a class="btn btn-cyan" href="/donate">❤️ Donate Now</a>
+    </div>
+
+    <!-- BUSINESS PARTNERSHIP -->
+    <div class="card">
+        <h2>🏪 Partner With Us</h2>
+        <p>
+            We are looking to partner with local businesses in Hartselle and the surrounding
+            area to host Blessing Boxes at their locations. Hosting a box is a simple, powerful
+            way to show your community that your business cares.
+        </p>
+        <div class="partner-box">
+            <p>
+                <strong style="color:white;">What hosting looks like:</strong><br>
+                We provide the box and handle restocking. You provide a visible outdoor or
+                entryway space. Your business gets recognized as a community partner on our
+                website and social media.
+            </p>
+        </div>
+        <br>
+        <a class="btn btn-outline" href="mailto:support@empowerbands.org?subject=Blessing Box Partnership Inquiry">📧 Contact Us to Partner</a>
+    </div>
+
+    <!-- SPREAD THE WORD -->
+    <div class="card">
+        <h2>📣 Spread the Word</h2>
+        <p>
+            Share this page with friends, family, churches, and local groups.
+            The more people who know, the more lives we can reach together.
+        </p>
+        <br>
+        <a class="btn btn-outline" href="https://www.facebook.com/sharer/sharer.php?u=https://empowerbands.org/blessing-boxes" target="_blank">Share on Facebook</a>
+    </div>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 EmpowerBands Worldwide &nbsp;|&nbsp; Decatur, Alabama &nbsp;|&nbsp; support@empowerbands.org</p>
+    <p style="margin-top:8px;">
+        <a href="/">Home</a> &nbsp;|&nbsp;
+        <a href="/donate">Donate</a> &nbsp;|&nbsp;
+        <a href="/privacy">Privacy Policy</a>
+    </p>
+</footer>
+
+</body>
+</html>
+"""
 
 # ===============================
 # PRIVACY POLICY
