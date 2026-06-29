@@ -494,7 +494,7 @@ body{
 
         <h3>Smart Wearable Safety Technology</h3>
 
-        <p>Your text here...</p>
+        <p>EmpowerBands Worldwide is committed to safety inclusion, and rapid emergency response through smart wearable technology....</p>
     </div>
 
 </section>
@@ -513,7 +513,7 @@ body{
         </div>
     </div>
 
-    <div class="hero-visual">
+    
         <img src="https://i.imgur.com/dE4kSOz.png">
     </div>
 </section>
