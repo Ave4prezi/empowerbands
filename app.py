@@ -2794,7 +2794,37 @@ def edit_history():
         }}
         .page {{ max-width:720px; margin:auto; }}
         h1 {{ font-size:32px; margin-bottom:6px; }}
-        .subtitle {{ color:#94a3b8; margin-bottom:28px; font-size:14px; }}
+        .subtitle {{ color:#94a3b8; margin-bottom:20px; font-size:14px; }}
+        .filters {{
+            display:flex;
+            gap:12px;
+            margin-bottom:24px;
+            flex-wrap:wrap;
+        }}
+        .filters input {{
+            flex:1;
+            min-width:160px;
+            padding:12px 16px;
+            border:none;
+            border-radius:12px;
+            background:rgba(255,255,255,0.1);
+            color:white;
+            font-size:14px;
+            outline:none;
+        }}
+        .filters input::placeholder {{ color:#94a3b8; }}
+        .filters input:focus {{ background:rgba(255,255,255,0.15); }}
+        .clear-btn {{
+            padding:12px 18px;
+            border:none;
+            border-radius:12px;
+            background:rgba(255,255,255,0.08);
+            color:#94a3b8;
+            font-size:13px;
+            cursor:pointer;
+            white-space:nowrap;
+        }}
+        .clear-btn:hover {{ background:rgba(255,255,255,0.14); color:white; }}
         .commit {{
             background:rgba(255,255,255,0.07);
             border:1px solid rgba(255,255,255,0.12);
@@ -2802,8 +2832,9 @@ def edit_history():
             padding:16px 20px;
             margin-bottom:12px;
         }}
+        .commit.hidden {{ display:none; }}
         .commit-msg {{ font-size:15px; font-weight:600; margin-bottom:8px; }}
-        .commit-meta {{ display:flex; gap:18px; font-size:12px; color:#94a3b8; }}
+        .commit-meta {{ display:flex; gap:18px; font-size:12px; color:#94a3b8; flex-wrap:wrap; }}
         .sha a {{ color:#67e8f9; text-decoration:none; font-family:monospace; }}
         .back {{
             display:inline-block;
@@ -2815,6 +2846,13 @@ def edit_history():
             text-decoration:none;
             font-size:14px;
         }}
+        .no-results {{
+            text-align:center;
+            padding:40px;
+            color:#94a3b8;
+            display:none;
+        }}
+        .count {{ color:#67e8f9; font-size:13px; margin-bottom:16px; }}
     </style>
 </head>
 <body>
@@ -2822,8 +2860,62 @@ def edit_history():
     <a class="back" href="/">← Back to Home</a>
     <h1>Edit History</h1>
     <p class="subtitle">Last 30 changes to the EmpowerBands codebase</p>
-    {commits_html}
+
+    <div class="filters">
+        <input type="text" id="keywordFilter" placeholder="🔍 Search by keyword or author..." oninput="filterCommits()">
+        <input type="date" id="dateFilter" oninput="filterCommits()">
+        <button class="clear-btn" onclick="clearFilters()">✕ Clear</button>
+    </div>
+
+    <div class="count" id="resultCount"></div>
+
+    <div id="commitList">
+        {commits_html}
+    </div>
+    <div class="no-results" id="noResults">No matching changes found.</div>
 </div>
+
+<script>
+function filterCommits() {{
+    const keyword = document.getElementById('keywordFilter').value.toLowerCase().trim();
+    const date = document.getElementById('dateFilter').value;
+    const commits = document.querySelectorAll('.commit');
+    let visible = 0;
+
+    commits.forEach(c => {{
+        const msg = c.querySelector('.commit-msg').textContent.toLowerCase();
+        const meta = c.querySelector('.commit-meta').textContent.toLowerCase();
+        const combined = msg + ' ' + meta;
+
+        const matchesKeyword = !keyword || combined.includes(keyword);
+        const matchesDate = !date || meta.includes(date);
+
+        if (matchesKeyword && matchesDate) {{
+            c.classList.remove('hidden');
+            visible++;
+        }} else {{
+            c.classList.add('hidden');
+        }}
+    }});
+
+    const countEl = document.getElementById('resultCount');
+    const noResults = document.getElementById('noResults');
+
+    if (keyword || date) {{
+        countEl.textContent = visible + ' result' + (visible !== 1 ? 's' : '') + ' found';
+        noResults.style.display = visible === 0 ? 'block' : 'none';
+    }} else {{
+        countEl.textContent = '';
+        noResults.style.display = 'none';
+    }}
+}}
+
+function clearFilters() {{
+    document.getElementById('keywordFilter').value = '';
+    document.getElementById('dateFilter').value = '';
+    filterCommits();
+}}
+</script>
 </body>
 </html>
 """
