@@ -81,6 +81,13 @@ if not os.path.exists(file_name):
     "https://i.imgur.com/dE4kSOz.png"
 ])
 
+# Create volunteer sign-ups file if missing
+_vol_file = "bb_volunteers.csv"
+if not os.path.exists(_vol_file):
+    with open(_vol_file, "w", newline="", encoding="utf-8") as _vf:
+        import csv as _csv_init
+        _csv_init.writer(_vf).writerow(["Name","Email","Phone","Availability","Message","Submitted"])
+
 # Create blessing box needs file if missing
 _bb_needs_file = "blessing_box_needs.json"
 if not os.path.exists(_bb_needs_file):
@@ -1274,6 +1281,10 @@ body{{
 
         <a class="add-btn" href="/admin/blessing-box-needs">
             📦 Update Box Needs
+</a>
+
+        <a class="add-btn" href="/admin/volunteers">
+            👥 Volunteers
 </a>
 
 </div>
@@ -3196,7 +3207,7 @@ def github_webhook():
 # BLESSING BOXES PAGE
 # ===============================
 
-@app.route("/blessing-boxes")
+@app.route("/blessing-boxes", methods=["GET","POST"])
 def blessing_boxes():
     import json as _bb_json
     try:
@@ -3208,6 +3219,33 @@ def blessing_boxes():
         f'<div class="need-item"><span>{i["emoji"]}</span>{i["label"]}</div>'
         for i in _bb_items
     ) or '<p style="color:#94a3b8;">No items listed yet.</p>'
+
+    vol_success = False
+    vol_error = ""
+    if request.method == "POST":
+        v_name = request.form.get("v_name","").strip()
+        v_email = request.form.get("v_email","").strip()
+        v_phone = request.form.get("v_phone","").strip()
+        v_avail = request.form.get("v_avail","").strip()
+        v_msg   = request.form.get("v_msg","").strip()
+        if v_name and (v_email or v_phone):
+            import csv as _vcsv, time as _vt
+            with open("bb_volunteers.csv","a",newline="",encoding="utf-8") as _vf:
+                _vcsv.writer(_vf).writerow([v_name,v_email,v_phone,v_avail,v_msg,_vt.strftime("%Y-%m-%d %H:%M")])
+            vol_success = True
+        else:
+            vol_error = "Please enter your name and at least one way to reach you."
+
+    vol_banner = ""
+    if vol_success:
+        vol_banner = '''<div style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:14px;padding:16px 20px;margin-bottom:20px;color:#86efac;font-size:15px;font-weight:600;">
+            ✅ Thank you! We'll be in touch soon.
+        </div>'''
+    elif vol_error:
+        vol_banner = f'''<div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);border-radius:14px;padding:16px 20px;margin-bottom:20px;color:#fca5a5;font-size:14px;">
+            ⚠️ {vol_error}
+        </div>'''
+
     return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -3390,8 +3428,39 @@ def blessing_boxes():
             <li><strong>Donate</strong> — A financial gift helps us purchase the items the boxes need most.</li>
         </ul>
         <br>
-        <a class="btn btn-green" href="mailto:support@empowerbands.org?subject=Blessing Box Volunteer">✋ Volunteer Sign Up</a>
         <a class="btn btn-cyan" href="/donate">❤️ Donate Now</a>
+    </div>
+
+    <!-- VOLUNTEER FORM -->
+    <div class="card" id="volunteer">
+        <h2>✋ Volunteer Sign Up</h2>
+        <p style="color:#cbd5e1;margin-bottom:18px;">Fill out the form below and we'll reach out with next steps. No experience needed — just a willing heart!</p>
+        {vol_banner}
+        <form method="POST" action="/blessing-boxes#volunteer">
+            <div style="display:grid;gap:12px;">
+                <input type="text" name="v_name" placeholder="Your Name *" required
+                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+                <input type="email" name="v_email" placeholder="Email Address"
+                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+                <input type="tel" name="v_phone" placeholder="Phone Number"
+                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+                <select name="v_avail"
+                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(30,41,59,0.9);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+                    <option value="">When are you available?</option>
+                    <option>Weekday mornings</option>
+                    <option>Weekday afternoons</option>
+                    <option>Weekday evenings</option>
+                    <option>Weekends</option>
+                    <option>Flexible / Any time</option>
+                </select>
+                <textarea name="v_msg" placeholder="Anything else you'd like us to know? (optional)" rows="3"
+                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+                <button type="submit"
+                    style="padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-size:16px;font-weight:700;cursor:pointer;">
+                    ✋ Submit Sign Up
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- BUSINESS PARTNERSHIP -->
@@ -3440,6 +3509,77 @@ def blessing_boxes():
 </html>
 """
 
+
+
+# ===============================
+# ADMIN — VIEW VOLUNTEERS
+# ===============================
+
+@app.route("/admin/volunteers")
+def admin_volunteers():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    vols = []
+    try:
+        with open("bb_volunteers.csv","r",encoding="utf-8") as _vf:
+            import csv as _vacsv
+            reader = _vacsv.DictReader(_vf)
+            for row in reader:
+                vols.append(row)
+        vols.reverse()
+    except:
+        vols = []
+
+    rows_html = ""
+    for v in vols:
+        rows_html += f"""<tr>
+            <td>{v.get('Name','')}</td>
+            <td>{v.get('Email','')}</td>
+            <td>{v.get('Phone','')}</td>
+            <td>{v.get('Availability','')}</td>
+            <td style="max-width:180px;word-break:break-word;">{v.get('Message','')}</td>
+            <td>{v.get('Submitted','')}</td>
+        </tr>"""
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteers — EmpowerBands</title>
+    <style>
+        body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);color:white;min-height:100vh;padding:25px 16px;}}
+        .page{{max-width:960px;margin:auto;}}
+        h1{{font-size:28px;margin-bottom:4px;}}
+        .sub{{color:#94a3b8;font-size:14px;margin-bottom:24px;}}
+        .back{{display:inline-block;margin-bottom:22px;padding:10px 18px;border-radius:12px;background:rgba(255,255,255,0.1);color:white;text-decoration:none;font-size:14px;margin-right:10px;}}
+        .wrap{{overflow-x:auto;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:20px;}}
+        table{{width:100%;border-collapse:collapse;font-size:14px;}}
+        th{{color:#67e8f9;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);}}
+        td{{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:#e5e7eb;vertical-align:top;}}
+        tr:last-child td{{border-bottom:none;}}
+        .empty{{text-align:center;padding:40px;color:#64748b;}}
+        .count{{display:inline-block;background:rgba(103,232,249,0.12);border:1px solid rgba(103,232,249,0.25);border-radius:8px;padding:4px 12px;font-size:13px;color:#67e8f9;margin-bottom:20px;}}
+    </style>
+</head>
+<body>
+<div class="page">
+    <a class="back" href="/dashboard">⬅ Dashboard</a>
+    <a class="back" href="/blessing-boxes" target="_blank">👁 View Page</a>
+    <h1>✋ Blessing Box Volunteers</h1>
+    <p class="sub">Everyone who has signed up to help through the website.</p>
+    <div class="count">{len(vols)} volunteer{'s' if len(vols) != 1 else ''} total</div>
+    <div class="wrap">
+        <table>
+            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Availability</th><th>Message</th><th>Submitted</th></tr>
+            {rows_html if rows_html else '<tr><td colspan="6" class="empty">No sign-ups yet.</td></tr>'}
+        </table>
+    </div>
+</div>
+</body>
+</html>
+"""
 
 # ===============================
 # ADMIN — UPDATE BLESSING BOX NEEDS
