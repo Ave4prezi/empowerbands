@@ -944,6 +944,14 @@ def dashboard():
     total_bands = count_rows(file_name)
     total_scans = count_rows(scan_log_file)
 
+    # Read visitor counter
+    _vc_file = "visit_count.txt"
+    try:
+        _dash_vc = int(open(_vc_file).read().strip()) if os.path.exists(_vc_file) else 0
+        dash_visit_count = f"{_dash_vc:,}"
+    except:
+        dash_visit_count = "—"
+
     # Fetch last GitHub commit + detect new changes since login
     import urllib.request as _ur, json as _json
     last_updated_str = "Unavailable"
@@ -1283,6 +1291,11 @@ onkeyup="filterBands()"
         <div class="stat-card">
             <div class="stat-number">{len(customers)}</div>
             <div class="stat-label">Active Bands</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">{dash_visit_count}</div>
+            <div class="stat-label">Site Visitors</div>
         </div>
 
     </div>
