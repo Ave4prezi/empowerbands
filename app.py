@@ -174,6 +174,17 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
 @app.route("/")
 def home():
     import urllib.request as _hw_ur, json as _hw_json
+
+    # Visitor counter
+    _vc_file = "visit_count.txt"
+    try:
+        _vc = int(open(_vc_file).read().strip()) if os.path.exists(_vc_file) else 0
+        _vc += 1
+        open(_vc_file, "w").write(str(_vc))
+        visit_count = f"{_vc:,}"
+    except:
+        visit_count = "—"
+
     whats_new_html = ""
     try:
         _hw_req = _hw_ur.Request(
@@ -643,6 +654,17 @@ body{
 </div>
 
 {whats_new_html}
+
+<div style="
+    text-align:center;
+    padding:18px 20px 10px;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+    color:rgba(255,255,255,0.45);
+">
+    👁 <strong style="color:rgba(255,255,255,0.7);">{visit_count}</strong> visitors and counting
+</div>
+
 </body>
 </html>
     <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
