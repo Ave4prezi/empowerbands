@@ -2857,7 +2857,10 @@ def edit_history():
 </head>
 <body>
 <div class="page">
-    <a class="back" href="/">← Back to Home</a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+        <a class="back" href="/">← Back to Home</a>
+        <a class="back" href="/dashboard" style="background:rgba(37,99,235,0.35);">⚙️ Dashboard</a>
+    </div>
     <h1>Edit History</h1>
     <p class="subtitle">Last 30 changes to the EmpowerBands codebase</p>
 
