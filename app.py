@@ -173,7 +173,43 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
 
 @app.route("/")
 def home():
-    return """
+    import urllib.request as _hw_ur, json as _hw_json
+    whats_new_html = ""
+    try:
+        _hw_req = _hw_ur.Request(
+            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
+            headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
+                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+        )
+        with _hw_ur.urlopen(_hw_req, timeout=5) as _hw_r:
+            _hw_commits = _hw_json.loads(_hw_r.read().decode())
+        if _hw_commits:
+            _hw_c = _hw_commits[0]
+            _hw_msg = _hw_c.get("commit",{}).get("message","").split("\n")[0]
+            _hw_date = _hw_c.get("commit",{}).get("author",{}).get("date","")[:10]
+            _hw_url = _hw_c.get("html_url","#")
+            whats_new_html = f"""<div style="
+                background:linear-gradient(135deg,rgba(14,165,233,0.18),rgba(37,99,235,0.14));
+                border:1px solid rgba(103,232,249,0.25);
+                border-radius:14px;
+                padding:14px 20px;
+                margin:20px auto;
+                max-width:680px;
+                display:flex;
+                align-items:center;
+                gap:12px;
+                font-family:Arial,sans-serif;
+                font-size:13px;
+                color:#e5e7eb;
+                flex-wrap:wrap;
+            ">
+                <span style="font-size:18px;">✨</span>
+                <span><strong style="color:#67e8f9;">What\'s new</strong> &nbsp;{_hw_date} — {_hw_msg}</span>
+                <a href="/history" style="margin-left:auto;color:#67e8f9;text-decoration:none;font-size:12px;white-space:nowrap;">See all changes →</a>
+            </div>"""
+    except:
+        pass
+    return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -606,6 +642,7 @@ body{
     </div>
 </div>
 
+{whats_new_html}
 </body>
 </html>
     <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
