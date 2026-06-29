@@ -1,6 +1,77 @@
-Mission statement
-"Protect What Matters Most" hero section
-Learn More button
-Donate button
-Overview of EmpowerBands safety modules
-Testimonials or featured partners (optional)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EmpowerBands Worldwide</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<!-- HERO SECTION -->
+<section class="hero">
+
+    <img class="hero-image" src="{{ url_for('static', filename='images/homepage.jpg') }}" alt="EmpowerBands Safety">
+
+    <div class="hero-content">
+
+        <img class="hero-logo" src="https://i.imgur.com/RpBUbHd.png" alt="EmpowerBands Logo">
+
+        <h1>Protect What Matters Most</h1>
+
+        <p class="mission">
+            EmpowerBands Worldwide is committed to safety, inclusion, and rapid emergency response through smart wearable technology.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="/learn-more" class="btn">Learn More</a>
+            <a href="/donate" class="btn btn-primary">Donate</a>
+        </div>
+
+    </div>
+</section>
+
+<!-- SAFETY MODULES -->
+<section class="modules">
+
+    <h2>Safety Modules</h2>
+
+    <div class="module-grid">
+
+        <div class="module">
+            <h3>SOS Emergency Alert</h3>
+            <p>Instant alerts sent to caregivers and emergency contacts with GPS location.</p>
+        </div>
+
+        <div class="module">
+            <h3>Location Tracking</h3>
+            <p>Real-time location sharing for safety monitoring and rapid response.</p>
+        </div>
+
+        <div class="module">
+            <h3>Community Support Network</h3>
+            <p>Connects users with volunteers, guardians, and support systems.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- TESTIMONIALS / PARTNERS (OPTIONAL) -->
+<section class="testimonials">
+
+    <h2>Community Impact</h2>
+
+    <div class="testimonial">
+        <p>"EmpowerBands gave our family peace of mind knowing help is always one button away."</p>
+        <span>- Community Member</span>
+    </div>
+
+</section>
+
+<!-- FOOTER (if you already have one, keep yours instead) -->
+<footer>
+    <p>&copy; 2026 EmpowerBands Worldwide</p>
+</footer>
+
+</body>
+</html>
