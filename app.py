@@ -481,7 +481,6 @@ body{
 
 <section class="hero">
 
-    <img class="hero-image" src="{{ url_for('static', filename='images/homepage.jpg') }}" alt="Hero Image">
 
     <div>
         <img class="hero-logo" src="https://i.imgur.com/RpBUbHd.png" alt="EmpowerBands Logo">
