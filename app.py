@@ -647,6 +647,19 @@ def admin():
 
         if request.form.get("password") == ADMIN_PASSWORD:
             session["logged_in"] = True
+            # Store latest commit SHA at login time so we can detect new changes
+            try:
+                import urllib.request as _ulr, json as _jj
+                _r2 = _ulr.Request(
+                    "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
+                    headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
+                             "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+                )
+                with _ulr.urlopen(_r2, timeout=5) as _rr:
+                    _cc = _jj.loads(_rr.read().decode())
+                session["last_seen_sha"] = _cc[0]["sha"] if _cc else ""
+            except:
+                session["last_seen_sha"] = ""
             return redirect("/dashboard")
 
         return """
@@ -871,12 +884,14 @@ def dashboard():
     total_bands = count_rows(file_name)
     total_scans = count_rows(scan_log_file)
 
-    # Fetch last GitHub commit timestamp
+    # Fetch last GitHub commit + detect new changes since login
     import urllib.request as _ur, json as _json
     last_updated_str = "Unavailable"
+    new_changes_badge = ""
+    new_changes_count = 0
     try:
         _req = _ur.Request(
-            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
+            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=10",
             headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
                      "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
         )
@@ -887,6 +902,36 @@ def dashboard():
             _msg = _c.get("commit",{}).get("message","").split("\n")[0]
             _date = _c.get("commit",{}).get("author",{}).get("date","")[:10]
             last_updated_str = f"{_date} — {_msg}"
+            # Count commits since last login
+            last_seen = session.get("last_seen_sha","")
+            if last_seen:
+                for _i, _commit in enumerate(_commits):
+                    if _commit.get("sha","") == last_seen:
+                        new_changes_count = _i
+                        break
+                else:
+                    new_changes_count = len(_commits)
+            if new_changes_count > 0:
+                new_changes_badge = f"""
+                <div style="
+                    background:linear-gradient(135deg,#f59e0b,#d97706);
+                    color:white;
+                    border-radius:14px;
+                    padding:14px 20px;
+                    margin:0 auto 20px;
+                    max-width:700px;
+                    display:flex;
+                    align-items:center;
+                    gap:12px;
+                    font-size:14px;
+                    font-weight:600;
+                    box-shadow:0 4px 20px rgba(245,158,11,0.3);
+                ">
+                    <span style="font-size:20px;">🔔</span>
+                    <span>{new_changes_count} new change{'s' if new_changes_count != 1 else ''} since your last login</span>
+                    <a href="/history" style="margin-left:auto;background:rgba(0,0,0,0.2);color:white;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:13px;">View →</a>
+                    <a href="/dashboard/mark-seen" style="background:rgba(0,0,0,0.15);color:white;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:13px;">Dismiss</a>
+                </div>"""
     except:
         pass
 
@@ -1160,6 +1205,8 @@ onkeyup="filterBands()"
 >
 
 </div>
+
+{new_changes_badge}
 
 <div class="stats">
 
@@ -2959,6 +3006,29 @@ function clearFilters() {{
 </body>
 </html>
 """
+
+
+# ===============================
+# MARK CHANGES AS SEEN
+# ===============================
+
+@app.route("/dashboard/mark-seen")
+def mark_seen():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    import urllib.request as _ur2, json as _jj2
+    try:
+        _req3 = _ur2.Request(
+            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
+            headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
+                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+        )
+        with _ur2.urlopen(_req3, timeout=5) as _r3:
+            _cc3 = _jj2.loads(_r3.read().decode())
+        session["last_seen_sha"] = _cc3[0]["sha"] if _cc3 else ""
+    except:
+        pass
+    return redirect("/dashboard")
 
 # ===============================
 # PRIVACY POLICY
