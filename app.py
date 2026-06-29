@@ -484,18 +484,20 @@ body{
 </div>
 
 <section class="hero">
+
+    <img class="hero-image" src="{{ url_for('static', filename='images/homepage.jpg') }}" alt="Hero Image">
+
     <div>
-        <img class="hero-logo" src="https://i.imgur.com/RpBUbHd.png">
+        <img class="hero-logo" src="https://i.imgur.com/RpBUbHd.png" alt="EmpowerBands Logo">
 
         <h1>EmpowerBands <span>Worldwide</span></h1>
 
         <h3>Smart Wearable Safety Technology</h3>
 
-        <p>
-            Smart NFC and QR wearable safety technology designed to help children,
-            seniors, caregivers, schools, and individuals with disabilities communicate
-            faster during emergencies.
-        </p>
+        <p>Your text here...</p>
+    </div>
+
+</section>
 
         <div style="margin-top:25px;">
             <a class="btn" href="/EB001">🚀 View Live Demo</a>
