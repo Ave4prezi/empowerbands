@@ -1,4 +1,6 @@
 from flask import Flask, request, redirect, session, send_file, jsonify
+import hmac
+import hashlib
 from twilio.rest import Client
 import csv
 import os
@@ -3029,6 +3031,68 @@ def mark_seen():
     except:
         pass
     return redirect("/dashboard")
+
+
+# ===============================
+# GITHUB PUSH WEBHOOK
+# ===============================
+
+@app.route("/webhook/github", methods=["POST"])
+def github_webhook():
+    secret = os.environ.get("GITHUB_WEBHOOK_SECRET", "")
+    if secret:
+        sig_header = request.headers.get("X-Hub-Signature-256", "")
+        expected = "sha256=" + hmac.new(secret.encode(), request.data, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig_header, expected):
+            return "Forbidden", 403
+
+    payload = request.get_json(silent=True) or {}
+    ref = payload.get("ref", "")
+
+    # Only notify on pushes to the main/master branch
+    if ref not in ("refs/heads/main", "refs/heads/master"):
+        return "OK", 200
+
+    pusher = payload.get("pusher", {}).get("name", "Someone")
+    commits = payload.get("commits", [])
+    repo_name = payload.get("repository", {}).get("full_name", "Ave4prezi/Empowerbands")
+    compare_url = payload.get("compare", f"https://github.com/{repo_name}/commits")
+
+    if not commits:
+        return "OK", 200
+
+    commit_lines = ""
+    for c in commits[:5]:
+        sha = c.get("id", "")[:7]
+        msg = c.get("message", "").split("\n")[0]
+        url = c.get("url", "#")
+        commit_lines += f"  • [{sha}] {msg}\n    {url}\n\n"
+
+    email_body = (
+        f"EmpowerBands — New Code Change\n\n"
+        f"{pusher} pushed {len(commits)} commit{'s' if len(commits) != 1 else ''} to {repo_name}.\n\n"
+        f"Changes:\n{commit_lines}"
+        f"View diff: {compare_url}\n\n"
+        f"— EmpowerBands Webhook"
+    )
+
+    email_list = [e.strip() for e in ALERT_EMAILS.split(",") if e.strip()] if ALERT_EMAILS else []
+
+    if email_list and ALERT_EMAIL_PASSWORD:
+        try:
+            msg = MIMEText(email_body)
+            msg["Subject"] = f"🔔 EmpowerBands: {len(commits)} new change{'s' if len(commits) != 1 else ''} by {pusher}"
+            msg["From"] = email_list[0]
+            msg["To"] = ", ".join(email_list)
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            server.login(email_list[0], ALERT_EMAIL_PASSWORD)
+            server.sendmail(email_list[0], email_list, msg.as_string())
+            server.quit()
+        except Exception as e:
+            print(f"Webhook email error: {e}")
+
+    return "OK", 200
 
 # ===============================
 # PRIVACY POLICY
