@@ -1114,6 +1114,10 @@ body{{
             🏠 Home
 </a>
 
+        <a class="add-btn" href="/history">
+            📋 Edit History
+</a>
+
 </div>
 
 <div style="margin-bottom:25px; max-width:700px; margin-left:auto; margin-right:auto;">
