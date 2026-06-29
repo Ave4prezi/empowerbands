@@ -871,6 +871,25 @@ def dashboard():
     total_bands = count_rows(file_name)
     total_scans = count_rows(scan_log_file)
 
+    # Fetch last GitHub commit timestamp
+    import urllib.request as _ur, json as _json
+    last_updated_str = "Unavailable"
+    try:
+        _req = _ur.Request(
+            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
+            headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
+                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+        )
+        with _ur.urlopen(_req, timeout=5) as _r:
+            _commits = _json.loads(_r.read().decode())
+        if _commits:
+            _c = _commits[0]
+            _msg = _c.get("commit",{}).get("message","").split("\n")[0]
+            _date = _c.get("commit",{}).get("author",{}).get("date","")[:10]
+            last_updated_str = f"{_date} — {_msg}"
+    except:
+        pass
+
     try:
         with open(file_name, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -1159,6 +1178,24 @@ onkeyup="filterBands()"
             <div class="stat-label">Active Bands</div>
         </div>
 
+    </div>
+
+    <div style="
+        background:rgba(255,255,255,0.06);
+        border:1px solid rgba(255,255,255,0.1);
+        border-radius:14px;
+        padding:14px 20px;
+        margin:0 auto 24px;
+        max-width:700px;
+        font-size:13px;
+        color:#94a3b8;
+        display:flex;
+        align-items:center;
+        gap:10px;
+    ">
+        <span style="color:#67e8f9;font-size:16px;">🕒</span>
+        <span><strong style="color:white;">Last updated:</strong> {last_updated_str}</span>
+        <a href="/history" style="margin-left:auto;color:#67e8f9;text-decoration:none;font-size:12px;">View all →</a>
     </div>
 
     {customer_cards if customer_cards else '<div class="empty">No bands added yet.</div>'}
