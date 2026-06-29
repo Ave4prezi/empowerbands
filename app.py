@@ -461,13 +461,7 @@ body{
 <body>
 
 <div class="header">
-    <div class="logo-wrap">
-        <img src="https://i.imgur.com/dE4kSOz.png">
-        <div class="logo-text">
-            EmpowerBands
-            <span>Worldwide</span>
-        </div>
-    </div>
+    
 
     <div class="nav">
         <a class="active" href="/">Home</a>
@@ -513,9 +507,6 @@ body{
         </div>
     </div>
 
-    
-        <img src="https://i.imgur.com/dE4kSOz.png">
-    </div>
 </section>
 
 <section class="section" id="how">
