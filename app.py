@@ -81,6 +81,27 @@ if not os.path.exists(file_name):
     "https://i.imgur.com/dE4kSOz.png"
 ])
 
+# Create blessing box needs file if missing
+_bb_needs_file = "blessing_box_needs.json"
+if not os.path.exists(_bb_needs_file):
+    import json as _bb_json_init
+    _bb_defaults = [
+        {"emoji": "🥫", "label": "Canned Food"},
+        {"emoji": "🍞", "label": "Shelf-Stable Snacks"},
+        {"emoji": "🧴", "label": "Shampoo & Conditioner"},
+        {"emoji": "🪥", "label": "Toothbrush & Toothpaste"},
+        {"emoji": "🧼", "label": "Soap & Body Wash"},
+        {"emoji": "🧻", "label": "Toilet Paper"},
+        {"emoji": "👕", "label": "Socks & Underwear"},
+        {"emoji": "🩹", "label": "First Aid Supplies"},
+        {"emoji": "🌡️", "label": "Cold Medicine"},
+        {"emoji": "👶", "label": "Baby Supplies"},
+        {"emoji": "🐾", "label": "Pet Food"},
+        {"emoji": "📦", "label": "Other Essentials"}
+    ]
+    with open(_bb_needs_file, "w") as _f:
+        _bb_json_init.dump(_bb_defaults, _f)
+
 # Create scan log only if missing
 if not os.path.exists(scan_log_file):
 
@@ -1249,6 +1270,10 @@ body{{
 
         <a class="add-btn" href="/history">
             📋 Edit History
+</a>
+
+        <a class="add-btn" href="/admin/blessing-box-needs">
+            📦 Update Box Needs
 </a>
 
 </div>
@@ -3173,7 +3198,17 @@ def github_webhook():
 
 @app.route("/blessing-boxes")
 def blessing_boxes():
-    return """
+    import json as _bb_json
+    try:
+        with open("blessing_box_needs.json", "r") as _f:
+            _bb_items = _bb_json.load(_f)
+    except:
+        _bb_items = []
+    needs_grid_html = "".join(
+        f'<div class="need-item"><span>{i["emoji"]}</span>{i["label"]}</div>'
+        for i in _bb_items
+    ) or '<p style="color:#94a3b8;">No items listed yet.</p>'
+    return f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3338,21 +3373,10 @@ def blessing_boxes():
 
     <!-- WHAT'S NEEDED -->
     <div class="card">
-        <h2>🛒 What's Needed</h2>
-        <p>The boxes accept any gently used or new items. Most-needed items include:</p>
+        <h2>🛒 What's Needed Right Now</h2>
+        <p>The boxes accept any gently used or new items. Here's what's most needed:</p>
         <div class="needs-grid">
-            <div class="need-item"><span>🥫</span>Canned Food</div>
-            <div class="need-item"><span>🍞</span>Shelf-Stable Snacks</div>
-            <div class="need-item"><span>🧴</span>Shampoo & Conditioner</div>
-            <div class="need-item"><span>🪥</span>Toothbrush & Toothpaste</div>
-            <div class="need-item"><span>🧼</span>Soap & Body Wash</div>
-            <div class="need-item"><span>🧻</span>Toilet Paper</div>
-            <div class="need-item"><span>👕</span>Socks & Underwear</div>
-            <div class="need-item"><span>🩹</span>First Aid Supplies</div>
-            <div class="need-item"><span>🌡️</span>Cold Medicine</div>
-            <div class="need-item"><span>👶</span>Baby Supplies</div>
-            <div class="need-item"><span>🐾</span>Pet Food</div>
-            <div class="need-item"><span>📦</span>Other Essentials</div>
+            {needs_grid_html}
         </div>
     </div>
 
@@ -3412,6 +3436,106 @@ def blessing_boxes():
     </p>
 </footer>
 
+</body>
+</html>
+"""
+
+
+# ===============================
+# ADMIN — UPDATE BLESSING BOX NEEDS
+# ===============================
+
+@app.route("/admin/blessing-box-needs", methods=["GET", "POST"])
+def admin_blessing_box_needs():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    import json as _ubn_json
+
+    _needs_file = "blessing_box_needs.json"
+    message = ""
+
+    if request.method == "POST":
+        raw = request.form.get("needs_text", "")
+        new_items = []
+        for line in raw.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(" ", 1)
+            if len(parts) == 2:
+                new_items.append({"emoji": parts[0].strip(), "label": parts[1].strip()})
+            else:
+                new_items.append({"emoji": "📦", "label": line})
+        with open(_needs_file, "w") as _f:
+            _ubn_json.dump(new_items, _f)
+        message = "✅ Needs list updated!"
+
+    try:
+        with open(_needs_file, "r") as _f:
+            items = _ubn_json.load(_f)
+    except:
+        items = []
+
+    current_text = "\n".join(f'{i["emoji"]} {i["label"]}' for i in items)
+    preview_rows = "".join(
+        f'<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;align-items:center;">'
+        f'<span style="font-size:20px;">{i["emoji"]}</span>'
+        f'<span style="color:#e5e7eb;">{i["label"]}</span></div>'
+        for i in items
+    ) or '<p style="color:#94a3b8;">No items yet.</p>'
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Box Needs — EmpowerBands</title>
+    <style>
+        body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);color:white;min-height:100vh;padding:30px 20px;}}
+        .page{{max-width:700px;margin:auto;}}
+        h1{{font-size:28px;margin-bottom:6px;}}
+        .sub{{color:#94a3b8;font-size:14px;margin-bottom:28px;}}
+        .card{{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:26px;margin-bottom:20px;}}
+        .card h2{{font-size:17px;font-weight:700;color:#67e8f9;margin-bottom:14px;}}
+        textarea{{width:100%;box-sizing:border-box;padding:14px;border:none;border-radius:14px;background:rgba(255,255,255,0.1);color:white;font-size:14px;line-height:1.7;resize:vertical;outline:none;font-family:monospace;}}
+        textarea::placeholder{{color:#64748b;}}
+        .hint{{font-size:12px;color:#64748b;margin-top:8px;line-height:1.6;}}
+        .save-btn{{margin-top:16px;width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-size:16px;font-weight:700;cursor:pointer;}}
+        .save-btn:hover{{opacity:0.9;}}
+        .msg{{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:12px;padding:12px 16px;margin-bottom:20px;color:#86efac;font-size:14px;font-weight:600;}}
+        .back{{display:inline-block;margin-bottom:22px;padding:10px 18px;border-radius:12px;background:rgba(255,255,255,0.1);color:white;text-decoration:none;font-size:14px;margin-right:10px;}}
+        .preview-box{{max-height:320px;overflow-y:auto;}}
+    </style>
+</head>
+<body>
+<div class="page">
+    <a class="back" href="/dashboard">⬅ Dashboard</a>
+    <a class="back" href="/blessing-boxes" target="_blank">👁 View Page</a>
+    <h1>📦 Update Blessing Box Needs</h1>
+    <p class="sub">Edit the list of items visitors see on the Blessing Boxes page.</p>
+
+    {f'<div class="msg">{message}</div>' if message else ''}
+
+    <div class="card">
+        <h2>✏️ Edit Needs List</h2>
+        <form method="POST">
+            <textarea name="needs_text" rows="14" placeholder="One item per line. Start each line with an emoji, then the item name.&#10;Example:&#10;🥫 Canned Food&#10;🧴 Shampoo">{current_text}</textarea>
+            <p class="hint">
+                One item per line · Start with an emoji, then a space, then the item name<br>
+                Example: <code style="color:#67e8f9;">🥫 Canned Soup</code> &nbsp;|&nbsp; <code style="color:#67e8f9;">🧼 Hand Soap</code>
+            </p>
+            <button class="save-btn" type="submit">💾 Save & Publish</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>👁 Current List Preview</h2>
+        <div class="preview-box">
+            {preview_rows}
+        </div>
+    </div>
+</div>
 </body>
 </html>
 """
