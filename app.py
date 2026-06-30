@@ -3254,7 +3254,7 @@ def blessing_boxes():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blessing Boxes — EmpowerBands</title>
     <style>
-        *{box-sizing:border-box;margin:0;padding:0;}
+        *{{box-sizing:border-box;margin:0;padding:0;}}
         body{{
             font-family:Arial,sans-serif;
             background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
@@ -3270,7 +3270,7 @@ def blessing_boxes():
             font-weight:900;
             margin-bottom:14px;
         }}
-        .hero h1 span{color:#67e8f9;}
+        .hero h1 span{{color:#67e8f9;}}
         .hero p{{
             font-size:17px;
             color:#cbd5e1;
@@ -3278,7 +3278,7 @@ def blessing_boxes():
             margin:0 auto;
             line-height:1.7;
         }}
-        .page{max-width:760px;margin:0 auto;padding:0 20px 60px;}
+        .page{{max-width:760px;margin:0 auto;padding:0 20px 60px;}}
         .card{{
             background:rgba(255,255,255,0.07);
             border:1px solid rgba(255,255,255,0.13);
@@ -3304,7 +3304,7 @@ def blessing_boxes():
             padding-left:20px;
             margin-top:8px;
         }}
-        .card li{margin-bottom:6px;}
+        .card li{{margin-bottom:6px;}}
         .location-badge{{
             display:inline-block;
             background:rgba(14,165,233,0.18);
@@ -3329,7 +3329,7 @@ def blessing_boxes():
             font-size:14px;
             color:#e5e7eb;
         }}
-        .need-item span{display:block;font-size:26px;margin-bottom:6px;}
+        .need-item span{{display:block;font-size:26px;margin-bottom:6px;}}
         .btn{{
             display:inline-block;
             padding:15px 28px;
@@ -3339,8 +3339,8 @@ def blessing_boxes():
             font-size:15px;
             margin:8px 8px 0 0;
         }}
-        .btn-cyan{background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}
-        .btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;}
+        .btn-cyan{{background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}}
+        .btn-green{{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;}}
         .btn-outline{{
             background:rgba(255,255,255,0.1);
             border:1px solid rgba(255,255,255,0.2);
@@ -3353,7 +3353,7 @@ def blessing_boxes():
             padding:22px;
             margin-top:14px;
         }}
-        .partner-box p{color:#bfdbfe;font-size:15px;line-height:1.7;}
+        .partner-box p{{color:#bfdbfe;font-size:15px;line-height:1.7;}}
         .back{{
             display:inline-block;
             margin:24px 0 0;
@@ -3371,7 +3371,7 @@ def blessing_boxes():
             font-size:13px;
             border-top:1px solid rgba(255,255,255,0.07);
         }}
-        footer a{color:#67e8f9;text-decoration:none;}
+        footer a{{color:#67e8f9;text-decoration:none;}}
     </style>
 </head>
 <body>
