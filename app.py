@@ -256,71 +256,71 @@ def home():
 <title>EmpowerBands Worldwide</title>
 
 <style>
-body{
+body{{
     margin:0;
     font-family:Arial,sans-serif;
     background:#020817;
     color:white;
-}
+}}
 
-.header{
+.header{{
     display:flex;
     align-items:center;
     justify-content:space-between;
     padding:18px 6%;
     border-bottom:1px solid rgba(255,255,255,0.1);
     background:#020817;
-}
+}}
 
-.logo-wrap{
+.logo-wrap{{
     display:flex;
     align-items:center;
     gap:14px;
-}
+}}
 
-.logo-wrap img{
+.logo-wrap img{{
     width:70px;
     height:70px;
     border-radius:50%;
     object-fit:cover;
     box-shadow:0 0 25px rgba(14,165,233,0.8);
-}
+}}
 
-.logo-text{
+.logo-text{{
     font-size:24px;
     font-weight:900;
-}
+}}
 
-.logo-text span{
+.logo-text span{{
     display:block;
     color:#38bdf8;
     font-size:16px;
-}
+}}
 
-.nav{
+.nav{{
     display:flex;
     gap:28px;
     align-items:center;
-}
+}}
 
-.nav a{
+.nav a{{
     color:white;
     text-decoration:none;
     font-weight:bold;
-}
+}}
 
-.nav .active{
+.nav .active{{
     color:#38bdf8;
     border-bottom:2px solid #38bdf8;
     padding-bottom:8px;
-}
+}}
 
-.top-buttons{
+.top-buttons{{
     display:flex;
     gap:12px;
-}
+}}
 
-.btn{
+.btn{{
     display:inline-block;
     padding:14px 22px;
     border-radius:10px;
@@ -329,15 +329,15 @@ body{
     font-weight:800;
     background:linear-gradient(135deg,#06b6d4,#2563eb);
     box-shadow:0 0 25px rgba(37,99,235,0.4);
-}
+}}
 
-.btn.dark{
+.btn.dark{{
     background:rgba(255,255,255,0.06);
     border:1px solid rgba(255,255,255,0.25);
     box-shadow:none;
-}
+}}
 
-.hero{
+.hero{{
     padding:60px 6% 35px;
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -345,92 +345,92 @@ body{
     align-items:center;
     background:
         radial-gradient(circle at right,#0b4cff 0%,rgba(2,8,23,0.8) 35%,#020817 75%);
-}
+}}
 
-.hero h1{
+.hero h1{{
     font-size:66px;
     line-height:1.05;
     margin:0;
-}
+}}
 
-.hero h1 span{
+.hero h1 span{{
     display:block;
     background:linear-gradient(135deg,#06b6d4,#4f46e5);
     -webkit-background-clip:text;
     color:transparent;
-}
+}}
 
-.hero h3{
+.hero h3{{
     color:#0ea5e9;
     font-size:24px;
     margin-bottom:12px;
-}
+}}
 
-.hero p{
+.hero p{{
     color:#dbeafe;
     line-height:1.6;
     max-width:620px;
-}
+}}
 
-.hero-logo{
+.hero-logo{{
     width:100%;
     max-width:520px;
     display:block;
     margin-bottom:25px;
     filter:drop-shadow(0 0 18px rgba(14,165,233,0.6));
-}
+}}
 
-.hero-visual{
+.hero-visual{{
     text-align:center;
-}
+}}
 
-.hero-visual img{
+.hero-visual img{{
     width:100%;
     max-width:460px;
     border-radius:30px;
     filter:drop-shadow(0 0 45px rgba(37,99,235,0.8));
-}
+}}
 
-.trust{
+.trust{{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
     gap:14px;
     margin-top:28px;
-}
+}}
 
-.trust-card{
+.trust-card{{
     border:1px solid rgba(56,189,248,0.25);
     border-radius:10px;
     padding:14px;
     background:rgba(255,255,255,0.04);
-}
+}}
 
-.section{
+.section{{
     padding:30px 6%;
-}
+}}
 
-.section h2{
+.section h2{{
     text-align:center;
     font-size:34px;
     margin-bottom:22px;
-}
+}}
 
-.grid{
+.grid{{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
     gap:18px;
-}
+}}
 
-.card{
+.card{{
     background:rgba(255,255,255,0.04);
     border:1px solid rgba(56,189,248,0.25);
     border-radius:16px;
     padding:24px;
     text-align:center;
     box-shadow:0 0 25px rgba(37,99,235,0.15);
-}
+}}
 
-.card .num{
+.card .num{{
     width:45px;
     height:45px;
     border-radius:50%;
@@ -441,18 +441,18 @@ body{
     margin:0 auto 14px;
     font-weight:900;
     box-shadow:0 0 20px rgba(37,99,235,0.8);
-}
+}}
 
-.card h3{
+.card h3{{
     margin:8px 0;
-}
+}}
 
-.card p{
+.card p{{
     color:#cbd5e1;
     line-height:1.5;
-}
+}}
 
-.cta{
+.cta{{
     margin:30px 6%;
     padding:28px;
     border-radius:18px;
@@ -462,23 +462,23 @@ body{
     grid-template-columns:100px 1fr 1.3fr;
     gap:25px;
     align-items:center;
-}
+}}
 
-.cta img{
+.cta img{{
     width:85px;
     height:85px;
     border-radius:50%;
     box-shadow:0 0 30px rgba(14,165,233,0.8);
-}
+}}
 
-.cta-buttons{
+.cta-buttons{{
     display:flex;
     gap:14px;
     flex-wrap:wrap;
     justify-content:flex-end;
-}
+}}
 
-.footer{
+.footer{{
     padding:30px 6%;
     border-top:1px solid rgba(255,255,255,0.1);
     color:#94a3b8;
@@ -486,52 +486,52 @@ body{
     justify-content:space-between;
     gap:20px;
     flex-wrap:wrap;
-}
+}}
 
-.footer a{
+.footer a{{
     color:#cbd5e1;
     text-decoration:none;
     margin:0 8px;
-}
+}}
 
-@media(max-width:850px){
-    .header,.nav,.top-buttons{
+@media(max-width:850px){{
+    .header,.nav,.top-buttons{{
         flex-direction:column;
         gap:16px;
-    }
+    }}
 
-    .hero{
+    .hero{{
         grid-template-columns:1fr;
         text-align:center;
-    }
+    }}
 
-    .hero h1{
+    .hero h1{{
         font-size:44px;
-    }
+    }}
 
-    .hero-logo{
+    .hero-logo{{
         margin:0 auto 25px;
-    }
+    }}
 
-    .cta{
+    .cta{{
         grid-template-columns:1fr;
         text-align:center;
-    }
+    }}
 
-    .cta img{
+    .cta img{{
         margin:auto;
-    }
+    }}
 
-    .cta-buttons{
+    .cta-buttons{{
         justify-content:center;
-    }
+    }}
 
-    .btn{
+    .btn{{
         width:100%;
         box-sizing:border-box;
         text-align:center;
-    }
-}
+    }}
+}}
 </style>
 </head>
 
@@ -1025,7 +1025,7 @@ def dashboard():
                     box-shadow:0 4px 20px rgba(245,158,11,0.3);
                 ">
                     <span style="font-size:20px;">🔔</span>
-                    <span>{new_changes_count} new change{'s' if new_changes_count != 1 else ''} since your last login</span>
+                    <span>{new_changes_count} new change{{'s' if new_changes_count != 1 else ''}} since your last login</span>
                     <a href="/history" style="margin-left:auto;background:rgba(0,0,0,0.2);color:white;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:13px;">View →</a>
                     <a href="/dashboard/mark-seen" style="background:rgba(0,0,0,0.15);color:white;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:13px;">Dismiss</a>
                 </div>"""
@@ -3255,38 +3255,38 @@ def blessing_boxes():
     <title>Blessing Boxes — EmpowerBands</title>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;}
-        body{
+        body{{
             font-family:Arial,sans-serif;
             background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
             color:white;
             min-height:100vh;
-        }
-        .hero{
+        }}
+        .hero{{
             text-align:center;
             padding:60px 20px 40px;
-        }
-        .hero h1{
+        }}
+        .hero h1{{
             font-size:38px;
             font-weight:900;
             margin-bottom:14px;
-        }
+        }}
         .hero h1 span{color:#67e8f9;}
-        .hero p{
+        .hero p{{
             font-size:17px;
             color:#cbd5e1;
             max-width:600px;
             margin:0 auto;
             line-height:1.7;
-        }
+        }}
         .page{max-width:760px;margin:0 auto;padding:0 20px 60px;}
-        .card{
+        .card{{
             background:rgba(255,255,255,0.07);
             border:1px solid rgba(255,255,255,0.13);
             border-radius:20px;
             padding:28px;
             margin-bottom:22px;
-        }
-        .card h2{
+        }}
+        .card h2{{
             font-size:20px;
             font-weight:800;
             margin-bottom:12px;
@@ -3294,18 +3294,18 @@ def blessing_boxes():
             display:flex;
             align-items:center;
             gap:10px;
-        }
-        .card p,.card li{
+        }}
+        .card p,.card li{{
             color:#cbd5e1;
             line-height:1.75;
             font-size:15px;
-        }
-        .card ul{
+        }}
+        .card ul{{
             padding-left:20px;
             margin-top:8px;
-        }
+        }}
         .card li{margin-bottom:6px;}
-        .location-badge{
+        .location-badge{{
             display:inline-block;
             background:rgba(14,165,233,0.18);
             border:1px solid rgba(103,232,249,0.3);
@@ -3314,23 +3314,23 @@ def blessing_boxes():
             font-size:14px;
             color:#e0f2fe;
             margin:6px 6px 0 0;
-        }
-        .needs-grid{
+        }}
+        .needs-grid{{
             display:grid;
             grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
             gap:12px;
             margin-top:14px;
-        }
-        .need-item{
+        }}
+        .need-item{{
             background:rgba(255,255,255,0.07);
             border-radius:12px;
             padding:14px;
             text-align:center;
             font-size:14px;
             color:#e5e7eb;
-        }
+        }}
         .need-item span{display:block;font-size:26px;margin-bottom:6px;}
-        .btn{
+        .btn{{
             display:inline-block;
             padding:15px 28px;
             border-radius:14px;
@@ -3338,23 +3338,23 @@ def blessing_boxes():
             font-weight:700;
             font-size:15px;
             margin:8px 8px 0 0;
-        }
+        }}
         .btn-cyan{background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}
         .btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;}
-        .btn-outline{
+        .btn-outline{{
             background:rgba(255,255,255,0.1);
             border:1px solid rgba(255,255,255,0.2);
             color:white;
-        }
-        .partner-box{
+        }}
+        .partner-box{{
             background:rgba(37,99,235,0.15);
             border:1px solid rgba(96,165,250,0.3);
             border-radius:16px;
             padding:22px;
             margin-top:14px;
-        }
+        }}
         .partner-box p{color:#bfdbfe;font-size:15px;line-height:1.7;}
-        .back{
+        .back{{
             display:inline-block;
             margin:24px 0 0;
             padding:10px 18px;
@@ -3363,14 +3363,14 @@ def blessing_boxes():
             color:white;
             text-decoration:none;
             font-size:14px;
-        }
-        footer{
+        }}
+        footer{{
             text-align:center;
             padding:30px 20px;
             color:#475569;
             font-size:13px;
             border-top:1px solid rgba(255,255,255,0.07);
-        }
+        }}
         footer a{color:#67e8f9;text-decoration:none;}
     </style>
 </head>
@@ -3569,7 +3569,7 @@ def admin_volunteers():
     <a class="back" href="/blessing-boxes" target="_blank">👁 View Page</a>
     <h1>✋ Blessing Box Volunteers</h1>
     <p class="sub">Everyone who has signed up to help through the website.</p>
-    <div class="count">{len(vols)} volunteer{'s' if len(vols) != 1 else ''} total</div>
+    <div class="count">{len(vols)} volunteer{{'s' if len(vols) != 1 else ''}} total</div>
     <div class="wrap">
         <table>
             <tr><th>Name</th><th>Email</th><th>Phone</th><th>Availability</th><th>Message</th><th>Submitted</th></tr>
