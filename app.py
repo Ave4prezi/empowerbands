@@ -134,6 +134,46 @@ def log_scan(band_id, name, scan_type, ip):
         writer.writerow([band_id, name, now, scan_type, ip])
 
 
+def send_safe_notification(name, phones, emails, band_id):
+    message = (
+        f"EmpowerBands Update\n\n"
+        f"{name} has marked their emergency alert as SAFE / RESOLVED.\n"
+        f"This may have been triggered by accident, or the situation has been handled.\n"
+        f"No further action is needed at this time."
+    )
+
+    success_sms = False
+    success_email = False
+
+    phone_list = [p.strip() for p in str(phones).split(",") if p.strip()]
+    if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        for phone in phone_list:
+            try:
+                client.messages.create(body=message, from_=TWILIO_PHONE_NUMBER, to=phone)
+                success_sms = True
+            except Exception as e:
+                print("Safe SMS failed:", e)
+
+    email_list = [e.strip() for e in str(emails).split(",") if e.strip()]
+    if ALERT_EMAIL_PASSWORD and email_list:
+        try:
+            msg = MIMEText(message)
+            msg["Subject"] = f"Safe / Resolved Update: {name}"
+            msg["From"] = ALERT_EMAILS
+            msg["To"] = ", ".join(email_list)
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            server.login(ALERT_EMAILS, ALERT_EMAIL_PASSWORD)
+            server.sendmail(ALERT_EMAILS, email_list, msg.as_string())
+            server.quit()
+            success_email = True
+        except Exception as e:
+            print("Safe email failed:", e)
+
+    return success_sms or success_email
+
+
 def send_full_alert(name, phones, emails, band_id, maps_link=None):
     profile_url = f"{BASE_URL}/{band_id}"
     location_text = f"\nLocation:\n{maps_link}" if maps_link else ""
@@ -717,7 +757,9 @@ def band_profile_shortcut(band_id):
     "privacy",
     "terms",
     "delete-request",
-    "sms-opt-in"
+    "sms-opt-in",
+    "donate",
+    "im_safe"
 ]
 
     if band_id.lower() in blocked_routes:
@@ -1961,7 +2003,8 @@ def profile(band_id):
                         return f"""
                         <h1>✅ Alert Sent</h1>
                         <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
+                        <p><a href="/im_safe/{band_id}" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">✅ I'm Safe — Notify Contacts It Was a False Alarm</a></p>
+                        <p style="margin-top:14px;"><a href="/{band_id}">Go Back</a></p>
                         """
                     else:
                         return f"""
@@ -2576,6 +2619,32 @@ Unlock Full Info
     <h1>Band Not Found</h1>
     <p>This band ID has not been added yet.</p>
     <p><a href="/admin">Admin Login</a></p>
+    """
+
+@app.route("/donate")
+def donate():
+    return redirect("https://www.paypal.com/ncp/payment/6ZT5B9XMXD3K6")
+
+@app.route("/im_safe/<band_id>")
+def im_safe(band_id):
+    band_id = band_id.strip().upper()
+    with open(file_name, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            if len(row) >= 9 and row[0].strip().upper() == band_id:
+                name = row[1]
+                emergency_phones = row[4] if len(row) > 4 else ""
+                emergency_emails = row[5] if len(row) > 5 else ""
+                send_safe_notification(name, emergency_phones, emergency_emails, band_id)
+                return f"""
+                <h1>✅ Marked as Safe</h1>
+                <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
+                <p><a href="/{band_id}">Go Back</a></p>
+                """
+    return """
+    <h1>Band Not Found</h1>
+    <p><a href="/">Home</a></p>
     """
 
 @app.route("/qr/<band_id>")
@@ -3567,6 +3636,7 @@ def admin_volunteers():
 <div class="page">
     <a class="back" href="/dashboard">⬅ Dashboard</a>
     <a class="back" href="/blessing-boxes" target="_blank">👁 View Page</a>
+    <a class="back" href="/admin/volunteers/export">⬇ Export CSV</a>
     <h1>✋ Blessing Box Volunteers</h1>
     <p class="sub">Everyone who has signed up to help through the website.</p>
     <div class="count">{len(vols)} volunteer{{'s' if len(vols) != 1 else ''}} total</div>
@@ -3580,6 +3650,23 @@ def admin_volunteers():
 </body>
 </html>
 """
+
+# ===============================
+# ADMIN — EXPORT VOLUNTEERS CSV
+# ===============================
+
+@app.route("/admin/volunteers/export")
+def admin_volunteers_export():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    if not os.path.exists("bb_volunteers.csv"):
+        return redirect("/admin/volunteers")
+    return send_file(
+        "bb_volunteers.csv",
+        as_attachment=True,
+        download_name="blessing_box_volunteers.csv",
+        mimetype="text/csv"
+    )
 
 # ===============================
 # ADMIN — UPDATE BLESSING BOX NEEDS
