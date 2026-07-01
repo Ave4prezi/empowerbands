@@ -81,6 +81,13 @@ if not os.path.exists(file_name):
     "https://i.imgur.com/dE4kSOz.png"
 ])
 
+# Create family spotlight file if missing
+_spotlight_file = "family_spotlight.json"
+if not os.path.exists(_spotlight_file):
+    with open(_spotlight_file, "w") as _sf:
+        import json as _spotlight_init_json
+        _spotlight_init_json.dump({"active": False, "month": "", "story": "", "photo_url": ""}, _sf)
+
 # Create volunteer sign-ups file if missing
 _vol_file = "bb_volunteers.csv"
 if not os.path.exists(_vol_file):
@@ -252,6 +259,39 @@ def home():
         visit_count = f"{_vc:,}"
     except:
         visit_count = "—"
+
+    spotlight_html = ""
+    try:
+        import json as _sp_json
+        with open("family_spotlight.json", "r") as _sp_f:
+            _sp = _sp_json.load(_sp_f)
+        if _sp.get("active") and _sp.get("story"):
+            _sp_photo = _sp.get("photo_url") or LOGO_URL
+            _sp_month = _sp.get("month", "")
+            spotlight_html = f"""<div style="
+                background:linear-gradient(135deg,rgba(34,197,94,0.14),rgba(14,165,233,0.12));
+                border:1px solid rgba(134,239,172,0.3);
+                border-radius:20px;
+                padding:26px;
+                margin:24px auto;
+                max-width:680px;
+                text-align:center;
+                font-family:Arial,sans-serif;
+                color:white;
+            ">
+                <div style="font-size:13px;font-weight:700;letter-spacing:.05em;color:#86efac;text-transform:uppercase;margin-bottom:10px;">
+                    💚 {_sp_month} Family We're Blessing
+                </div>
+                <img src="{_sp_photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.2);margin-bottom:14px;">
+                <p style="font-size:15px;line-height:1.7;color:#e5e7eb;max-width:560px;margin:0 auto;">
+                    {_sp.get("story","")}
+                </p>
+                <a href="/donate" style="display:inline-block;margin-top:16px;padding:12px 24px;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;text-decoration:none;font-weight:700;font-size:14px;">
+                    ❤️ Help Bless Next Month's Family
+                </a>
+            </div>"""
+    except:
+        spotlight_html = ""
 
     whats_new_html = ""
     try:
@@ -695,6 +735,8 @@ body{{
         <a class="btn dark" href="/EB001">🚀 View Demo</a>
     </div>
 </section>
+
+{spotlight_html}
 
 <div class="footer">
     <div>
@@ -1327,6 +1369,10 @@ body{{
 
         <a class="add-btn" href="/admin/volunteers">
             👥 Volunteers
+</a>
+
+        <a class="add-btn" href="/admin/spotlight">
+            💚 Family Spotlight
 </a>
 
 </div>
@@ -3645,6 +3691,84 @@ def admin_volunteers():
             <tr><th>Name</th><th>Email</th><th>Phone</th><th>Availability</th><th>Message</th><th>Submitted</th></tr>
             {rows_html if rows_html else '<tr><td colspan="6" class="empty">No sign-ups yet.</td></tr>'}
         </table>
+    </div>
+</div>
+</body>
+</html>
+"""
+
+# ===============================
+# ADMIN — FAMILY SPOTLIGHT
+# ===============================
+
+@app.route("/admin/spotlight", methods=["GET","POST"])
+def admin_spotlight():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    import json as _asp_json
+    _sp_file = "family_spotlight.json"
+    message = ""
+
+    if request.method == "POST":
+        data = {
+            "active": request.form.get("active") == "on",
+            "month": request.form.get("month","").strip(),
+            "story": request.form.get("story","").strip(),
+            "photo_url": request.form.get("photo_url","").strip(),
+        }
+        with open(_sp_file, "w") as _f:
+            _asp_json.dump(data, _f)
+        message = "✅ Spotlight updated!"
+
+    try:
+        with open(_sp_file, "r") as _f:
+            current = _asp_json.load(_f)
+    except:
+        current = {"active": False, "month": "", "story": "", "photo_url": ""}
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Spotlight — EmpowerBands</title>
+    <style>
+        body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);color:white;min-height:100vh;padding:30px 20px;}}
+        .page{{max-width:640px;margin:auto;}}
+        h1{{font-size:28px;margin-bottom:6px;}}
+        .sub{{color:#94a3b8;font-size:14px;margin-bottom:24px;}}
+        .back{{display:inline-block;margin-bottom:22px;padding:10px 18px;border-radius:12px;background:rgba(255,255,255,0.1);color:white;text-decoration:none;font-size:14px;margin-right:10px;}}
+        .card{{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:26px;}}
+        label{{display:block;font-size:13px;color:#94a3b8;margin-bottom:6px;margin-top:16px;}}
+        input[type=text],textarea{{width:100%;box-sizing:border-box;padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;}}
+        textarea{{resize:vertical;}}
+        .toggle-row{{display:flex;align-items:center;gap:10px;margin-top:16px;}}
+        button{{margin-top:22px;width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-size:16px;font-weight:700;cursor:pointer;}}
+        .msg{{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:#86efac;font-size:14px;}}
+    </style>
+</head>
+<body>
+<div class="page">
+    <a class="back" href="/dashboard">⬅ Dashboard</a>
+    <a class="back" href="/" target="_blank">👁 View Page</a>
+    <h1>💚 Family Spotlight</h1>
+    <p class="sub">Feature the family your donations are blessing this month on the homepage.</p>
+    {'<div class="msg">' + message + '</div>' if message else ''}
+    <div class="card">
+        <form method="POST">
+            <div class="toggle-row">
+                <input type="checkbox" name="active" id="active" {'checked' if current.get('active') else ''} style="width:20px;height:20px;">
+                <label for="active" style="margin:0;">Show on homepage</label>
+            </div>
+            <label>Month (e.g. "July 2026")</label>
+            <input type="text" name="month" value="{current.get('month','')}" placeholder="July 2026">
+            <label>Family's Story</label>
+            <textarea name="story" rows="5" placeholder="This month, we're blessing the Johnson family...">{current.get('story','')}</textarea>
+            <label>Photo URL (optional — defaults to logo)</label>
+            <input type="text" name="photo_url" value="{current.get('photo_url','')}" placeholder="https://...">
+            <button type="submit">💾 Save & Publish</button>
+        </form>
     </div>
 </div>
 </body>
