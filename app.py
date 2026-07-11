@@ -27,7 +27,7 @@ TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
 ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
 
-LOGO_URL = "https://i.imgur.com/dE4kSOz.png"
+LOGO_URL = "https://i.imgur.com/bSUxUXa.jpeg"
 
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -78,7 +78,7 @@ if not os.path.exists(file_name):
     "123 Hope Street, Decatur AL 35601",
     "Black / African American",
     "Male",
-    "https://i.imgur.com/dE4kSOz.png"
+    "https://i.imgur.com/bSUxUXa.jpeg"
 ])
 
 # Create family spotlight file if missing
@@ -681,6 +681,30 @@ body{{
 
 </section>
 
+</section>
+
+<section id="about" class="section">
+    <h2>About Us</h2>
+
+    <p>
+        EmpowerBands Worldwide is a safety technology company focused on helping
+        individuals, families, caregivers, and communities access critical
+        emergency information when it matters most.
+    </p>
+
+    <p>
+        Through NFC-enabled wearable technology, EmpowerBands makes it easier
+        for first responders, caregivers, and trusted contacts to quickly view
+        important information during an emergency without requiring a special app.
+    </p>
+
+    <p>
+        Our goal is to create simple, inclusive, and reliable safety solutions
+        that give people greater peace of mind at home, at school, while traveling,
+        and throughout everyday life.
+    </p>
+</section>
+
         <div style="margin-top:25px;">
             <a class="btn" href="/EB001">🚀 View Live Demo</a>
             <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Support Our Mission</a>
@@ -754,7 +778,7 @@ body{{
 </section>
 
 <section class="cta">
-    <img src="https://i.imgur.com/bSUxUXa.jpeg">
+    <img src="https://i.imgur.com/RpBUbHd.png">
 
     <div>
         <h2>Ready To Support The Mission?</h2>
