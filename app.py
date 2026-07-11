@@ -858,12 +858,12 @@ body{{
 
 
 
-# IMPORTANT: Specific routes must be defined BEFORE the catch-all /<band_id> route above
+# IMPORTANT: Keep the catch-all /<band_id> route below all specific routes.
 
 
 
-SECTION A — I'M SAFE ROUTE
-==========================
+
+# SECTION A - I'M SAFE ROUTE
 
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
@@ -1545,9 +1545,10 @@ function filterBands(){{
 </body>
 
 </html
-    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>.
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
+</body>
+</html>
 """
-
 def profile(band_id):
     band_id = band_id.strip().upper()
     confirm_alert = request.args.get("confirm_alert") == "yes"
@@ -1584,8 +1585,8 @@ def profile(band_id):
 
     
                 
-SECTION C — ALERT RESULT WITH I'M SAFE BUTTON
-=============================================
+# SECTION C — ALERT RESULT WITH I'M SAFE BUTTON
+
 
                 entered_pin = request.args.get("pin")
 
