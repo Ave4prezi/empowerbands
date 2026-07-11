@@ -638,14 +638,19 @@ body{{
 
 
     <div>
-        <img class="hero-logo" src="images/logo.png" alt="EmpowerBands Logo">
+    <img class="hero-logo"
+         src="https://i.imgur.com/xBaiuGi.png"
+         alt="EmpowerBands Logo">
 
-        <h1>EmpowerBands <span>Worldwide</span></h1>
+    <h1>EmpowerBands <span>Worldwide</span></h1>
 
-        <h3>Smart Wearable Safety Technology</h3>
+    <h3>Smart Wearable Safety Technology</h3>
 
-        <p>EmpowerBands Worldwide is committed to safety inclusion, and rapid emergency response through smart wearable technology....</p>
-    </div>
+    <p>
+        EmpowerBands Worldwide is committed to safety inclusion,
+        and rapid emergency response through smart wearable technology....
+    </p>
+</div>
 
 </section>
 
