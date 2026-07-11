@@ -857,32 +857,6 @@ body{{
 """
 
 
-# ===============================
-# SHORT LINK REDIRECT
-# ===============================
-@app.route("/<band_id>")
-def band_profile_shortcut(band_id):
-
-    blocked_routes = [
-    "admin",
-    "add",
-    "scans",   
-    "alert_with_location",
-    "manifest.json",
-    "pro",
-    "privacy",
-    "terms",
-    "delete-request",
-    "sms-opt-in",
-    "donate",
-    "im_safe",
-    "qr"
-]
-
-    if band_id.lower() in blocked_routes:
-        return redirect("/")
-
-    return profile(band_id.upper())
 
 # IMPORTANT: Specific routes must be defined BEFORE the catch-all /<band_id> route above
 
@@ -1813,6 +1787,24 @@ def qr_code(band_id):
     buffer.seek(0)
 
     return send_file(buffer, mimetype="image/png")
+
+# ===============================
+# PUBLIC BAND SHORT LINK
+# Keep this below every other route.
+# ===============================
+
+@app.route("/<band_id>")
+def band_profile_shortcut(band_id):
+    band_id = band_id.strip().upper()
+
+    # Only allow valid EmpowerBand-style IDs
+    if not band_id.startswith("EB"):
+        return redirect("/")
+
+    if not band_id[2:].isdigit():
+        return redirect("/")
+
+    return profile(band_id)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
