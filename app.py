@@ -196,6 +196,7 @@ def send_safe_notification(name, phones, emails, band_id):
         except Exception as e:
             print("Safe email failed:", e)
 
+    log_scan(band_id, name, "SAFE_ALERT", request.remote_addr if request else "unknown")
     return success_sms or success_email
 
 
@@ -258,3 +259,56 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
 
     print("Alert result -> SMS:", success_sms, "EMAIL:", success_email)
     return success_sms or success_email
+
+
+@app.route("/im_safe/<band_id>")
+def im_safe(band_id):
+    band_id = band_id.strip().upper()
+    
+    # Check rate limit - prevent spam
+    if not can_send_safe_notification(band_id):
+        return f"""
+        <html>
+        <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
+            <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
+                <h2>⏱️ Too Many Safe Alerts</h2>
+                <p style="color:#666;">You can only send one Safe alert every 5 minutes to prevent spam.</p>
+                <p style="margin-top:20px;"><a href="/{band_id}" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Go Back</a></p>
+            </div>
+        </body>
+        </html>
+        """
+    
+    with open(file_name, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+        for row in reader:
+            if len(row) >= 9 and row[0].strip().upper() == band_id:
+                name = row[1]
+                emergency_phones = row[4] if len(row) > 4 else ""
+                emergency_emails = row[5] if len(row) > 5 else ""
+                send_safe_notification(name, emergency_phones, emergency_emails, band_id)
+                return f"""
+                <html>
+                <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+                <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
+                    <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
+                        <h2>✅ Marked as Safe</h2>
+                        <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
+                        <p style="margin-top:20px;"><a href="/{band_id}" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Go Back</a></p>
+                    </div>
+                </body>
+                </html>
+                """
+    return """
+    <html>
+    <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
+        <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
+            <h2>Band Not Found</h2>
+            <p><a href="/" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Home</a></p>
+        </div>
+    </body>
+    </html>
+    """
