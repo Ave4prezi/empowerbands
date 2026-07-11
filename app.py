@@ -638,7 +638,7 @@ body{{
 
 
     <div>
-        <img class="hero-logo" src="https://i.imgur.com/RpBUbHd.png" alt="EmpowerBands Logo">
+        <img class="hero-logo" src="images/logo.png" alt="EmpowerBands Logo">
 
         <h1>EmpowerBands <span>Worldwide</span></h1>
 
