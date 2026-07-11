@@ -637,12 +637,6 @@ body{{
 <section class="hero">
 
 
-    <div class="hero-banner">
-    <img
-        src="https://i.imgur.com/r2zY0p6.png"
-        alt="EmpowerBands Worldwide"
-    >
-</div>
 
 <div class="hero-banner">
     <img
@@ -652,26 +646,27 @@ body{{
 </div>
 
 <style>
-.hero-banner {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    overflow: hidden;
-    padding: 0;
-}
+.hero-banner {{
+    grid-column:1 / -1;
+    width:calc(100% + 12vw);
+    margin-left:-6vw;
+    overflow:hidden;
+    padding:0;
+}}
 
-.hero-banner img {
-    display: block;
-    width: 100%;
-    height: 320px;
-    object-fit: cover;
-    object-position: center;
-}
+.hero-banner img {{
+    display:block;
+    width:100%;
+    height:320px;
+    object-fit:cover;
+    object-position:center;
+}}
 
-@media (max-width: 768px) {
-    .hero-banner img {
-        height: 190px;
-    }
-}
+@media(max-width:768px) {{
+    .hero-banner img {{
+        height:190px;
+    }}
+}}
 </style>
 
     <h1>EmpowerBands <span>Worldwide</span></h1>
