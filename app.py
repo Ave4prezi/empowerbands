@@ -640,7 +640,7 @@ body{{
 
 <div class="hero-banner">
     <img
-        src="https://i.imgur.com/r2zY0p6.png"
+        src="https://i.imgur.com/bSUxUXa.jpeg"
         alt="EmpowerBands Worldwide"
     >
 </div>
@@ -754,7 +754,7 @@ body{{
 </section>
 
 <section class="cta">
-    <img src="https://i.imgur.com/dE4kSOz.png">
+    <img src="https://i.imgur.com/bSUxUXa.jpeg">
 
     <div>
         <h2>Ready To Support The Mission?</h2>
