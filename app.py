@@ -261,23 +261,20 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
     return success_sms or success_email
 
 
+# ===============================
+# SPECIFIC ROUTES FIRST (MUST COME BEFORE CATCH-ALL /<band_id>)
+# ===============================
+
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
     band_id = band_id.strip().upper()
     
     # Check rate limit - prevent spam
     if not can_send_safe_notification(band_id):
-        return f"""
-        <html>
-        <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-        <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
-            <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
-                <h2>⏱️ Too Many Safe Alerts</h2>
-                <p style="color:#666;">You can only send one Safe alert every 5 minutes to prevent spam.</p>
-                <p style="margin-top:20px;"><a href="/{band_id}" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Go Back</a></p>
-            </div>
-        </body>
-        </html>
+        return """
+        <h2>⏱️ Too Many Safe Alerts</h2>
+        <p>You can only send one Safe alert every 5 minutes to prevent spam.</p>
+        <p><a href="/">Go Back</a></p>
         """
     
     with open(file_name, "r", encoding="utf-8") as f:
@@ -290,25 +287,55 @@ def im_safe(band_id):
                 emergency_emails = row[5] if len(row) > 5 else ""
                 send_safe_notification(name, emergency_phones, emergency_emails, band_id)
                 return f"""
-                <html>
-                <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-                <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
-                    <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
-                        <h2>✅ Marked as Safe</h2>
-                        <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
-                        <p style="margin-top:20px;"><a href="/{band_id}" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Go Back</a></p>
-                    </div>
-                </body>
-                </html>
+                <h1>✅ Marked as Safe</h1>
+                <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
+                <p><a href="/{band_id}">Go Back</a></p>
                 """
     return """
-    <html>
-    <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
-        <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
-            <h2>Band Not Found</h2>
-            <p><a href="/" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Home</a></p>
-        </div>
-    </body>
-    </html>
+    <h1>Band Not Found</h1>
+    <p><a href="/">Home</a></p>
     """
+
+@app.route("/qr/<band_id>")
+def qr_code(band_id):
+    band_id = band_id.strip().upper()
+    url = f"{BASE_URL}/{band_id}"
+
+    img = qrcode.make(url)
+
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return send_file(buffer, mimetype="image/png")
+
+@app.route("/donate")
+def donate():
+    return redirect("https://www.paypal.com/ncp/payment/6ZT5B9XMXD3K6")
+
+# ===============================
+# CATCH-ALL BAND PROFILE ROUTE (COMES LAST)
+# ===============================
+@app.route("/<band_id>")
+def band_profile_shortcut(band_id):
+
+    blocked_routes = [
+        "admin",
+        "add",
+        "scans",   
+        "alert_with_location",
+        "manifest.json",
+        "pro",
+        "privacy",
+        "terms",
+        "delete-request",
+        "sms-opt-in",
+        "donate",
+        "im_safe",
+        "qr"
+    ]
+
+    if band_id.lower() in blocked_routes:
+        return redirect("/")
+
+    return profile(band_id.upper())
