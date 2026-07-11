@@ -78,7 +78,7 @@ if not os.path.exists(file_name):
     "123 Hope Street, Decatur AL 35601",
     "Black / African American",
     "Male",
-    "https://i.imgur.com/bSUxUXa.jpeg"
+    "https://i.imgur.com/7A4KvOJ.jpeg"
 ])
 
 # Create family spotlight file if missing
