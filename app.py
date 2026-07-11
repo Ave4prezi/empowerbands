@@ -639,7 +639,7 @@ body{{
 
     <div>
     <img class="hero-logo"
-         src="https://i.imgur.com/xBaiuGi.png"
+         src="https://i.imgur.com/r2zY0p6.png"
          alt="EmpowerBands Logo">
 
     <h1>EmpowerBands <span>Worldwide</span></h1>
