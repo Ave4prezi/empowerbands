@@ -860,6 +860,11 @@ body{{
 
 # IMPORTANT: Specific routes must be defined BEFORE the catch-all /<band_id> route above
 
+
+
+SECTION A — I'M SAFE ROUTE
+==========================
+
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
     band_id = band_id.strip().upper()
@@ -1110,6 +1115,439 @@ EmpowerBands Emergency System
 </html>
 """
 
+# ===============================
+# DASHBOARD
+# ===============================
+def count_rows(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return max(0, sum(1 for row in f) - 1)
+    except:
+        return 0
+
+@app.route("/dashboard")
+def dashboard():
+
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    customers = []
+    total_bands = count_rows(file_name)
+    total_scans = count_rows(scan_log_file)
+
+    # Read visitor counter
+    _vc_file = "visit_count.txt"
+    try:
+        _dash_vc = int(open(_vc_file).read().strip()) if os.path.exists(_vc_file) else 0
+        dash_visit_count = f"{_dash_vc:,}"
+    except:
+        dash_visit_count = "—"
+
+    # Fetch last GitHub commit + detect new changes since login
+    import urllib.request as _ur, json as _json
+    last_updated_str = "Unavailable"
+    new_changes_badge = ""
+    new_changes_count = 0
+    try:
+        _req = _ur.Request(
+            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=10",
+            headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
+                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+        )
+        with _ur.urlopen(_req, timeout=5) as _r:
+            _commits = _json.loads(_r.read().decode())
+        if _commits:
+            _c = _commits[0]
+            _msg = _c.get("commit",{}).get("message","").split("\n")[0]
+            _date = _c.get("commit",{}).get("author",{}).get("date","")[:10]
+            last_updated_str = f"{_date} — {_msg}"
+            # Count commits since last login
+            last_seen = session.get("last_seen_sha","")
+            if last_seen:
+                for _i, _commit in enumerate(_commits):
+                    if _commit.get("sha","") == last_seen:
+                        new_changes_count = _i
+                        break
+                else:
+                    new_changes_count = len(_commits)
+            if new_changes_count > 0:
+                new_changes_badge = f"""
+                <div style="
+                    background:linear-gradient(135deg,#f59e0b,#d97706);
+                    color:white;
+                    border-radius:14px;
+                    padding:14px 20px;
+                    margin:0 auto 20px;
+                    max-width:700px;
+                    display:flex;
+                    align-items:center;
+                    gap:12px;
+                    font-size:14px;
+                    font-weight:600;
+                    box-shadow:0 4px 20px rgba(245,158,11,0.3);
+                ">
+                    <span style="font-size:20px;">🔔</span>
+                    <span>{new_changes_count} new change{{'s' if new_changes_count != 1 else ''}} since your last login</span>
+                    <a href="/history" style="margin-left:auto;background:rgba(0,0,0,0.2);color:white;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:13px;">View →</a>
+                    <a href="/dashboard/mark-seen" style="background:rgba(0,0,0,0.15);color:white;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:13px;">Dismiss</a>
+                </div>"""
+    except:
+        pass
+
+    try:
+        with open(file_name, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                customers.append(row)
+
+    except:
+        customers = []
+
+    customer_cards = ""
+    
+    for customer in customers:
+
+        band_id = customer.get("band_id", "")
+        name = customer.get("name", "")
+        email = customer.get("email", "")
+        phone = customer.get("phone", "")
+
+        customer_cards += f"""
+
+        <div class="customer-card searchable">
+
+            <div class="top-row">
+                <div>
+                    <div class="band-id">{band_id}</div>
+                    <div class="customer-name">{name}</div>
+                </div>
+
+                <div class="status">
+                    ACTIVE
+                </div>
+            </div>
+
+            <div class="info">
+                📧 {email}
+            </div>
+
+            <div class="info">
+                📱 {phone}
+            </div>
+
+            <div class="actions">
+
+    <a class="btn view"
+       href="/customer/{band_id}">
+       View Profile
+    </a>
+
+    <a class="btn edit"
+       href="/edit/{band_id}">
+       Edit Profile
+    </a>
+
+    <a class="btn delete"
+       href="/delete/{band_id}"
+       onclick="return confirm('Delete this band permanently?')">
+       Delete
+    </a>
+
+</div>
+            </div>
+
+        </div>
+
+        """
+
+    return f"""
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EmpowerBands Dashboard</title>
+
+<style>
+
+body{{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+    min-height:100vh;
+    color:white;
+}}
+
+.page{{
+    padding:25px;
+}}
+
+.topbar{{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+    gap:10px;
+    flex-wrap:wrap;
+}}
+
+.logo{{
+    font-size:32px;
+    font-weight:800;
+}}
+
+.logo span{{
+    color:#38bdf8;
+}}
+
+.add-btn{{
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    padding:14px 20px;
+    border-radius:16px;
+    color:white;
+    text-decoration:none;
+    font-weight:700;
+}}
+
+.stats{{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px;
+    margin-bottom:25px;
+}}
+
+.stat-card{{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(20px);
+    border-radius:24px;
+    padding:22px;
+}}
+
+.stat-number{{
+    font-size:34px;
+    font-weight:800;
+}}
+
+.stat-label{{
+    color:#cbd5e1;
+    margin-top:5px;
+}}
+
+.customer-card{{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(20px);
+    border-radius:24px;
+    padding:22px;
+    margin-bottom:18px;
+}}
+
+.top-row{{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}}
+
+.band-id{{
+    color:#38bdf8;
+    font-size:14px;
+    font-weight:700;
+}}
+
+.customer-name{{
+    font-size:24px;
+    font-weight:700;
+    margin-top:4px;
+}}
+
+.status{{
+    background:#16a34a;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+}}
+
+.info{{
+    margin-top:14px;
+    color:#dbeafe;
+}}
+
+.actions{{
+    margin-top:20px;
+}}
+
+.btn{{
+    display:inline-block;
+    padding:12px 18px;
+    border-radius:14px;
+    text-decoration:none;
+    color:white;
+    font-weight:700;
+}}
+
+.view{{
+    background:#2563eb;
+}}
+
+.edit{{
+    background:#0f766e;
+    margin-left:8px;
+}}
+
+.delete{{
+    background:#dc2626;
+    margin-left:8px;
+}} 
+.empty{{ 
+    text-align:center;
+    padding:80px 20px;
+    color:#94a3b8;
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="topbar">
+    
+
+        <div class="logo">
+            Empower<span>Bands</span>
+        </div>
+
+        <a class="add-btn" href="/add">
+            + Add Band
+        </a>
+
+        <a class="add-btn" href="/scans">
+            📡 View Scans
+        </a>
+
+        <a class="add-btn" href="/">
+            🏠 Home
+</a>
+
+        <a class="add-btn" href="/history">
+            📋 Edit History
+</a>
+
+        <a class="add-btn" href="/admin/blessing-box-needs">
+            📦 Update Box Needs
+</a>
+
+        <a class="add-btn" href="/admin/volunteers">
+            👥 Volunteers
+</a>
+
+        <a class="add-btn" href="/admin/spotlight">
+            💚 Family Spotlight
+</a>
+
+</div>
+
+<div style="margin-bottom:25px; max-width:700px; margin-left:auto; margin-right:auto;">
+
+<input
+type="text"
+id="searchInput"
+placeholder="🔍 Search by name, band ID, or phone..."
+style="
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+background:rgba(255,255,255,0.1);
+color:white;
+font-size:16px;
+box-sizing:border-box;
+outline:none;
+"
+onkeyup="filterBands()"
+>
+
+</div>
+
+{new_changes_badge}
+
+<div class="stats">
+
+        <div class="stat-card">
+            <div class="stat-number">{total_bands}</div>
+            <div class="stat-label">Total Bands</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">{total_scans}</div>
+            <div class="stat-label">Total Scans</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">{len(customers)}</div>
+            <div class="stat-label">Active Bands</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">{dash_visit_count}</div>
+            <div class="stat-label">Site Visitors</div>
+        </div>
+
+    </div>
+
+    <div style="
+        background:rgba(255,255,255,0.06);
+        border:1px solid rgba(255,255,255,0.1);
+        border-radius:14px;
+        padding:14px 20px;
+        margin:0 auto 24px;
+        max-width:700px;
+        font-size:13px;
+        color:#94a3b8;
+        display:flex;
+        align-items:center;
+        gap:10px;
+    ">
+        <span style="color:#67e8f9;font-size:16px;">🕒</span>
+        <span><strong style="color:white;">Last updated:</strong> {last_updated_str}</span>
+        <a href="/history" style="margin-left:auto;color:#67e8f9;text-decoration:none;font-size:12px;">View all →</a>
+    </div>
+
+    {customer_cards if customer_cards else '<div class="empty">No bands added yet.</div>'}
+
+</div>
+
+<script>
+function filterBands(){{
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let cards = document.getElementsByClassName("searchable");
+
+    for(let i = 0; i < cards.length; i++){{
+        let text = cards[i].innerText.toLowerCase();
+
+        if(text.includes(input)){{
+            cards[i].style.display = "block";
+        }}else{{
+            cards[i].style.display = "none";
+        }}
+    }}
+}}
+</script>
+
+</body>
+
+</html
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>.
+"""
+
 def profile(band_id):
     band_id = band_id.strip().upper()
     confirm_alert = request.args.get("confirm_alert") == "yes"
@@ -1145,22 +1583,67 @@ def profile(band_id):
                 )
 
     
+                
+SECTION C — ALERT RESULT WITH I'M SAFE BUTTON
+=============================================
+
                 entered_pin = request.args.get("pin")
+
                 if alert_mode:
-                    success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
+                    success = send_full_alert(
+                        name,
+                        emergency_phones,
+                        emergency_emails,
+                        band_id
+                    )
 
                     if success:
                         return f"""
-                        <h1>✅ Alert Sent</h1>
-                        <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/im_safe/{band_id}" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">I'm Safe</a></p>
-                        <p style="margin-top:14px;"><a href="/{band_id}">Go Back</a></p>
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta name="viewport" content="width=device-width, initial-scale=1">
+                            <title>Alert Sent</title>
+                        </head>
+                        <body style="font-family:Arial;background:#07111f;color:white;text-align:center;padding:40px;">
+                            <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:30px;border-radius:18px;max-width:460px;margin:auto;">
+                                <h1>✅ Alert Sent</h1>
+                                <p>Emergency contact(s) have been notified.</p>
+
+                                <a href="/im_safe/{band_id}"
+                                   style="display:block;margin-top:18px;padding:16px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">
+                                    ✅ I'm Safe — Mark Alert Resolved
+                                </a>
+
+                                <a href="/{band_id}"
+                                   style="display:block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+                                    Go Back
+                                </a>
+                            </div>
+                        </body>
+                        </html>
                         """
                     else:
                         return f"""
-                        <h1>❌ Alert Failed</h1>
-                        <p>There was a problem sending the alert.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta name="viewport" content="width=device-width, initial-scale=1">
+                            <title>Alert Failed</title>
+                        </head>
+                        <body style="font-family:Arial;background:#07111f;color:white;text-align:center;padding:40px;">
+                            <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:30px;border-radius:18px;max-width:460px;margin:auto;">
+                                <h1>❌ Alert Failed</h1>
+                                <p>There was a problem sending the alert.</p>
+                                <p>Call the emergency contact or 911 if this is life-threatening.</p>
+
+                                <a href="/{band_id}"
+                                   style="display:block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+                                    Go Back
+                                </a>
+                            </div>
+                        </body>
+                        </html>
                         """
 
                 if confirm_alert:
