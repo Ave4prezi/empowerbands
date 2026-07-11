@@ -3507,22 +3507,40 @@ def blessing_boxes():
     <!-- WHERE ARE THE BOXES -->
     <div class="card" style="margin-top:20px;">
         <h2>📍 Where to Find a Box</h2>
-        <p>We currently have Blessing Boxes set up at:</p>
-        <br>
-        <a href="https://www.google.com/maps/search/The+Spotted+Ladybug+Hartselle+AL" target="_blank" class="location-badge" style="text-decoration:none;">
-            📦 The Spotted Ladybug — Downtown Hartselle, AL
-        </a>
-        <br><br>
-        <p style="font-size:14px;color:#94a3b8;">
-            📌 <em>Tap the badge above to get directions.</em>
-        </p>
-        <br>
-        <p>
-            We are actively looking to partner with additional local businesses to host
-            boxes throughout the community. If you own or manage a business and would
-            like to host a box, see the partnership section below.
-        </p>
-    </div>
+<p>We currently have Blessing Boxes set up at:</p>
+
+<br>
+
+<a href="https://www.google.com/maps/search/The+Spotted+Ladybug+Hartselle+AL"
+   target="_blank"
+   class="location-badge"
+   style="text-decoration:none;">
+    📦 The Spotted Ladybug — Downtown Hartselle, AL
+</a>
+
+<br><br>
+
+<a href="https://www.google.com/maps/search/Cowboys+1605+Main+St+E+Hartselle+AL+35640"
+   target="_blank"
+   class="location-badge"
+   style="text-decoration:none;">
+    📦 Cowboys — 1605 Main St E, Hartselle, AL
+</a>
+
+<br><br>
+
+<p style="font-size:14px;color:#94a3b8;">
+    📌 <em>Tap either badge above to get directions.</em>
+</p>
+
+<br>
+
+<p>
+    We are actively looking to partner with additional local businesses to host
+    Blessing Boxes throughout the community. If you own or manage a business and
+    would like to host a box, see the partnership section below.
+</p>
+</div>
 
     <!-- WHAT'S NEEDED -->
     <div class="card">
