@@ -262,8 +262,629 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
 
 
 # ===============================
-# SPECIFIC ROUTES FIRST (MUST COME BEFORE CATCH-ALL /<band_id>)
+# HOME PAGE
 # ===============================
+
+@app.route("/")
+def home():
+    import urllib.request as _hw_ur, json as _hw_json
+
+    # Visitor counter
+    _vc_file = "visit_count.txt"
+    try:
+        _vc = int(open(_vc_file).read().strip()) if os.path.exists(_vc_file) else 0
+        _vc += 1
+        open(_vc_file, "w").write(str(_vc))
+        visit_count = f"{_vc:,}"
+    except:
+        visit_count = "—"
+
+    spotlight_html = ""
+    try:
+        import json as _sp_json
+        with open("family_spotlight.json", "r") as _sp_f:
+            _sp = _sp_json.load(_sp_f)
+        if _sp.get("active") and _sp.get("story"):
+            _sp_photo = _sp.get("photo_url") or LOGO_URL
+            _sp_month = _sp.get("month", "")
+            spotlight_html = f"""<div style="
+                background:linear-gradient(135deg,rgba(34,197,94,0.14),rgba(14,165,233,0.12));
+                border:1px solid rgba(134,239,172,0.3);
+                border-radius:20px;
+                padding:26px;
+                margin:24px auto;
+                max-width:680px;
+                text-align:center;
+                font-family:Arial,sans-serif;
+                color:white;
+            ">
+                <div style="font-size:13px;font-weight:700;letter-spacing:.05em;color:#86efac;text-transform:uppercase;margin-bottom:10px;">
+                    💚 {_sp_month} Family We're Blessing
+                </div>
+                <img src="{_sp_photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.2);margin-bottom:14px;">
+                <p style="font-size:15px;line-height:1.7;color:#e5e7eb;max-width:560px;margin:0 auto;">
+                    {_sp.get("story","")}
+                </p>
+                <a href="/donate" style="display:inline-block;margin-top:16px;padding:12px 24px;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;text-decoration:none;font-weight:700;">
+                    ❤️ Help Bless Next Month's Family
+                </a>
+            </div>"""
+    except:
+        spotlight_html = ""
+
+    whats_new_html = ""
+    try:
+        _hw_req = _hw_ur.Request(
+            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
+            headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
+                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+        )
+        with _hw_ur.urlopen(_hw_req, timeout=5) as _hw_r:
+            _hw_commits = _hw_json.loads(_hw_r.read().decode())
+        if _hw_commits:
+            _hw_c = _hw_commits[0]
+            _hw_msg = _hw_c.get("commit",{}).get("message","").split("\n")[0]
+            _hw_date = _hw_c.get("commit",{}).get("author",{}).get("date","")[:10]
+            _hw_url = _hw_c.get("html_url","#")
+            whats_new_html = f"""<div style="
+                background:linear-gradient(135deg,rgba(14,165,233,0.18),rgba(37,99,235,0.14));
+                border:1px solid rgba(103,232,249,0.25);
+                border-radius:14px;
+                padding:14px 20px;
+                margin:20px auto;
+                max-width:680px;
+                display:flex;
+                align-items:center;
+                gap:12px;
+                font-family:Arial,sans-serif;
+                font-size:13px;
+                color:#e5e7eb;
+                flex-wrap:wrap;
+            ">
+                <span style="font-size:18px;">✨</span>
+                <span><strong style="color:#67e8f9;">What\'s new</strong> &nbsp;{_hw_date} — {_hw_msg}</span>
+                <a href="/history" style="margin-left:auto;color:#67e8f9;text-decoration:none;font-size:12px;white-space:nowrap;">See all changes →</a>
+            </div>"""
+    except:
+        pass
+    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EmpowerBands Worldwide</title>
+
+<style>
+body{{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#020817;
+    color:white;
+}}
+
+.header{{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 6%;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    background:#020817;
+}}
+
+.logo-wrap{{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}}
+
+.logo-wrap img{{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+    box-shadow:0 0 25px rgba(14,165,233,0.8);
+}}
+
+.logo-text{{
+    font-size:24px;
+    font-weight:900;
+}}
+
+.logo-text span{{
+    display:block;
+    color:#38bdf8;
+    font-size:16px;
+}}
+
+.nav{{
+    display:flex;
+    gap:28px;
+    align-items:center;
+}}
+
+.nav a{{
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}}
+
+.nav .active{{
+    color:#38bdf8;
+    border-bottom:2px solid #38bdf8;
+    padding-bottom:8px;
+}}
+
+.top-buttons{{
+    display:flex;
+    gap:12px;
+}}
+
+.btn{{
+    display:inline-block;
+    padding:14px 22px;
+    border-radius:10px;
+    text-decoration:none;
+    color:white;
+    font-weight:800;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    box-shadow:0 0 25px rgba(37,99,235,0.4);
+}}
+
+.btn.dark{{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.25);
+    box-shadow:none;
+}}
+
+.hero{{
+    padding:60px 6% 35px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:35px;
+    align-items:center;
+    background:
+        radial-gradient(circle at right,#0b4cff 0%,rgba(2,8,23,0.8) 35%,#020817 75%);
+}}
+
+.hero h1{{
+    font-size:66px;
+    line-height:1.05;
+    margin:0;
+}}
+
+.hero h1 span{{
+    display:block;
+    background:linear-gradient(135deg,#06b6d4,#4f46e5);
+    -webkit-background-clip:text;
+    color:transparent;
+}}
+
+.hero h3{{
+    color:#0ea5e9;
+    font-size:24px;
+    margin-bottom:12px;
+}}
+
+.hero p{{
+    color:#dbeafe;
+    line-height:1.6;
+    max-width:620px;
+}}
+
+.hero-logo{{
+    width:100%;
+    max-width:520px;
+    display:block;
+    margin-bottom:25px;
+    filter:drop-shadow(0 0 18px rgba(14,165,233,0.6));
+}}
+
+.hero-visual{{
+    text-align:center;
+}}
+
+.hero-visual img{{
+    width:100%;
+    max-width:460px;
+    border-radius:30px;
+    filter:drop-shadow(0 0 45px rgba(37,99,235,0.8));
+}}
+
+.trust{{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px;
+    margin-top:28px;
+}}
+
+.trust-card{{
+    border:1px solid rgba(56,189,248,0.25);
+    border-radius:10px;
+    padding:14px;
+    background:rgba(255,255,255,0.04);
+}}
+
+.section{{
+    padding:30px 6%;
+}}
+
+.section h2{{
+    text-align:center;
+    font-size:34px;
+    margin-bottom:22px;
+}}
+
+.grid{{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:18px;
+}}
+
+.card{{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(56,189,248,0.25);
+    border-radius:16px;
+    padding:24px;
+    text-align:center;
+    box-shadow:0 0 25px rgba(37,99,235,0.15);
+}}
+
+.card .num{{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:#2563eb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 14px;
+    font-weight:900;
+    box-shadow:0 0 20px rgba(37,99,235,0.8);
+}}
+
+.card h3{{
+    margin:8px 0;
+}}
+
+.card p{{
+    color:#cbd5e1;
+    line-height:1.5;
+}}
+
+.cta{{
+    margin:30px 6%;
+    padding:28px;
+    border-radius:18px;
+    border:1px solid #2563eb;
+    box-shadow:0 0 35px rgba(37,99,235,0.4);
+    display:grid;
+    grid-template-columns:100px 1fr 1.3fr;
+    gap:25px;
+    align-items:center;
+}}
+
+.cta img{{
+    width:85px;
+    height:85px;
+    border-radius:50%;
+    box-shadow:0 0 30px rgba(14,165,233,0.8);
+}}
+
+.cta-buttons{{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}}
+
+.footer{{
+    padding:30px 6%;
+    border-top:1px solid rgba(255,255,255,0.1);
+    color:#94a3b8;
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+}}
+
+.footer a{{
+    color:#cbd5e1;
+    text-decoration:none;
+    margin:0 8px;
+}}
+
+@media(max-width:850px){{
+    .header,.nav,.top-buttons{{
+        flex-direction:column;
+        gap:16px;
+    }}
+
+    .hero{{
+        grid-template-columns:1fr;
+        text-align:center;
+    }}
+
+    .hero h1{{
+        font-size:44px;
+    }}
+
+    .hero-logo{{
+        margin:0 auto 25px;
+    }}
+
+    .cta{{
+        grid-template-columns:1fr;
+        text-align:center;
+    }}
+
+    .cta img{{
+        margin:auto;
+    }}
+
+    .cta-buttons{{
+        justify-content:center;
+    }}
+
+    .btn{{
+        width:100%;
+        box-sizing:border-box;
+        text-align:center;
+    }}
+}}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    
+
+    <div class="nav">
+        <a class="active" href="/">Home</a>
+        <a href="#how">How It Works</a>
+        <a href="#about">About Us</a>
+        <a href="#mission">Mission</a>
+        <a href="mailto:support@empowerbands.org">Contact</a>
+    </div>
+
+    <div class="top-buttons">
+        <a class="btn" href="/EB001">🚀 View Demo</a>
+        <a class="btn dark" href="/admin">🔒 Admin Login</a>
+    </div>
+</div>
+
+<section class="hero">
+
+
+
+<div class="hero-banner">
+    <img
+        src="https://i.imgur.com/bSUxUXa.jpeg"
+        alt="EmpowerBands Worldwide"
+    >
+</div>
+
+<style>
+.hero-banner {{
+    grid-column:1 / -1;
+    width:calc(100% + 12vw);
+    margin-left:-6vw;
+    overflow:hidden;
+    padding:0;
+}}
+
+.hero-banner img {{
+    display:block;
+    width:100%;
+    height:320px;
+    object-fit:cover;
+    object-position:center;
+}}
+
+@media(max-width:768px) {{
+    .hero-banner img {{
+        height:190px;
+    }}
+}}
+</style>
+
+    <h1>EmpowerBands <span>Worldwide</span></h1>
+
+    <h3>Smart Wearable Safety Technology</h3>
+
+    <p>
+        EmpowerBands Worldwide is committed to safety inclusion,
+        and rapid emergency response through smart wearable technology....
+    </p>
+</div>
+
+</section>
+
+</section>
+
+<section id="about" class="section">
+    <h2>About Us</h2>
+
+    <p>
+        EmpowerBands Worldwide is a safety technology company focused on helping
+        individuals, families, caregivers, and communities access critical
+        emergency information when it matters most.
+    </p>
+
+    <p>
+        Through NFC-enabled wearable technology, EmpowerBands makes it easier
+        for first responders, caregivers, and trusted contacts to quickly view
+        important information during an emergency without requiring a special app.
+    </p>
+
+    <p>
+        Our goal is to create simple, inclusive, and reliable safety solutions
+        that give people greater peace of mind at home, at school, while traveling,
+        and throughout everyday life.
+    </p>
+</section>
+
+        <div style="margin-top:25px;">
+            <a class="btn" href="/EB001">🚀 View Live Demo</a>
+            <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Support Our Mission</a>
+            <a class="btn dark" href="mailto:support@empowerbands.org">🛡️ Partner With Us</a>
+        </div>
+
+        <div class="trust">
+            <div class="trust-card">📡 NFC + QR Technology</div>
+            <div class="trust-card">♿ Accessibility Focused</div>
+            <div class="trust-card">❤️ Nonprofit Organization</div>
+            <div class="trust-card">🏫 School & Caregiver Ready</div>
+        </div>
+    </div>
+
+</section>
+
+<section class="section" id="how">
+    <h2>How EmpowerBands Works</h2>
+
+    <div class="grid">
+        <div class="card">
+            <div class="num">1</div>
+            <h3>Tap The Band</h3>
+            <p>A smartphone taps the NFC wearable or scans the QR code.</p>
+        </div>
+
+        <div class="card">
+            <div class="num">2</div>
+            <h3>View Emergency Profile</h3>
+            <p>Important instructions, caregiver contacts, and support details appear instantly.</p>
+        </div>
+
+        <div class="card">
+            <div class="num">3</div>
+            <h3>Send Alerts Fast</h3>
+            <p>Emergency contacts can receive alerts and GPS location sharing within seconds.</p>
+        </div>
+
+        <div class="card">
+            <div class="num">4</div>
+            <h3>Improve Safety</h3>
+            <p>Supports schools, caregivers, seniors, disabilities, and emergency response situations.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="mission">
+    <h2>Real-World Scenarios</h2>
+
+    <div class="grid">
+        <div class="card">
+            <h3>👦 Child With Autism</h3>
+            <p>A nonverbal child becomes separated. Staff scan the band and access caregiver instructions.</p>
+        </div>
+
+        <div class="card">
+            <h3>👵 Senior With Dementia</h3>
+            <p>A senior experiencing confusion can be identified and connected with family quickly.</p>
+        </div>
+
+        <div class="card">
+            <h3>🏫 School Safety Support</h3>
+            <p>Teachers and staff can access emergency instructions during medical or communication situations.</p>
+        </div>
+
+        <div class="card">
+            <h3>♿ Accessibility Support</h3>
+            <p>Individuals with visible or invisible disabilities can communicate support needs quickly.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <img src="https://i.imgur.com/RpBUbHd.png">
+
+    <div>
+        <h2>Ready To Support The Mission?</h2>
+        <p>Partner with EmpowerBands Worldwide to help build safer, more accessible communities.</p>
+    </div>
+
+    <div class="cta-buttons">
+        <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
+        <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
+        <a class="btn dark" href="/EB001">🚀 View Demo</a>
+    </div>
+</section>
+
+{spotlight_html}
+
+<div class="footer">
+    <div>
+        <strong>EmpowerBands Worldwide</strong><br>
+        Protect What Matters Most
+    </div>
+
+    <div>
+        Decatur, Alabama<br>
+        support@empowerbands.org
+    </div>
+
+    <div>
+        <a href="/blessing-boxes">💛 Blessing Boxes</a> |
+        <a href="/sms-opt-in">SMS Opt-In</a> |
+        <a href="/privacy">Privacy Policy</a> |
+        <a href="/terms">Terms of Service</a> |
+        <a href="/delete-request">Data Deletion Request</a>
+    </div>
+
+    <div style="margin-top:12px;">
+        Contact: support@empowerbands.org<br>
+        Follow Us:
+        <a href="https://linktr.ee/EmpowerBandsWorldwide">Linktree</a>
+    </div>
+</div>
+
+{whats_new_html}
+
+<div style="
+    text-align:center;
+    padding:18px 20px 10px;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+    color:rgba(255,255,255,0.45);
+">
+    👁 <strong style="color:rgba(255,255,255,0.7);">{visit_count}</strong> visitors and counting
+</div>
+
+</body>
+</html>
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
+"""
+
+
+# ===============================
+# SHORT LINK REDIRECT
+# ===============================
+@app.route("/<band_id>")
+def band_profile_shortcut(band_id):
+
+    blocked_routes = [
+    "admin",
+    "add",
+    "scans",   
+    "alert_with_location",
+    "manifest.json",
+    "pro",
+    "privacy",
+    "terms",
+    "delete-request",
+    "sms-opt-in",
+    "donate",
+    "im_safe",
+    "qr"
+]
+
+    if band_id.lower() in blocked_routes:
+        return redirect("/")
+
+    return profile(band_id.upper())
+
+# IMPORTANT: Specific routes must be defined BEFORE the catch-all /<band_id> route above
 
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
@@ -272,9 +893,16 @@ def im_safe(band_id):
     # Check rate limit - prevent spam
     if not can_send_safe_notification(band_id):
         return """
-        <h2>⏱️ Too Many Safe Alerts</h2>
-        <p>You can only send one Safe alert every 5 minutes to prevent spam.</p>
-        <p><a href="/">Go Back</a></p>
+        <html>
+        <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
+            <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
+                <h2>⏱️ Too Many Safe Alerts</h2>
+                <p style="color:#666;">You can only send one Safe alert every 5 minutes to prevent spam.</p>
+                <p style="margin-top:20px;"><a href="/{band_id}" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Go Back</a></p>
+            </div>
+        </body>
+        </html>
         """
     
     with open(file_name, "r", encoding="utf-8") as f:
@@ -287,14 +915,891 @@ def im_safe(band_id):
                 emergency_emails = row[5] if len(row) > 5 else ""
                 send_safe_notification(name, emergency_phones, emergency_emails, band_id)
                 return f"""
-                <h1>✅ Marked as Safe</h1>
-                <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
-                <p><a href="/{band_id}">Go Back</a></p>
+                <html>
+                <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+                <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
+                    <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
+                        <h2>✅ Marked as Safe</h2>
+                        <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
+                        <p style="margin-top:20px;"><a href="/{band_id}" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Go Back</a></p>
+                    </div>
+                </body>
+                </html>
                 """
     return """
-    <h1>Band Not Found</h1>
-    <p><a href="/">Home</a></p>
+    <html>
+    <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:40px;">
+        <div style="background:white;padding:30px;border-radius:12px;max-width:420px;margin:auto;">
+            <h2>Band Not Found</h2>
+            <p><a href="/" style="display:inline-block;padding:12px 24px;background:#111827;color:white;text-decoration:none;border-radius:10px;font-weight:bold;">Home</a></p>
+        </div>
+    </body>
+    </html>
     """
+
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+
+    if request.method == "POST":
+
+        if request.form.get("password") == ADMIN_PASSWORD:
+            session["logged_in"] = True
+            return redirect("/dashboard")
+
+        return """
+        <h2 style='color:white;text-align:center;margin-top:100px;'>
+        Wrong Password
+        </h2>
+
+        <p style='text-align:center;'>
+        <a href='/admin'>Try Again</a>
+        </p>
+        """
+
+    
+    return """
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EmpowerBands Admin</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    min-height:100vh;
+    color:white;
+    overflow:hidden;
+}
+
+.bg-glow{
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:#06b6d4;
+    filter:blur(140px);
+    opacity:.15;
+    top:-120px;
+    right:-120px;
+}
+
+.page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+    position:relative;
+    z-index:2;
+}
+
+.card{
+    width:100%;
+    max-width:460px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:35px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
+
+.logo{
+    text-align:center;
+    font-size:38px;
+    font-weight:800;
+    margin-bottom:6px;
+    letter-spacing:.5px;
+}
+
+.logo span{
+    color:#38bdf8;
+}
+
+.subtitle{
+    text-align:center;
+    color:#cbd5e1;
+    margin-bottom:28px;
+    font-size:15px;
+}
+
+input{
+    width:100%;
+    box-sizing:border-box;
+    padding:16px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    margin-bottom:16px;
+    font-size:16px;
+    background:rgba(255,255,255,0.12);
+    color:white;
+}
+
+input::placeholder{
+    color:#cbd5e1;
+}
+
+.btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    font-size:17px;
+    font-weight:700;
+    cursor:pointer;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+    transition:.25s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+    opacity:.95;
+}
+
+.footer{
+    text-align:center;
+    margin-top:22px;
+    color:#94a3b8;
+    font-size:12px;
+    line-height:1.5;
+}
+
+.shield{
+    width:80px;
+    height:80px;
+    margin:0 auto 20px;
+    border-radius:50%;
+    background:rgba(56,189,248,.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    border:1px solid rgba(255,255,255,.12);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bg-glow"></div>
+
+<div class="page">
+
+<div class="card">
+
+<div class="shield">
+🛡️
+</div>
+
+<div class="logo">
+Empower<span>Bands</span>
+</div>
+
+<div class="subtitle">
+Secure Admin Access Portal
+</div>
+
+<form method="POST">
+
+<input
+type="password"
+name="password"
+placeholder="Enter admin password"
+required
+>
+
+<button class="btn" type="submit">
+Login To Dashboard
+</button>
+
+</form>
+
+<div class="footer">
+Protected access for authorized personnel only.<br>
+EmpowerBands Emergency System
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
+"""
+
+def profile(band_id):
+    band_id = band_id.strip().upper()
+    confirm_alert = request.args.get("confirm_alert") == "yes"
+    alert_mode = request.args.get("alert") == "yes"
+
+    with open(file_name, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader, None)
+
+        for row in reader:
+            if len(row) >= 9 and row[0].strip().upper() == band_id:
+                name = row[1]
+                email = row[2]
+                phone = row[3]
+                emergency_phones = row[4] if len(row) > 4 else ""
+                emergency_emails = row[5] if len(row) > 5 else ""
+                age_group = row[6] if len(row) > 6 else ""
+                condition = row[7] if len(row) > 7 else ""
+                instructions = row[8] if len(row) > 8 else ""
+                medical_notes = row[9] if len(row) > 9 else ""
+                pin = row[10] if (len(row) > 10 and row[10]) else "1234"
+                address = row[11] if len(row) > 11 else ""
+                race = row[12] if len(row) > 12 else ""
+                gender = row[13] if len(row) > 13 else ""
+                photo_url = row[14] if len(row) > 14 else ""
+
+                visitor_ip = request.remote_addr
+                log_scan(
+                    band_id,
+                    name,
+                    "PROFILE_VIEW",
+                    visitor_ip
+                )
+
+    
+                entered_pin = request.args.get("pin")
+                if alert_mode:
+                    success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
+
+                    if success:
+                        return f"""
+                        <h1>✅ Alert Sent</h1>
+                        <p>Emergency contact(s) have been notified.</p>
+                        <p><a href="/im_safe/{band_id}" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">I'm Safe</a></p>
+                        <p style="margin-top:14px;"><a href="/{band_id}">Go Back</a></p>
+                        """
+                    else:
+                        return f"""
+                        <h1>❌ Alert Failed</h1>
+                        <p>There was a problem sending the alert.</p>
+                        <p><a href="/{band_id}">Go Back</a></p>
+                        """
+
+                if confirm_alert:
+                    return f"""
+                    <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1">
+                    </head>
+                    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
+                        <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
+                            <h2>⚠️ Emergency Alert</h2>
+                            <p>This will notify the designated emergency contact(s) on file.</p>
+
+                            <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
+                                <strong>Important:</strong><br>
+                                This system does <b>NOT contact 911 or emergency services</b>.<br><br>
+                                If this is a life-threatening emergency, please call <b>911 immediately</b>.
+                            </div>
+
+                            <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;cursor:pointer;">
+                                🚨 Send Alert With Location
+                            </button>
+
+                            <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+                                Cancel
+                            </a>
+                        </div>
+
+                        <script>
+                        function sendAlertWithLocation(){{
+                            if (navigator.geolocation) {{
+                                navigator.geolocation.getCurrentPosition(function(pos){{
+                                    let lat = pos.coords.latitude;
+                                    let lon = pos.coords.longitude;
+                                    window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+                                }}, function(){{
+                                    window.location.href = "/{band_id}?alert=yes";
+                                }});
+                            }} else {{
+                                window.location.href = "/{band_id}?alert=yes";
+                            }}
+                        }}
+                        </script>
+                    </body>
+                    </html>
+                    """
+
+                if entered_pin == pin:
+                    return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<title>Full Emergency Info</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body {{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#22c55e 0%,#07111f 28%,#030712 100%);
+    min-height:100vh;
+    color:white;
+}}
+
+.page {{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+}}
+
+.card {{
+    width:100%;
+    max-width:560px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}}
+
+.badge {{
+    display:inline-block;
+    background:rgba(34,197,94,.15);
+    color:#86efac;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:18px;
+}}
+
+h1 {{
+    margin:0;
+    font-size:36px;
+    font-weight:800;
+}}
+
+.info {{
+    color:#cbd5e1;
+    margin-top:8px;
+    margin-bottom:22px;
+}}
+
+.section {{
+    margin-top:18px;
+    padding:16px;
+    border-radius:18px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.1);
+}}
+
+.section-title {{
+    color:#67e8f9;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:7px;
+}}
+
+.section-text {{
+    color:#e5e7eb;
+    line-height:1.6;
+}}
+
+.btn {{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+    padding:16px;
+    border-radius:16px;
+    margin-top:16px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:16px;
+}}
+
+.btn-blue {{
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+}}
+
+.btn-dark {{
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:1px solid rgba(255,255,255,.15);
+}}
+
+.btn-red {{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;
+}}
+
+a[href^="tel"] {{
+    color:white;
+    text-decoration:none;
+}}
+
+.footer {{
+    margin-top:25px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+}}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="card">
+
+<div class="badge">
+Unlocked Full Emergency Info
+</div>
+
+<h1>{name}</h1>
+
+<div class="info">
+{age_group} • ID: {band_id}
+</div>
+
+<div class="section">
+<div class="section-title">
+EMAIL
+</div>
+
+<div class="section-text">
+{email}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+EMERGENCY CONTACT
+</div>
+
+<div class="section-text">
+{emergency_phones}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+CONDITION
+</div>
+
+<div class="section-text">
+{condition}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+INSTRUCTIONS
+</div>
+
+<div class="section-text">
+{instructions}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+PRIVATE MEDICAL NOTES
+</div>
+
+<div class="section-text">
+{medical_notes}
+</div>
+</div>
+<div class="section">
+<div class="section-title">
+ADDRESS
+</div>
+
+<div class="section-text">
+{address}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+RACE
+</div>
+
+<div class="section-text">
+{race}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+GENDER
+</div>
+
+<div class="section-text">
+{gender}
+</div>
+</div>
+
+
+<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip()}">
+📞 Call Emergency Contact
+</a> 
+
+<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
+    🚨 Send Alert
+</a>
+<p style="font-size:12px; color:#ffcccc; margin-top:10px;">
+    EmpowerBands is not 911. In a life-threatening emergency, call 911 immediately.
+</p>
+
+<a class="btn btn-dark" href="/{band_id}">
+Back to Public View
+</a>
+
+<div class="footer">
+PIN verified • EmpowerBands Emergency Response System
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
+"""
+                return f"""
+<!DOCTYPE html>
+<html>
+<head>
+<title>EmpowerBand {band_id}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body {{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    min-height:100vh;
+    color:white;
+    padding-top:95px
+}}
+
+.page {{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+}}
+
+.card {{
+    width:100%;
+    max-width:520px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}}
+
+.badge {{
+    display:inline-block;
+    background:rgba(56,189,248,.12);
+    color:#7dd3fc;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:18px;
+}}
+
+h1 {{
+    margin:0;
+    font-size:38px;
+    font-weight:800;
+}}
+
+.info {{
+    color:#cbd5e1;
+    margin-top:8px;
+    margin-bottom:25px;
+}}
+
+.alert-box {{
+    background:rgba(250,204,21,.12);
+    border:1px solid rgba(250,204,21,.35);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:20px;
+}}
+
+.section {{
+    margin-top:22px;
+}}
+
+.section-title {{
+    color:#67e8f9;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:8px;
+}}
+
+.section-text {{
+    color:#e5e7eb;
+    line-height:1.6;
+}}
+
+.btn {{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+    padding:16px;
+    border-radius:16px;
+    margin-top:16px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:16px;
+}}
+
+.btn-red {{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;
+}}
+
+.btn-blue {{
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+}}
+
+.btn-dark {{
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:1px solid rgba(255,255,255,.15);
+}}
+
+.pin-box {{
+    margin-top:25px;
+}}
+
+input {{
+    width:100%;
+    box-sizing:border-box;
+    padding:15px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    background:rgba(255,255,255,.1);
+    color:white;
+    margin-bottom:14px;
+    font-size:16px;
+}}
+
+
+input::placeholder {{
+    color:#cbd5e1;
+}}
+
+.unlock-btn {{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    color:white;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+}}
+
+a[href^="tel"] {{ 
+    color:white;
+    text-decoration:none;
+}}
+
+
+.footer {{
+    margin-top:25px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+}}
+
+.sticky-alert{{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:9999;
+    background:white;
+    padding:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+}}
+
+.sticky-alert button{{
+    width:100%;
+    background:#dc2626;
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+    padding:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}}
+
+body{{
+    padding-top:95px;
+}}
+</style>
+</head>
+
+<body>
+
+<div class="sticky-alert">
+<form action="/{band_id}" method="GET">
+    <input type="hidden" name="confirm_alert" value="yes">
+    <button type="submit">🚨 SEND EMERGENCY ALERT</button>
+</form>
+</div>
+
+<div class="page">
+<div class="card">
+
+<div class="badge">
+EmpowerBands Emergency Profile
+</div>
+
+<img
+src="{photo_url if photo_url else LOGO_URL}"
+style="
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid rgba(255,255,255,.15);
+margin-bottom:20px;
+"
+>
+
+<h1>{name}</h1>
+<img src="/qr/{band_id}" style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
+
+<p>Scan QR backup if NFC is unavailable.</p>
+
+<a class="btn btn-blue" href="/qr/{band_id}" download="{band_id}-qr.png">
+    ⬇️ Download QR Code
+</a>
+
+<div class="info">
+{age_group} • ID: {band_id}
+</div>
+
+<div class="alert-box">
+⚠️ <strong>{condition}</strong>
+</div>
+
+<div class="section">
+<div class="section-title">
+WHAT TO DO
+</div>
+
+<div class="section-text">
+{instructions}
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+MEDICAL NOTES
+</div>
+
+<div class="section-text">
+Protected — enter PIN to view
+</div>
+</div>
+
+<a class="btn btn-red" href="/{band_id}?confirm_alert=yes">
+🚨 Activate Emergency Alert
+</a>
+
+<a class="btn btn-blue" href="tel:{emergency_phones.split(',')[0].strip() if emergency_phones else ''}">
+📞 Call Emergency Contact
+</a>
+
+
+
+<div class="pin-box">
+
+<form method="GET" action="/{band_id}">
+
+<input
+type="password"
+name="pin"
+placeholder="Enter PIN to unlock full info"
+required
+>
+
+<button class="unlock-btn" type="submit">
+Unlock Full Info
+</button>
+
+</form>
+
+</div>
+
+<div class="footer">
+    EmpowerBands Emergency Response System
+</div>
+
+<footer style="text-align:center; padding:20px; font-size:13px; opacity:0.8;">
+    <p>
+        <a href="/privacy">Privacy Policy</a> |
+        <a href="/terms">Terms of Service</a> |
+        <a href="/delete-request">Data Deletion Request</a>
+    </p>
+
+    <p>
+        EmpowerBands is not a replacement for 911, EMS, or professional medical monitoring.
+    </p>
+</footer>
+
+</div>
+
+</div>
+
+</body>
+</html>
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
+"""
+
+
+    return """
+    <h1>Band Not Found</h1>
+    <p>This band ID has not been added yet.</p>
+    <p><a href="/admin">Admin Login</a></p>
+    """
+
+@app.route("/donate")
+def donate():
+    return redirect("https://www.paypal.com/ncp/payment/6ZT5B9XMXD3K6")
 
 @app.route("/qr/<band_id>")
 def qr_code(band_id):
@@ -309,33 +1814,5 @@ def qr_code(band_id):
 
     return send_file(buffer, mimetype="image/png")
 
-@app.route("/donate")
-def donate():
-    return redirect("https://www.paypal.com/ncp/payment/6ZT5B9XMXD3K6")
-
-# ===============================
-# CATCH-ALL BAND PROFILE ROUTE (COMES LAST)
-# ===============================
-@app.route("/<band_id>")
-def band_profile_shortcut(band_id):
-
-    blocked_routes = [
-        "admin",
-        "add",
-        "scans",   
-        "alert_with_location",
-        "manifest.json",
-        "pro",
-        "privacy",
-        "terms",
-        "delete-request",
-        "sms-opt-in",
-        "donate",
-        "im_safe",
-        "qr"
-    ]
-
-    if band_id.lower() in blocked_routes:
-        return redirect("/")
-
-    return profile(band_id.upper())
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=False)
