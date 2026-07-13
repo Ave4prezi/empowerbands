@@ -1,1 +1,714 @@
 
+/* =========================================================
+   EMPOWERBANDS BOARD PAGE — PREMIUM UI UPGRADE
+   Paste at the bottom of static/css/style.css
+========================================================= */
+
+:root {
+    --eb-dark: #04111f;
+    --eb-navy: #071d31;
+    --eb-blue: #0ea5e9;
+    --eb-cyan: #67d8ff;
+    --eb-light: #f4f9fc;
+    --eb-white: #ffffff;
+    --eb-text: #162d3d;
+    --eb-muted: #617787;
+    --eb-border: rgba(12, 72, 105, 0.12);
+    --eb-shadow: 0 25px 70px rgba(4, 17, 31, 0.16);
+    --eb-shadow-hover: 0 35px 90px rgba(4, 17, 31, 0.24);
+}
+
+/* Smooth global page behavior */
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ---------------------------------------------------------
+   TOP NAVIGATION
+--------------------------------------------------------- */
+
+.board-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(4, 17, 31, 0.86);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(4, 17, 31, 0.12);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.board-topbar-inner {
+    min-height: 82px;
+}
+
+.board-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.12rem;
+    letter-spacing: -0.02em;
+}
+
+.board-brand::before {
+    content: "E";
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    color: var(--eb-dark);
+    background: linear-gradient(145deg, var(--eb-cyan), var(--eb-blue));
+    border-radius: 50%;
+    font-weight: 900;
+    box-shadow: 0 10px 28px rgba(14, 165, 233, 0.35);
+}
+
+.board-navigation a {
+    position: relative;
+    padding: 10px 0;
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.board-navigation a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 2px;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--eb-blue), var(--eb-cyan));
+    border-radius: 999px;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.25s ease;
+}
+
+.board-navigation a:hover {
+    color: var(--eb-cyan);
+    transform: translateY(-1px);
+}
+
+.board-navigation a:hover::after,
+.board-navigation .board-active::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* ---------------------------------------------------------
+   PREMIUM HERO
+--------------------------------------------------------- */
+
+.board-hero-section {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 720px;
+    display: flex;
+    align-items: center;
+    padding: 120px 0;
+    background:
+        radial-gradient(
+            circle at 85% 12%,
+            rgba(14, 165, 233, 0.30),
+            transparent 32rem
+        ),
+        radial-gradient(
+            circle at 10% 90%,
+            rgba(103, 216, 255, 0.16),
+            transparent 28rem
+        ),
+        linear-gradient(135deg, #03101d 0%, #082840 55%, #0a3854 100%);
+}
+
+.board-hero-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    opacity: 0.08;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
+    background-size: 42px 42px;
+}
+
+.board-hero-section::after {
+    content: "";
+    position: absolute;
+    width: 560px;
+    height: 560px;
+    right: -220px;
+    bottom: -270px;
+    z-index: -1;
+    background: radial-gradient(
+        circle,
+        rgba(103, 216, 255, 0.32),
+        transparent 68%
+    );
+    border-radius: 50%;
+    filter: blur(10px);
+}
+
+.board-hero-layout {
+    position: relative;
+    z-index: 2;
+}
+
+.board-hero-copy {
+    animation: boardFadeUp 0.8s ease both;
+}
+
+.board-hero-copy h1 {
+    max-width: 780px;
+    text-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+}
+
+.board-hero-copy h1 span {
+    background: linear-gradient(90deg, var(--eb-cyan), #ffffff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.board-hero-text {
+    max-width: 740px;
+    font-size: 1.18rem;
+}
+
+.board-responsibility-card {
+    position: relative;
+    overflow: hidden;
+    padding: 38px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0.05)
+        );
+    border: 1px solid rgba(255, 255, 255, 0.17);
+    border-radius: 30px;
+    box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    animation: boardFadeUp 0.9s 0.15s ease both;
+}
+
+.board-responsibility-card::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    top: -90px;
+    right: -60px;
+    background: rgba(103, 216, 255, 0.16);
+    border-radius: 50%;
+    filter: blur(6px);
+}
+
+.board-responsibility-card blockquote {
+    position: relative;
+    z-index: 2;
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.board-button {
+    position: relative;
+    overflow: hidden;
+    min-height: 54px;
+    padding: 14px 25px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.board-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        transparent 25%,
+        rgba(255,255,255,0.35),
+        transparent 75%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.55s ease;
+}
+
+.board-button:hover::before {
+    transform: translateX(120%);
+}
+
+.board-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.26);
+}
+
+/* ---------------------------------------------------------
+   BOARD MEMBER SECTION
+--------------------------------------------------------- */
+
+.board-members-section {
+    position: relative;
+    padding: 110px 0;
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(14, 165, 233, 0.08),
+            transparent 25rem
+        ),
+        var(--eb-light);
+}
+
+.board-section-heading {
+    margin-bottom: 62px;
+}
+
+.board-section-heading h2 {
+    letter-spacing: -0.035em;
+}
+
+.board-section-heading p:last-child {
+    max-width: 690px;
+    margin-inline: auto;
+    font-size: 1.05rem;
+}
+
+.board-members-grid {
+    gap: 32px;
+}
+
+.board-member-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(14, 105, 150, 0.12);
+    border-radius: 30px;
+    box-shadow: var(--eb-shadow);
+    transform: translateY(0);
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+}
+
+.board-member-card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--eb-shadow-hover);
+    border-color: rgba(14, 165, 233, 0.30);
+}
+
+.board-member-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 30px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.board-member-photo {
+    position: relative;
+}
+
+.board-member-photo::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 42%;
+    background: linear-gradient(
+        to top,
+        rgba(4, 17, 31, 0.55),
+        transparent
+    );
+    pointer-events: none;
+}
+
+.board-member-photo img {
+    transition:
+        transform 0.55s ease,
+        filter 0.55s ease;
+}
+
+.board-member-card:hover .board-member-photo img {
+    transform: scale(1.05);
+    filter: saturate(1.04) contrast(1.03);
+}
+
+.board-member-badge {
+    z-index: 3;
+    padding: 9px 14px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(4, 17, 31, 0.92),
+            rgba(8, 56, 84, 0.88)
+        );
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 10px 24px rgba(4, 17, 31, 0.25);
+    backdrop-filter: blur(10px);
+}
+
+.board-member-content {
+    position: relative;
+    padding: 32px;
+}
+
+.board-member-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 32px;
+    width: 54px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--eb-blue), var(--eb-cyan));
+    border-radius: 999px;
+}
+
+.board-member-role {
+    margin-top: 7px;
+}
+
+.board-member-content h3 {
+    margin-top: 6px;
+    font-size: 2.1rem;
+    letter-spacing: -0.03em;
+}
+
+.board-member-content > p:not(.board-member-role) {
+    line-height: 1.75;
+}
+
+.board-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #087fb7;
+    font-weight: 800;
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.board-contact-link:hover {
+    color: var(--eb-blue);
+    transform: translateX(4px);
+    text-decoration: none;
+}
+
+/* ---------------------------------------------------------
+   VALUES
+--------------------------------------------------------- */
+
+.board-commitment-section {
+    position: relative;
+    padding: 115px 0;
+    overflow: hidden;
+}
+
+.board-commitment-section::before {
+    content: "";
+    position: absolute;
+    width: 440px;
+    height: 440px;
+    left: -230px;
+    bottom: -210px;
+    background: rgba(14, 165, 233, 0.08);
+    border-radius: 50%;
+    filter: blur(20px);
+}
+
+.board-commitment-copy h2 {
+    letter-spacing: -0.04em;
+}
+
+.board-values-grid {
+    gap: 20px;
+}
+
+.board-value-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 225px;
+    padding: 30px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.95),
+            rgba(239, 248, 252, 0.94)
+        );
+    border: 1px solid var(--eb-border);
+    border-radius: 24px;
+    box-shadow: 0 16px 45px rgba(4, 17, 31, 0.08);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.board-value-card::before {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    top: -60px;
+    right: -45px;
+    background: rgba(14, 165, 233, 0.10);
+    border-radius: 50%;
+}
+
+.board-value-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 58px rgba(4, 17, 31, 0.13);
+}
+
+.board-value-card span {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    color: var(--eb-dark);
+    background: linear-gradient(145deg, var(--eb-cyan), var(--eb-blue));
+    border-radius: 50%;
+    box-shadow: 0 10px 22px rgba(14, 165, 233, 0.22);
+}
+
+.board-value-card h3 {
+    margin-top: 28px;
+    font-size: 1.45rem;
+}
+
+/* ---------------------------------------------------------
+   PARTNER CTA
+--------------------------------------------------------- */
+
+.board-partner-section {
+    padding: 35px 0 110px;
+}
+
+.board-partner-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 54px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 32px;
+    box-shadow: 0 32px 90px rgba(4, 17, 31, 0.22);
+}
+
+.board-partner-card::before {
+    content: "";
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    right: -110px;
+    top: -150px;
+    z-index: -1;
+    background: rgba(103, 216, 255, 0.18);
+    border-radius: 50%;
+    filter: blur(10px);
+}
+
+.board-partner-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(4, 17, 31, 0.98),
+            rgba(9, 55, 83, 0.98)
+        );
+}
+
+/* ---------------------------------------------------------
+   FOOTER
+--------------------------------------------------------- */
+
+.board-footer {
+    position: relative;
+    overflow: hidden;
+    padding-top: 72px;
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(14, 165, 233, 0.13),
+            transparent 23rem
+        ),
+        var(--eb-dark);
+}
+
+.board-footer h3 {
+    font-size: 1.35rem;
+}
+
+.board-footer-links a {
+    transition:
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.board-footer-links a:hover {
+    transform: translateX(4px);
+}
+
+/* ---------------------------------------------------------
+   ANIMATIONS
+--------------------------------------------------------- */
+
+@keyframes boardFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(28px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.board-member-card {
+    animation: boardFadeUp 0.7s ease both;
+}
+
+.board-member-card:nth-child(2) {
+    animation-delay: 0.12s;
+}
+
+.board-member-card:nth-child(3) {
+    animation-delay: 0.24s;
+}
+
+.board-value-card {
+    animation: boardFadeUp 0.65s ease both;
+}
+
+.board-value-card:nth-child(2) {
+    animation-delay: 0.08s;
+}
+
+.board-value-card:nth-child(3) {
+    animation-delay: 0.16s;
+}
+
+.board-value-card:nth-child(4) {
+    animation-delay: 0.24s;
+}
+
+/* ---------------------------------------------------------
+   TABLET
+--------------------------------------------------------- */
+
+@media (max-width: 980px) {
+    .board-hero-section {
+        min-height: auto;
+        padding: 95px 0;
+    }
+
+    .board-hero-layout {
+        gap: 45px;
+    }
+
+    .board-responsibility-card {
+        max-width: 680px;
+    }
+
+    .board-partner-card {
+        padding: 42px;
+    }
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+--------------------------------------------------------- */
+
+@media (max-width: 700px) {
+    .board-topbar-inner {
+        min-height: auto;
+    }
+
+    .board-brand {
+        font-size: 1rem;
+    }
+
+    .board-brand::before {
+        width: 38px;
+        height: 38px;
+    }
+
+    .board-navigation {
+        width: 100%;
+        padding-top: 4px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .board-hero-section {
+        padding: 78px 0 72px;
+    }
+
+    .board-hero-copy h1 {
+        font-size: clamp(3rem, 17vw, 5rem);
+    }
+
+    .board-hero-text {
+        font-size: 1.03rem;
+    }
+
+    .board-responsibility-card {
+        padding: 26px;
+    }
+
+    .board-members-section,
+    .board-commitment-section {
+        padding: 78px 0;
+    }
+
+    .board-member-card {
+        border-radius: 24px;
+    }
+
+    .board-member-content {
+        padding: 26px;
+    }
+
+    .board-value-card {
+        min-height: 190px;
+    }
+
+    .board-partner-section {
+        padding-bottom: 78px;
+    }
+
+    .board-partner-card {
+        padding: 32px 24px;
+        border-radius: 26px;
+    }
+}
+
+/* Respect reduced-motion accessibility setting */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
