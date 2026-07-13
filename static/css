@@ -1,490 +1,4 @@
-/* ==================================================
-   BOARD OF DIRECTORS PAGE
-================================================== */
 
-.board-page-container {
-    width: min(1180px, calc(100% - 36px));
-    margin: 0 auto;
-}
-
-.board-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: rgba(7, 17, 31, 0.96);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.board-topbar-inner {
-    width: min(1180px, calc(100% - 36px));
-    min-height: 76px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 30px;
-}
-
-.board-brand {
-    color: #ffffff;
-    font-size: 1.05rem;
-    font-weight: 800;
-    text-decoration: none;
-}
-
-.board-brand span {
-    color: #7dd3fc;
-}
-
-.board-navigation {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-.board-navigation a {
-    color: rgba(255, 255, 255, 0.78);
-    font-size: 0.92rem;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.board-navigation a:hover,
-.board-navigation .board-active {
-    color: #7dd3fc;
-}
-
-.board-hero-section {
-    padding: 105px 0 95px;
-    color: #ffffff;
-    background:
-        radial-gradient(
-            circle at 85% 20%,
-            rgba(56, 189, 248, 0.22),
-            transparent 28rem
-        ),
-        linear-gradient(135deg, #07111f, #0d334d);
-}
-
-.board-hero-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
-    gap: 70px;
-    align-items: center;
-}
-
-.board-eyebrow {
-    margin: 0 0 14px;
-    color: #38bdf8;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-}
-
-.board-hero-copy .board-eyebrow,
-.board-partner-card .board-eyebrow {
-    color: #7dd3fc;
-}
-
-.board-hero-copy h1 {
-    margin: 0;
-    font-size: clamp(3.2rem, 8vw, 6.5rem);
-    line-height: 1;
-    letter-spacing: -0.055em;
-}
-
-.board-hero-copy h1 span {
-    color: #7dd3fc;
-}
-
-.board-hero-text {
-    max-width: 720px;
-    margin: 28px 0 0;
-    color: rgba(255, 255, 255, 0.78);
-    font-size: 1.15rem;
-    line-height: 1.75;
-}
-
-.board-hero-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 34px;
-}
-
-.board-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 50px;
-    padding: 12px 22px;
-    border-radius: 999px;
-    font-weight: 800;
-    text-decoration: none;
-    transition: transform 0.2s ease;
-}
-
-.board-button:hover {
-    transform: translateY(-2px);
-}
-
-.board-button-primary {
-    color: #07111f;
-    background: linear-gradient(135deg, #7dd3fc, #38bdf8);
-}
-
-.board-button-secondary {
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    background: rgba(255, 255, 255, 0.07);
-}
-
-.board-responsibility-card {
-    padding: 34px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 26px;
-    backdrop-filter: blur(14px);
-}
-
-.board-card-label {
-    margin: 0 0 18px;
-    color: #7dd3fc;
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-}
-
-.board-responsibility-card blockquote {
-    margin: 0;
-    font-size: 1.4rem;
-    line-height: 1.5;
-}
-
-.board-card-line {
-    width: 58px;
-    height: 3px;
-    margin: 26px 0;
-    background: #7dd3fc;
-    border-radius: 999px;
-}
-
-.board-responsibility-card p:last-child {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.72);
-}
-
-.board-members-section {
-    padding: 95px 0;
-    background: #f3f8fb;
-}
-
-.board-section-heading {
-    max-width: 760px;
-    margin: 0 auto 50px;
-    text-align: center;
-}
-
-.board-section-heading h2,
-.board-commitment-copy h2,
-.board-partner-card h2 {
-    margin: 0;
-    color: #07111f;
-    font-size: clamp(2.3rem, 5vw, 4rem);
-    line-height: 1.1;
-}
-
-.board-section-heading p:last-child {
-    margin: 18px 0 0;
-    color: #607483;
-}
-
-.board-members-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 28px;
-}
-
-.board-member-card {
-    overflow: hidden;
-    background: #ffffff;
-    border: 1px solid #dbe7ee;
-    border-radius: 24px;
-    box-shadow: 0 20px 55px rgba(7, 17, 31, 0.13);
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-.board-member-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 28px 70px rgba(7, 17, 31, 0.18);
-}
-
-.board-member-photo {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 4 / 5;
-    background: #dcecf3;
-}
-
-.board-member-photo img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    object-position: center top;
-}
-
-.board-member-badge {
-    position: absolute;
-    left: 18px;
-    bottom: 18px;
-    padding: 8px 13px;
-    color: #ffffff;
-    background: rgba(7, 17, 31, 0.85);
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.board-member-content {
-    padding: 28px;
-}
-
-.board-member-role {
-    margin: 0 0 5px;
-    color: #0284c7;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.board-member-content h3 {
-    margin: 0;
-    color: #07111f;
-    font-size: 2rem;
-    line-height: 1.15;
-}
-
-.board-member-content > p:not(.board-member-role) {
-    margin: 18px 0 22px;
-    color: #607483;
-}
-
-.board-contact-link {
-    color: #0284c7;
-    font-size: 0.9rem;
-    font-weight: 800;
-    text-decoration: none;
-}
-
-.board-contact-link:hover {
-    text-decoration: underline;
-}
-
-.board-commitment-section {
-    padding: 95px 0;
-    background: #ffffff;
-}
-
-.board-commitment-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: 70px;
-    align-items: start;
-}
-
-.board-commitment-copy > p:last-child {
-    margin: 24px 0 0;
-    color: #607483;
-    line-height: 1.75;
-}
-
-.board-values-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-}
-
-.board-value-card {
-    min-height: 215px;
-    padding: 26px;
-    background: #f3f8fb;
-    border: 1px solid #dbe7ee;
-    border-radius: 20px;
-}
-
-.board-value-card span {
-    color: #38bdf8;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.13em;
-}
-
-.board-value-card h3 {
-    margin: 28px 0 8px;
-    color: #07111f;
-    font-size: 1.35rem;
-}
-
-.board-value-card p {
-    margin: 0;
-    color: #607483;
-}
-
-.board-partner-section {
-    padding: 20px 0 95px;
-    background: #ffffff;
-}
-
-.board-partner-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    padding: 46px;
-    color: #ffffff;
-    background:
-        radial-gradient(
-            circle at 85% 20%,
-            rgba(125, 211, 252, 0.22),
-            transparent 18rem
-        ),
-        linear-gradient(135deg, #07111f, #0d334d);
-    border-radius: 26px;
-}
-
-.board-partner-card h2 {
-    color: #ffffff;
-    font-size: clamp(2rem, 4vw, 3.3rem);
-}
-
-.board-partner-card p:not(.board-eyebrow) {
-    max-width: 720px;
-    margin: 16px 0 0;
-    color: rgba(255, 255, 255, 0.72);
-}
-
-.board-footer {
-    padding: 60px 0 24px;
-    color: rgba(255, 255, 255, 0.74);
-    background: #07111f;
-}
-
-.board-footer-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr 0.8fr;
-    gap: 48px;
-}
-
-.board-footer h3 {
-    margin: 0;
-    color: #ffffff;
-}
-
-.board-footer p {
-    margin: 12px 0 0;
-}
-
-.board-footer a {
-    color: rgba(255, 255, 255, 0.74);
-    text-decoration: none;
-}
-
-.board-footer a:hover {
-    color: #7dd3fc;
-}
-
-.board-footer-links {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.board-footer-bottom {
-    margin-top: 44px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
-}
-
-.board-footer-bottom p {
-    margin: 0;
-    font-size: 0.86rem;
-}
-
-@media (max-width: 980px) {
-    .board-hero-layout,
-    .board-commitment-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .board-members-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .board-member-card:last-child {
-        grid-column: 1 / -1;
-        width: min(540px, 100%);
-        margin: 0 auto;
-    }
-
-    .board-partner-card {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .board-footer-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 700px) {
-    .board-topbar-inner {
-        align-items: flex-start;
-        flex-direction: column;
-        padding: 18px 0;
-    }
-
-    .board-navigation {
-        flex-wrap: wrap;
-        gap: 14px;
-    }
-
-    .board-hero-section,
-    .board-members-section,
-    .board-commitment-section {
-        padding: 70px 0;
-    }
-
-    .board-members-grid,
-    .board-values-grid,
-    .board-footer-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .board-member-card:last-child {
-        grid-column: auto;
-        width: 100%;
-    }
-
-    .board-hero-buttons {
-        flex-direction: column;
-    }
-
-    .board-button {
-        width: 100%;
-    }
-
-    .board-partner-card {
-        padding: 30px 24px;
-    }
-}
 
 /* =========================================================
    EMPOWERBANDS BOARD PAGE — PREMIUM UI UPGRADE
@@ -1197,5 +711,495 @@ body {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+
+
+/* ==================================================
+   BOARD OF DIRECTORS PAGE
+================================================== */
+
+.board-page-container {
+    width: min(1180px, calc(100% - 36px));
+    margin: 0 auto;
+}
+
+.board-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(7, 17, 31, 0.96);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.board-topbar-inner {
+    width: min(1180px, calc(100% - 36px));
+    min-height: 76px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.board-brand {
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.board-brand span {
+    color: #7dd3fc;
+}
+
+.board-navigation {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.board-navigation a {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.board-navigation a:hover,
+.board-navigation .board-active {
+    color: #7dd3fc;
+}
+
+.board-hero-section {
+    padding: 105px 0 95px;
+    color: #ffffff;
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(56, 189, 248, 0.22),
+            transparent 28rem
+        ),
+        linear-gradient(135deg, #07111f, #0d334d);
+}
+
+.board-hero-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 70px;
+    align-items: center;
+}
+
+.board-eyebrow {
+    margin: 0 0 14px;
+    color: #38bdf8;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.board-hero-copy .board-eyebrow,
+.board-partner-card .board-eyebrow {
+    color: #7dd3fc;
+}
+
+.board-hero-copy h1 {
+    margin: 0;
+    font-size: clamp(3.2rem, 8vw, 6.5rem);
+    line-height: 1;
+    letter-spacing: -0.055em;
+}
+
+.board-hero-copy h1 span {
+    color: #7dd3fc;
+}
+
+.board-hero-text {
+    max-width: 720px;
+    margin: 28px 0 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 1.15rem;
+    line-height: 1.75;
+}
+
+.board-hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 34px;
+}
+
+.board-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.board-button:hover {
+    transform: translateY(-2px);
+}
+
+.board-button-primary {
+    color: #07111f;
+    background: linear-gradient(135deg, #7dd3fc, #38bdf8);
+}
+
+.board-button-secondary {
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.board-responsibility-card {
+    padding: 34px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 26px;
+    backdrop-filter: blur(14px);
+}
+
+.board-card-label {
+    margin: 0 0 18px;
+    color: #7dd3fc;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.board-responsibility-card blockquote {
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.5;
+}
+
+.board-card-line {
+    width: 58px;
+    height: 3px;
+    margin: 26px 0;
+    background: #7dd3fc;
+    border-radius: 999px;
+}
+
+.board-responsibility-card p:last-child {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.board-members-section {
+    padding: 95px 0;
+    background: #f3f8fb;
+}
+
+.board-section-heading {
+    max-width: 760px;
+    margin: 0 auto 50px;
+    text-align: center;
+}
+
+.board-section-heading h2,
+.board-commitment-copy h2,
+.board-partner-card h2 {
+    margin: 0;
+    color: #07111f;
+    font-size: clamp(2.3rem, 5vw, 4rem);
+    line-height: 1.1;
+}
+
+.board-section-heading p:last-child {
+    margin: 18px 0 0;
+    color: #607483;
+}
+
+.board-members-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+}
+
+.board-member-card {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #dbe7ee;
+    border-radius: 24px;
+    box-shadow: 0 20px 55px rgba(7, 17, 31, 0.13);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.board-member-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 28px 70px rgba(7, 17, 31, 0.18);
+}
+
+.board-member-photo {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: #dcecf3;
+}
+
+.board-member-photo img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.board-member-badge {
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    padding: 8px 13px;
+    color: #ffffff;
+    background: rgba(7, 17, 31, 0.85);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.board-member-content {
+    padding: 28px;
+}
+
+.board-member-role {
+    margin: 0 0 5px;
+    color: #0284c7;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.board-member-content h3 {
+    margin: 0;
+    color: #07111f;
+    font-size: 2rem;
+    line-height: 1.15;
+}
+
+.board-member-content > p:not(.board-member-role) {
+    margin: 18px 0 22px;
+    color: #607483;
+}
+
+.board-contact-link {
+    color: #0284c7;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.board-contact-link:hover {
+    text-decoration: underline;
+}
+
+.board-commitment-section {
+    padding: 95px 0;
+    background: #ffffff;
+}
+
+.board-commitment-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 70px;
+    align-items: start;
+}
+
+.board-commitment-copy > p:last-child {
+    margin: 24px 0 0;
+    color: #607483;
+    line-height: 1.75;
+}
+
+.board-values-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.board-value-card {
+    min-height: 215px;
+    padding: 26px;
+    background: #f3f8fb;
+    border: 1px solid #dbe7ee;
+    border-radius: 20px;
+}
+
+.board-value-card span {
+    color: #38bdf8;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+}
+
+.board-value-card h3 {
+    margin: 28px 0 8px;
+    color: #07111f;
+    font-size: 1.35rem;
+}
+
+.board-value-card p {
+    margin: 0;
+    color: #607483;
+}
+
+.board-partner-section {
+    padding: 20px 0 95px;
+    background: #ffffff;
+}
+
+.board-partner-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 46px;
+    color: #ffffff;
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(125, 211, 252, 0.22),
+            transparent 18rem
+        ),
+        linear-gradient(135deg, #07111f, #0d334d);
+    border-radius: 26px;
+}
+
+.board-partner-card h2 {
+    color: #ffffff;
+    font-size: clamp(2rem, 4vw, 3.3rem);
+}
+
+.board-partner-card p:not(.board-eyebrow) {
+    max-width: 720px;
+    margin: 16px 0 0;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.board-footer {
+    padding: 60px 0 24px;
+    color: rgba(255, 255, 255, 0.74);
+    background: #07111f;
+}
+
+.board-footer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr;
+    gap: 48px;
+}
+
+.board-footer h3 {
+    margin: 0;
+    color: #ffffff;
+}
+
+.board-footer p {
+    margin: 12px 0 0;
+}
+
+.board-footer a {
+    color: rgba(255, 255, 255, 0.74);
+    text-decoration: none;
+}
+
+.board-footer a:hover {
+    color: #7dd3fc;
+}
+
+.board-footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.board-footer-bottom {
+    margin-top: 44px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.board-footer-bottom p {
+    margin: 0;
+    font-size: 0.86rem;
+}
+
+@media (max-width: 980px) {
+    .board-hero-layout,
+    .board-commitment-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .board-members-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .board-member-card:last-child {
+        grid-column: 1 / -1;
+        width: min(540px, 100%);
+        margin: 0 auto;
+    }
+
+    .board-partner-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .board-footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .board-topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 18px 0;
+    }
+
+    .board-navigation {
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .board-hero-section,
+    .board-members-section,
+    .board-commitment-section {
+        padding: 70px 0;
+    }
+
+    .board-members-grid,
+    .board-values-grid,
+    .board-footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .board-member-card:last-child {
+        grid-column: auto;
+        width: 100%;
+    }
+
+    .board-hero-buttons {
+        flex-direction: column;
+    }
+
+    .board-button {
+        width: 100%;
+    }
+
+    .board-partner-card {
+        padding: 30px 24px;
     }
 }
