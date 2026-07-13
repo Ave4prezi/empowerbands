@@ -1,1 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Board of Directors | EmpowerBands Worldwide</title>
+
+    <style>
+        :root {
+            --navy: #071d2e;
+            --navy-light: #0e3854;
+            --blue: #1aa6d9;
+            --blue-light: #78d6f5;
+            --white: #ffffff;
+            --light: #f3f8fb;
+            --text: #183042;
+            --muted: #607483;
+            --border: #dbe7ee;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: var(--white);
+            line-height: 1.65;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .page-container {
+            width: min(1180px, calc(100% - 36px));
+            margin: 0 auto;
+        }
+
+        .board-header {
+            padding: 24px 0;
+            background: var(--navy);
+            color: var(--white);
+        }
+
+        .board-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .board-logo {
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .board-logo span {
+            color: var(--blue-light);
+        }
+
+        .board-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .board-nav-links a {
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .board-nav-links a:hover {
+            color: var(--blue-light);
+        }
+
+        .board-hero {
+            padding: 100px 0 90px;
+            color: var(--white);
+            background:
+                radial-gradient(circle at 85% 20%, rgba(26, 166, 217, 0.22), transparent 28rem),
+                linear-gradient(135deg, var(--navy), var(--navy-light));
+        }
+
+        .board-hero-content {
+            max-width: 820px;
+        }
+
+        .eyebrow {
+            margin: 0 0 14px;
+            color: var(--blue-light);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.17em;
+            text-transform: uppercase;
+        }
+
+        .board-hero h1 {
+            margin: 0;
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 1;
+            letter-spacing: -0.05em;
+        }
+
+        .board-hero h1 span {
+            color: var(--blue-light);
+        }
+
+        .board-hero p:last-child {
+            max-width: 760px;
+            margin: 28px 0 0;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 1.15rem;
+        }
+
+        .board-section {
+            padding: 90px 0;
+            background: var(--light);
+        }
+
+        .section-heading {
+            max-width: 760px;
+            margin: 0 auto 48px;
+            text-align: center;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            color: var(--navy);
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            line-height: 1.1;
+        }
+
+        .section-heading p:last-child {
+            margin: 18px 0 0;
+            color: var(--muted);
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 28px;
+        }
+
+        .board-card {
+            overflow: hidden;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 20px 55px rgba(7, 29, 46, 0.13);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .board-card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 28px 70px rgba(7, 29, 46, 0.18);
+        }
+
+        .board-photo {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 4 / 5;
+            background: #dcecf3;
+        }
+
+        .board-photo img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            object-position: center top;
+        }
+
+        .board-badge {
+            position: absolute;
+            left: 18px;
+            bottom: 18px;
+            padding: 8px 13px;
+            color: var(--white);
+            background: rgba(7, 29, 46, 0.84);
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .board-content {
+            padding: 28px;
+        }
+
+        .board-role {
+            margin: 0 0 5px;
+            color: #087dac;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .board-content h3 {
+            margin: 0;
+            color: var(--navy);
+            font-size: 2rem;
+            line-height: 1.15;
+        }
+
+        .board-bio {
+            margin: 18px 0 0;
+            color: var(--muted);
+        }
+
+        .commitment-section {
+            padding: 90px 0;
+            background: var(--white);
+        }
+
+        .commitment-grid {
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .commitment-copy h2 {
+            margin: 0;
+            color: var(--navy);
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            line-height: 1.1;
+        }
+
+        .commitment-copy p:last-child {
+            margin: 22px 0 0;
+            color: var(--muted);
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .value-card {
+            min-height: 200px;
+            padding: 26px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        .value-card span {
+            color: var(--blue);
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+        }
+
+        .value-card h3 {
+            margin: 26px 0 8px;
+            color: var(--navy);
+            font-size: 1.35rem;
+        }
+
+        .value-card p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .board-footer {
+            padding: 48px 0;
+            color: rgba(255, 255, 255, 0.74);
+            background: var(--navy);
+            text-align: center;
+        }
+
+        .board-footer p {
+            margin: 0;
+        }
+
+        @media (max-width: 960px) {
+            .board-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .board-card:last-child {
+                grid-column: 1 / -1;
+                width: min(540px, 100%);
+                margin: 0 auto;
+            }
+
+            .commitment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .board-nav {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .board-nav-links {
+                flex-wrap: wrap;
+                gap: 14px;
+            }
+
+            .board-hero {
+                padding: 75px 0;
+            }
+
+            .board-section,
+            .commitment-section {
+                padding: 70px 0;
+            }
+
+            .board-grid,
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .board-card:last-child {
+                grid-column: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="board-header">
+    <div class="page-container board-nav">
+        <a class="board-logo" href="{{ url_for('home') }}">
+            EmpowerBands <span>Worldwide</span>
+        </a>
+
+        <nav class="board-nav-links" aria-label="Board page navigation">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('about') }}">About Us</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('donate') }}">Donate</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+
+    <section class="board-hero">
+        <div class="page-container board-hero-content">
+            <p class="eyebrow">Leadership with purpose</p>
+
+            <h1>
+                Board of <span>Directors</span>
+            </h1>
+
+            <p>
+                Meet the leaders guiding EmpowerBands Worldwide as we advance
+                safety, accessibility, and faster emergency response through
+                smart wearable technology.
+            </p>
+        </div>
+    </section>
+
+    <section class="board-section">
+        <div class="page-container">
+
+            <div class="section-heading">
+                <p class="eyebrow">The people behind the mission</p>
+
+                <h2>Our Leadership</h2>
+
+                <p>
+                    Our board provides strategic direction, operational leadership,
+                    financial oversight, and community advocacy.
+                </p>
+            </div>
+
+            <div class="board-grid">
+
+                <article class="board-card">
+                    <div class="board-photo">
+                        <img
+                            src="{{ url_for('static', filename='images/april-mcdaniel.png') }}"
+                            alt="April McDaniel, Founder and Chief Executive Officer"
+                        >
+
+                        <span class="board-badge">Founder</span>
+                    </div>
+
+                    <div class="board-content">
+                        <p class="board-role">Chief Executive Officer</p>
+
+                        <h3>April McDaniel</h3>
+
+                        <p class="board-bio">
+                            April McDaniel founded EmpowerBands Worldwide with a
+                            vision to improve emergency response through innovative
+                            wearable technology. She leads the organization’s
+                            strategic direction, partnerships, fundraising
+                            initiatives, and long-term growth while keeping its
+                            mission centered on protecting vulnerable individuals
+                            and supporting families.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="board-card">
+                    <div class="board-photo">
+                        <img
+                            src="{{ url_for('static', filename='images/avery-johnson.png') }}"
+                            alt="Avery Johnson, Co-Founder and Director of Operations"
+                        >
+
+                        <span class="board-badge">Co-Founder</span>
+                    </div>
+
+                    <div class="board-content">
+                        <p class="board-role">Director of Operations</p>
+
+                        <h3>Avery Johnson</h3>
+
+                        <p class="board-bio">
+                            Avery Johnson oversees daily operations, community
+                            outreach, strategic partnerships, and organizational
+                            development. He brings leadership, entrepreneurship,
+                            and a commitment to community service while helping
+                            build relationships with schools, healthcare providers,
+                            first responders, and nonprofit organizations.
+                        </p>
+                    </div>
+                </article>
+
+                <article class="board-card">
+                    <div class="board-photo">
+                        <img
+                            src="{{ url_for('static', filename='images/selina.png') }}"
+                            alt="Selina, Treasurer"
+                        >
+
+                        <span class="board-badge">Treasurer</span>
+                    </div>
+
+                    <div class="board-content">
+                        <p class="board-role">Financial Oversight</p>
+
+                        <h3>Selina</h3>
+
+                        <p class="board-bio">
+                            Selina provides financial oversight for EmpowerBands
+                            Worldwide, including budgeting, fiscal accountability,
+                            and organizational compliance. She helps ensure that
+                            resources are managed responsibly while supporting
+                            long-term sustainability and mission-driven growth.
+                        </p>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="commitment-section">
+        <div class="page-container commitment-grid">
+
+            <div class="commitment-copy">
+                <p class="eyebrow">Our commitment</p>
+
+                <h2>
+                    Guided by integrity, innovation, and compassion.
+                </h2>
+
+                <p>
+                    The EmpowerBands Worldwide Board of Directors is committed
+                    to responsible governance, transparency, thoughtful growth,
+                    and technology that improves safety and independence.
+                </p>
+            </div>
+
+            <div class="values-grid">
+
+                <div class="value-card">
+                    <span>01</span>
+                    <h3>Integrity</h3>
+                    <p>
+                        We lead with honesty, accountability, and responsible
+                        decision-making.
+                    </p>
+                </div>
+
+                <div class="value-card">
+                    <span>02</span>
+                    <h3>Accessibility</h3>
+                    <p>
+                        We consider diverse abilities, needs, and real-world
+                        situations in our work.
+                    </p>
+                </div>
+
+                <div class="value-card">
+                    <span>03</span>
+                    <h3>Innovation</h3>
+                    <p>
+                        We pursue practical technology that helps people when
+                        every second matters.
+                    </p>
+                </div>
+
+                <div class="value-card">
+                    <span>04</span>
+                    <h3>Community</h3>
+                    <p>
+                        We collaborate with families, caregivers, schools,
+                        organizations, and public-safety partners.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="board-footer">
+    <div class="page-container">
+        <p>
+            &copy; 2026 EmpowerBands Worldwide. All rights reserved.
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>
