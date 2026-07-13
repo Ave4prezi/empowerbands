@@ -839,6 +839,10 @@ body{{
     
 
 
+@app.route('/board')
+def board():
+    return render_template('board.html')
+
 # ===============================
 # SHORT LINK REDIRECT
 # ===============================
