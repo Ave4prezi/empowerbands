@@ -625,6 +625,7 @@ body{{
         <a href="#how">How It Works</a>
         <a href="#about">About Us</a>
         <a href="#mission">Mission</a>
+        <a href="/board">Board of Directors</a>
         <a href="mailto:support@empowerbands.org">Contact</a>
     </div>
 
