@@ -684,6 +684,106 @@
                 grid-column: auto;
             }
         }
+
+        /* QR scanner */
+        .band-action-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .scan-qr-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 17px;
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--navy);
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(7, 26, 46, 0.11);
+        }
+
+        .scan-qr-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(7, 26, 46, 0.16);
+        }
+
+        .scan-qr-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .qr-scanner-panel {
+            margin: -4px 0 22px;
+            padding: 18px;
+            border: 1px solid rgba(216, 173, 84, 0.55);
+            border-radius: 16px;
+            background: #071a2e;
+            color: #ffffff;
+            box-shadow: 0 18px 38px rgba(7, 26, 46, 0.2);
+        }
+
+        .qr-scanner-panel[hidden] {
+            display: none;
+        }
+
+        .qr-scanner-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .qr-scanner-header strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .qr-scanner-header span {
+            display: block;
+            color: #b9ccdc;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .close-scanner-button {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        #qrVideo {
+            display: block;
+            width: 100%;
+            max-height: 360px;
+            object-fit: cover;
+            border: 2px solid rgba(241, 213, 143, 0.7);
+            border-radius: 13px;
+            background: #000000;
+        }
+
+        .scanner-status {
+            margin: 12px 0 0;
+            color: #c6d8e5;
+            font-size: 12px;
+            text-align: center;
+        }
+
     </style>
 </head>
 
@@ -1112,6 +1212,9 @@
         </footer>
     </div>
 
+        <!-- QR Scanner Library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
     <script>
         const registrationForm =
             document.getElementById("registrationForm");
@@ -1130,6 +1233,183 @@
 
         const purchaseDateInput =
             document.getElementById("purchaseDate");
+
+
+        const openScannerButton =
+            document.getElementById("openScannerButton");
+
+        const closeScannerButton =
+            document.getElementById("closeScannerButton");
+
+        const qrScannerPanel =
+            document.getElementById("qrScannerPanel");
+
+        const qrVideo =
+            document.getElementById("qrVideo");
+
+        const qrCanvas =
+            document.getElementById("qrCanvas");
+
+        const scannerStatus =
+            document.getElementById("scannerStatus");
+
+        const bandIdInput =
+            document.getElementById("bandId");
+
+        const qrCanvasContext =
+            qrCanvas.getContext("2d", { willReadFrequently: true });
+
+        let scannerStream = null;
+        let scannerAnimationFrame = null;
+        let scannerIsRunning = false;
+
+        openScannerButton.addEventListener("click", startQrScanner);
+        closeScannerButton.addEventListener("click", stopQrScanner);
+
+        async function startQrScanner() {
+            clearStatus();
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showStatus(
+                    "This browser does not support camera scanning. Please enter the Band ID manually.",
+                    "error"
+                );
+                return;
+            }
+
+            openScannerButton.disabled = true;
+            qrScannerPanel.hidden = false;
+            scannerStatus.textContent = "Requesting camera access...";
+
+            try {
+                scannerStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: "environment" } },
+                    audio: false
+                });
+
+                qrVideo.srcObject = scannerStream;
+                await qrVideo.play();
+
+                scannerIsRunning = true;
+                scannerStatus.textContent =
+                    "Point the camera at the EmpowerBand QR code.";
+
+                scanVideoFrame();
+
+                qrScannerPanel.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            } catch (error) {
+                stopQrScanner();
+                showStatus(
+                    "Camera permission was denied or unavailable. You can still enter the Band ID manually.",
+                    "error"
+                );
+            }
+        }
+
+        function scanVideoFrame() {
+            if (!scannerIsRunning) return;
+
+            if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+                qrCanvas.width = qrVideo.videoWidth;
+                qrCanvas.height = qrVideo.videoHeight;
+
+                qrCanvasContext.drawImage(
+                    qrVideo,
+                    0,
+                    0,
+                    qrCanvas.width,
+                    qrCanvas.height
+                );
+
+                const imageData = qrCanvasContext.getImageData(
+                    0,
+                    0,
+                    qrCanvas.width,
+                    qrCanvas.height
+                );
+
+                const qrResult = jsQR(
+                    imageData.data,
+                    imageData.width,
+                    imageData.height,
+                    { inversionAttempts: "attemptBoth" }
+                );
+
+                if (qrResult && qrResult.data) {
+                    const scannedBandId = extractBandId(qrResult.data);
+
+                    if (scannedBandId) {
+                        bandIdInput.value = scannedBandId;
+                        bandIdInput.dispatchEvent(new Event("input"));
+                        stopQrScanner();
+
+                        showStatus(
+                            "Band ID scanned successfully. Complete the remaining information to activate your EmpowerBand.",
+                            "success"
+                        );
+
+                        bandIdInput.focus();
+                        return;
+                    }
+
+                    scannerStatus.textContent =
+                        "A QR code was detected, but it did not contain a valid EmpowerBand ID.";
+                }
+            }
+
+            scannerAnimationFrame = requestAnimationFrame(scanVideoFrame);
+        }
+
+        function extractBandId(scannedValue) {
+            const value = scannedValue.trim();
+
+            if (/^EB-[A-Z0-9-]+$/i.test(value)) {
+                return value.toUpperCase();
+            }
+
+            try {
+                const scannedUrl = new URL(value);
+                const bandFromUrl =
+                    scannedUrl.searchParams.get("band") ||
+                    scannedUrl.searchParams.get("bandId") ||
+                    scannedUrl.searchParams.get("id");
+
+                if (bandFromUrl && /^EB-[A-Z0-9-]+$/i.test(bandFromUrl)) {
+                    return bandFromUrl.toUpperCase();
+                }
+            } catch (error) {
+                // Not a URL.
+            }
+
+            const bandMatch = value.match(/EB-[A-Z0-9-]+/i);
+            return bandMatch ? bandMatch[0].toUpperCase() : null;
+        }
+
+        function stopQrScanner() {
+            scannerIsRunning = false;
+
+            if (scannerAnimationFrame) {
+                cancelAnimationFrame(scannerAnimationFrame);
+                scannerAnimationFrame = null;
+            }
+
+            if (scannerStream) {
+                scannerStream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                scannerStream = null;
+            }
+
+            qrVideo.srcObject = null;
+            qrScannerPanel.hidden = true;
+            openScannerButton.disabled = false;
+        }
+
+        window.addEventListener("beforeunload", stopQrScanner);
+
 
         /*
          * Prevent users from selecting a future purchase date.
@@ -1314,6 +1594,7 @@
                         "success"
                     );
 
+                    stopQrScanner();
                     registrationForm.reset();
 
                     passwordMeterBars.forEach(function (bar) {
