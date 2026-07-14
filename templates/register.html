@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Create your EmpowerBands account and activate your smart safety band."
+    >
+
+    <title>Activate Your EmpowerBand | EmpowerBands Worldwide</title>
+
+    <style>
+        :root {
+            --navy: #071a2e;
+            --navy-light: #0d2d4d;
+            --blue: #1e6ea1;
+            --blue-light: #39a6d8;
+            --gold: #d8ad54;
+            --gold-light: #f1d58f;
+            --white: #ffffff;
+            --off-white: #f5f8fb;
+            --text: #172536;
+            --muted: #64748b;
+            --border: #d9e2ec;
+            --success: #16815d;
+            --success-background: #e8f8f1;
+            --danger: #b42318;
+            --danger-background: #fff0ee;
+            --shadow: 0 24px 70px rgba(7, 26, 46, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(57, 166, 216, 0.14),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 90% 90%,
+                    rgba(216, 173, 84, 0.13),
+                    transparent 30%
+                ),
+                linear-gradient(
+                    145deg,
+                    #eef5fa 0%,
+                    #f8fafc 50%,
+                    #edf3f8 100%
+                );
+            color: var(--text);
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .page-shell {
+            min-height: 100vh;
+        }
+
+        .site-header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 82px;
+            padding: 14px clamp(20px, 5vw, 72px);
+            background: rgba(7, 26, 46, 0.97);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+            color: var(--white);
+            box-shadow: 0 10px 30px rgba(7, 26, 46, 0.16);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 13px;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 47px;
+            height: 47px;
+            place-items: center;
+            border: 1px solid rgba(241, 213, 143, 0.7);
+            border-radius: 14px;
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(216, 173, 84, 0.22),
+                    rgba(255, 255, 255, 0.05)
+                );
+            color: var(--gold-light);
+            font-size: 23px;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.16),
+                0 8px 25px rgba(0, 0, 0, 0.18);
+        }
+
+        .brand-copy strong {
+            display: block;
+            font-size: 17px;
+            line-height: 1.1;
+            letter-spacing: 0.2px;
+        }
+
+        .brand-copy span {
+            display: block;
+            margin-top: 4px;
+            color: #b9ccdc;
+            font-size: 11px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .header-link {
+            padding: 10px 17px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition:
+                transform 160ms ease,
+                border-color 160ms ease,
+                background 160ms ease;
+        }
+
+        .header-link:hover {
+            transform: translateY(-1px);
+            border-color: var(--gold-light);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .registration-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 0.88fr) minmax(520px, 1.12fr);
+            width: min(1180px, calc(100% - 36px));
+            margin: 58px auto;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 28px;
+            background: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .intro-panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 760px;
+            padding: clamp(34px, 5vw, 62px);
+            overflow: hidden;
+            background:
+                linear-gradient(
+                    155deg,
+                    rgba(7, 26, 46, 0.98),
+                    rgba(13, 45, 77, 0.96)
+                );
+            color: var(--white);
+        }
+
+        .intro-panel::before {
+            position: absolute;
+            top: -120px;
+            right: -110px;
+            width: 330px;
+            height: 330px;
+            border: 1px solid rgba(241, 213, 143, 0.2);
+            border-radius: 50%;
+            content: "";
+        }
+
+        .intro-panel::after {
+            position: absolute;
+            right: -70px;
+            bottom: -90px;
+            width: 270px;
+            height: 270px;
+            border-radius: 50%;
+            background: rgba(57, 166, 216, 0.12);
+            content: "";
+            filter: blur(2px);
+        }
+
+        .intro-content,
+        .trust-card {
+            position: relative;
+            z-index: 2;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            color: var(--gold-light);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.7px;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before {
+            width: 28px;
+            height: 1px;
+            background: var(--gold);
+            content: "";
+        }
+
+        .intro-panel h1 {
+            max-width: 490px;
+            margin: 0;
+            font-size: clamp(36px, 4.7vw, 58px);
+            line-height: 1.02;
+            letter-spacing: -2px;
+        }
+
+        .intro-panel h1 span {
+            color: var(--gold-light);
+        }
+
+        .intro-description {
+            max-width: 510px;
+            margin: 24px 0 0;
+            color: #c4d5e3;
+            font-size: 17px;
+            line-height: 1.75;
+        }
+
+        .benefits {
+            display: grid;
+            gap: 17px;
+            margin-top: 36px;
+        }
+
+        .benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+        }
+
+        .benefit-icon {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            flex: 0 0 34px;
+            place-items: center;
+            border: 1px solid rgba(241, 213, 143, 0.3);
+            border-radius: 10px;
+            background: rgba(216, 173, 84, 0.1);
+            color: var(--gold-light);
+            font-size: 15px;
+        }
+
+        .benefit strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--white);
+            font-size: 14px;
+        }
+
+        .benefit span {
+            color: #afc5d6;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .trust-card {
+            margin-top: 45px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.13);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(10px);
+        }
+
+        .trust-card strong {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--white);
+            font-size: 14px;
+        }
+
+        .trust-card p {
+            margin: 0;
+            color: #bcd0de;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .form-panel {
+            padding: clamp(30px, 4vw, 58px);
+            background:
+                linear-gradient(
+                    180deg,
+                    #ffffff 0%,
+                    #fbfdff 100%
+                );
+        }
+
+        .form-heading {
+            margin-bottom: 31px;
+        }
+
+        .form-heading .step-label {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: var(--blue);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+        }
+
+        .form-heading h2 {
+            margin: 0;
+            color: var(--navy);
+            font-size: clamp(27px, 3vw, 38px);
+            line-height: 1.15;
+            letter-spacing: -1px;
+        }
+
+        .form-heading p {
+            margin: 11px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.65;
+        }
+
+        .form-section {
+            padding: 0;
+            border: 0;
+            margin: 0 0 30px;
+        }
+
+        .form-section legend {
+            width: 100%;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--navy);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 17px;
+        }
+
+        .field {
+            margin-bottom: 17px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #26384b;
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .required {
+            color: var(--danger);
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            color: #7890a4;
+            font-size: 15px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            min-height: 52px;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            outline: none;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            font-size: 15px;
+            transition:
+                border-color 160ms ease,
+                box-shadow 160ms ease,
+                transform 160ms ease;
+        }
+
+        .field input.with-icon {
+            padding-left: 44px;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 4px rgba(30, 110, 161, 0.11);
+        }
+
+        .field input::placeholder {
+            color: #9aabba;
+        }
+
+        .field-help {
+            display: block;
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .band-id-field input {
+            border-color: rgba(216, 173, 84, 0.75);
+            background: #fffdf8;
+            font-weight: 750;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .password-meter {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .password-meter span {
+            height: 4px;
+            border-radius: 999px;
+            background: #dce5ec;
+        }
+
+        .password-meter span.active {
+            background: var(--blue);
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            margin: 16px 0;
+        }
+
+        .checkbox-row input {
+            width: 18px;
+            height: 18px;
+            margin: 2px 0 0;
+            flex: 0 0 18px;
+            accent-color: var(--navy);
+        }
+
+        .checkbox-row label {
+            color: #526579;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .checkbox-row a {
+            color: var(--blue);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .checkbox-row a:hover {
+            text-decoration: underline;
+        }
+
+        .submit-button {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 57px;
+            margin-top: 23px;
+            padding: 14px 24px;
+            overflow: hidden;
+            border: 1px solid #061729;
+            border-radius: 12px;
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--navy),
+                    var(--navy-light)
+                );
+            color: var(--white);
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            box-shadow: 0 14px 28px rgba(7, 26, 46, 0.21);
+            transition:
+                transform 160ms ease,
+                box-shadow 160ms ease,
+                opacity 160ms ease;
+        }
+
+        .submit-button::after {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    110deg,
+                    transparent 20%,
+                    rgba(255, 255, 255, 0.13) 45%,
+                    transparent 70%
+                );
+            content: "";
+            transform: translateX(-110%);
+            transition: transform 450ms ease;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 34px rgba(7, 26, 46, 0.27);
+        }
+
+        .submit-button:hover::after {
+            transform: translateX(110%);
+        }
+
+        .submit-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+            transform: none;
+        }
+
+        .status-message {
+            display: none;
+            margin-top: 18px;
+            padding: 14px 16px;
+            border: 1px solid transparent;
+            border-radius: 11px;
+            font-size: 13px;
+            font-weight: 650;
+            line-height: 1.55;
+        }
+
+        .status-message.success {
+            display: block;
+            border-color: rgba(22, 129, 93, 0.2);
+            background: var(--success-background);
+            color: var(--success);
+        }
+
+        .status-message.error {
+            display: block;
+            border-color: rgba(180, 35, 24, 0.18);
+            background: var(--danger-background);
+            color: var(--danger);
+        }
+
+        .signin-row {
+            margin: 22px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .signin-row a {
+            color: var(--blue);
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .site-footer {
+            padding: 0 20px 34px;
+            color: #75879a;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .site-footer a {
+            color: #526b80;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        @media (max-width: 920px) {
+            .registration-layout {
+                grid-template-columns: 1fr;
+                max-width: 720px;
+                margin-top: 34px;
+            }
+
+            .intro-panel {
+                min-height: auto;
+            }
+
+            .intro-panel h1 {
+                max-width: 600px;
+            }
+
+            .trust-card {
+                max-width: 560px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .site-header {
+                min-height: 72px;
+                padding: 12px 16px;
+            }
+
+            .brand-copy span {
+                display: none;
+            }
+
+            .header-link {
+                padding: 9px 12px;
+                font-size: 12px;
+            }
+
+            .registration-layout {
+                width: min(100% - 20px, 720px);
+                margin: 18px auto 32px;
+                border-radius: 21px;
+            }
+
+            .intro-panel,
+            .form-panel {
+                padding: 27px 21px;
+            }
+
+            .intro-panel h1 {
+                font-size: 37px;
+                letter-spacing: -1.4px;
+            }
+
+            .intro-description {
+                font-size: 15px;
+            }
+
+            .field-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand" href="/" aria-label="EmpowerBands home">
+                <div class="brand-mark" aria-hidden="true">✦</div>
+
+                <div class="brand-copy">
+                    <strong>EmpowerBands Worldwide</strong>
+                    <span>Protect What Matters Most</span>
+                </div>
+            </a>
+
+            <a class="header-link" href="/login">
+                Account Sign In
+            </a>
+        </header>
+
+        <main class="registration-layout">
+            <section class="intro-panel">
+                <div class="intro-content">
+                    <div class="eyebrow">
+                        Secure Band Activation
+                    </div>
+
+                    <h1>
+                        Protection begins with
+                        <span>one simple step.</span>
+                    </h1>
+
+                    <p class="intro-description">
+                        Create your secure EmpowerBands account and connect
+                        your band so important safety information can be
+                        available when it matters most.
+                    </p>
+
+                    <div class="benefits">
+                        <div class="benefit">
+                            <div class="benefit-icon">✓</div>
+
+                            <div>
+                                <strong>Activate your unique band</strong>
+
+                                <span>
+                                    Connect your registered Band ID to your
+                                    secure customer account.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="benefit">
+                            <div class="benefit-icon">⌁</div>
+
+                            <div>
+                                <strong>NFC and QR accessibility</strong>
+
+                                <span>
+                                    EmpowerBands works without requiring
+                                    first responders to download an app.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="benefit">
+                            <div class="benefit-icon">♢</div>
+
+                            <div>
+                                <strong>Built for families and caregivers</strong>
+
+                                <span>
+                                    Designed to support children, seniors,
+                                    schools, caregivers, and communities.
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trust-card">
+                    <strong>Your information deserves protection.</strong>
+
+                    <p>
+                        Account passwords must be encrypted by the server.
+                        Emergency-profile information should never be sent
+                        through an ordinary email form.
+                    </p>
+                </div>
+            </section>
+
+            <section class="form-panel">
+                <div class="form-heading">
+                    <span class="step-label">Customer Registration</span>
+
+                    <h2>Activate your EmpowerBand</h2>
+
+                    <p>
+                        Enter the Band ID from your package and create the
+                        account that will manage your band.
+                    </p>
+                </div>
+
+                <form id="registrationForm" novalidate>
+                    <fieldset class="form-section">
+                        <legend>1. Band and purchase information</legend>
+
+                        <div class="field-grid">
+                            <div class="field full band-id-field">
+                                <label for="bandId">
+                                    EmpowerBand ID
+                                    <span class="required">*</span>
+                                </label>
+
+                                <div class="input-wrap">
+                                    <span class="input-icon">#</span>
+
+                                    <input
+                                        class="with-icon"
+                                        type="text"
+                                        id="bandId"
+                                        name="bandId"
+                                        maxlength="50"
+                                        placeholder="EB-PAYLESS-0001"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                </div>
+
+                                <span class="field-help">
+                                    Find this code on the product card,
+                                    packaging, or band label.
+                                </span>
+                            </div>
+
+                            <div class="field">
+                                <label for="purchaseLocation">
+                                    Purchase location
+                                    <span class="required">*</span>
+                                </label>
+
+                                <select
+                                    id="purchaseLocation"
+                                    name="purchaseLocation"
+                                    required
+                                >
+                                    <option value="">
+                                        Select a location
+                                    </option>
+
+                                    <option value="Payless">
+                                        Payless
+                                    </option>
+
+                                    <option value="EmpowerBands Website">
+                                        EmpowerBands website
+                                    </option>
+
+                                    <option value="School or Organization">
+                                        School or organization
+                                    </option>
+
+                                    <option value="Community Event">
+                                        Community event
+                                    </option>
+
+                                    <option value="Gift">
+                                        Received as a gift
+                                    </option>
+
+                                    <option value="Other">
+                                        Other
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label for="purchaseDate">
+                                    Purchase date
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="purchaseDate"
+                                    name="purchaseDate"
+                                >
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="form-section">
+                        <legend>2. Create your account</legend>
+
+                        <div class="field-grid">
+                            <div class="field">
+                                <label for="firstName">
+                                    First name
+                                    <span class="required">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="firstName"
+                                    name="firstName"
+                                    autocomplete="given-name"
+                                    placeholder="First name"
+                                    required
+                                >
+                            </div>
+
+                            <div class="field">
+                                <label for="lastName">
+                                    Last name
+                                    <span class="required">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="lastName"
+                                    name="lastName"
+                                    autocomplete="family-name"
+                                    placeholder="Last name"
+                                    required
+                                >
+                            </div>
+
+                            <div class="field full">
+                                <label for="email">
+                                    Email address
+                                    <span class="required">*</span>
+                                </label>
+
+                                <div class="input-wrap">
+                                    <span class="input-icon">@</span>
+
+                                    <input
+                                        class="with-icon"
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        autocomplete="email"
+                                        placeholder="name@example.com"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="field full">
+                                <label for="phone">
+                                    Phone number
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    autocomplete="tel"
+                                    placeholder="256-555-1234"
+                                >
+                            </div>
+
+                            <div class="field">
+                                <label for="password">
+                                    Create password
+                                    <span class="required">*</span>
+                                </label>
+
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    minlength="10"
+                                    autocomplete="new-password"
+                                    placeholder="At least 10 characters"
+                                    required
+                                >
+
+                                <div
+                                    class="password-meter"
+                                    id="passwordMeter"
+                                    aria-hidden="true"
+                                >
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label for="confirmPassword">
+                                    Confirm password
+                                    <span class="required">*</span>
+                                </label>
+
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    minlength="10"
+                                    autocomplete="new-password"
+                                    placeholder="Enter it again"
+                                    required
+                                >
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="checkbox-row">
+                        <input
+                            type="checkbox"
+                            id="termsConsent"
+                            name="termsConsent"
+                            required
+                        >
+
+                        <label for="termsConsent">
+                            I agree to the
+                            <a href="/terms" target="_blank">
+                                Terms of Service
+                            </a>
+                            and
+                            <a href="/privacy" target="_blank">
+                                Privacy Policy
+                            </a>
+                            and authorize EmpowerBands to connect this
+                            band to my account.
+                        </label>
+                    </div>
+
+                    <div class="checkbox-row">
+                        <input
+                            type="checkbox"
+                            id="marketingConsent"
+                            name="marketingConsent"
+                        >
+
+                        <label for="marketingConsent">
+                            Send me optional EmpowerBands product news,
+                            safety resources, and community updates.
+                        </label>
+                    </div>
+
+                    <button
+                        class="submit-button"
+                        type="submit"
+                        id="submitButton"
+                    >
+                        Activate My EmpowerBand
+                    </button>
+
+                    <div
+                        class="status-message"
+                        id="statusMessage"
+                        role="alert"
+                        aria-live="polite"
+                    ></div>
+
+                    <p class="signin-row">
+                        Already have an account?
+                        <a href="/login">Sign in here</a>
+                    </p>
+                </form>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            EmpowerBands Worldwide · Decatur, Alabama ·
+            <a href="mailto:support@empowerbands.org">
+                support@empowerbands.org
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        const registrationForm =
+            document.getElementById("registrationForm");
+
+        const submitButton =
+            document.getElementById("submitButton");
+
+        const statusMessage =
+            document.getElementById("statusMessage");
+
+        const passwordInput =
+            document.getElementById("password");
+
+        const passwordMeterBars =
+            document.querySelectorAll("#passwordMeter span");
+
+        const purchaseDateInput =
+            document.getElementById("purchaseDate");
+
+        /*
+         * Prevent users from selecting a future purchase date.
+         */
+        purchaseDateInput.max =
+            new Date().toISOString().split("T")[0];
+
+        /*
+         * Automatically capitalize the Band ID.
+         */
+        document
+            .getElementById("bandId")
+            .addEventListener("input", function () {
+                this.value = this.value
+                    .toUpperCase()
+                    .replace(/\s+/g, "");
+            });
+
+        /*
+         * Basic visual password-strength indicator.
+         * The server must still validate the password.
+         */
+        passwordInput.addEventListener("input", function () {
+            const password = this.value;
+            let strength = 0;
+
+            if (password.length >= 10) {
+                strength += 1;
+            }
+
+            if (/[A-Z]/.test(password)) {
+                strength += 1;
+            }
+
+            if (/[0-9]/.test(password)) {
+                strength += 1;
+            }
+
+            if (/[^A-Za-z0-9]/.test(password)) {
+                strength += 1;
+            }
+
+            passwordMeterBars.forEach(function (bar, index) {
+                bar.classList.toggle(
+                    "active",
+                    index < strength
+                );
+            });
+        });
+
+        registrationForm.addEventListener(
+            "submit",
+            async function (event) {
+                event.preventDefault();
+
+                clearStatus();
+
+                if (!registrationForm.checkValidity()) {
+                    registrationForm.reportValidity();
+                    return;
+                }
+
+                const password =
+                    document.getElementById("password").value;
+
+                const confirmPassword =
+                    document.getElementById(
+                        "confirmPassword"
+                    ).value;
+
+                if (password !== confirmPassword) {
+                    showStatus(
+                        "Your passwords do not match. Please enter them again.",
+                        "error"
+                    );
+
+                    document
+                        .getElementById("confirmPassword")
+                        .focus();
+
+                    return;
+                }
+
+                if (password.length < 10) {
+                    showStatus(
+                        "Your password must contain at least 10 characters.",
+                        "error"
+                    );
+
+                    passwordInput.focus();
+                    return;
+                }
+
+                const registrationData = {
+                    bandId: document
+                        .getElementById("bandId")
+                        .value
+                        .trim()
+                        .toUpperCase(),
+
+                    purchaseLocation: document
+                        .getElementById("purchaseLocation")
+                        .value,
+
+                    purchaseDate:
+                        document
+                            .getElementById("purchaseDate")
+                            .value || null,
+
+                    firstName: document
+                        .getElementById("firstName")
+                        .value
+                        .trim(),
+
+                    lastName: document
+                        .getElementById("lastName")
+                        .value
+                        .trim(),
+
+                    email: document
+                        .getElementById("email")
+                        .value
+                        .trim()
+                        .toLowerCase(),
+
+                    phone: document
+                        .getElementById("phone")
+                        .value
+                        .trim(),
+
+                    password: password,
+
+                    termsConsent: document
+                        .getElementById("termsConsent")
+                        .checked,
+
+                    marketingConsent: document
+                        .getElementById("marketingConsent")
+                        .checked
+                };
+
+                setLoading(true);
+
+                try {
+                    /*
+                     * This sends the form to your secure server route.
+                     */
+                    const response = await fetch(
+                        "/api/register-band",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify(
+                                registrationData
+                            )
+                        }
+                    );
+
+                    let result = {};
+
+                    try {
+                        result = await response.json();
+                    } catch (jsonError) {
+                        result = {};
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(
+                            result.message ||
+                            "We could not activate this band. Please verify the Band ID and try again."
+                        );
+                    }
+
+                    showStatus(
+                        result.message ||
+                        "Your EmpowerBand was activated successfully. Redirecting to your account...",
+                        "success"
+                    );
+
+                    registrationForm.reset();
+
+                    passwordMeterBars.forEach(function (bar) {
+                        bar.classList.remove("active");
+                    });
+
+                    setTimeout(function () {
+                        window.location.href =
+                            result.redirectUrl ||
+                            "/dashboard";
+                    }, 1600);
+                } catch (error) {
+                    showStatus(
+                        error.message ||
+                        "Something went wrong. Please try again.",
+                        "error"
+                    );
+                } finally {
+                    setLoading(false);
+                }
+            }
+        );
+
+        function setLoading(isLoading) {
+            submitButton.disabled = isLoading;
+
+            submitButton.textContent = isLoading
+                ? "Securing Your Registration..."
+                : "Activate My EmpowerBand";
+        }
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className =
+                "status-message " + type;
+
+            statusMessage.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+        }
+
+        function clearStatus() {
+            statusMessage.textContent = "";
+            statusMessage.className = "status-message";
+        }
+    </script>
+</body>
+</html>
