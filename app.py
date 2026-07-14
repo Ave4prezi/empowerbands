@@ -1098,9 +1098,19 @@ EmpowerBands Emergency System
    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
+
+
+
+
 @app.route("/register", methods=["GET"])
 def register_band_page():
     return render_template("register.html")
+
+
+    
+@app.route("/activate")
+def activate_band():
+    return render_template("activate.html")
 
 
 # ===============================
