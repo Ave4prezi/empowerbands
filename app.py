@@ -1098,6 +1098,11 @@ EmpowerBands Emergency System
    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
+@app.route("/register", methods=["GET"])
+def register_band_page():
+    return render_template("register.html")
+
+
 # ===============================
 # DASHBOARD
 # ===============================
