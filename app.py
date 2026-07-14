@@ -1103,6 +1103,11 @@ EmpowerBands Emergency System
 """
 
 
+@app.route("/login")
+def login():
+    return redirect(url_for("admin"))
+
+
 
 
 
