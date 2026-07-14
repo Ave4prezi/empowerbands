@@ -1,1 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Activate and register your EmpowerBand.">
+  <title>Activate Your EmpowerBand</title>
+  <link rel="stylesheet" href="static/css/activate.css">
+</head>
+<body>
+  <header class="board-topbar">
+    <div class="board-topbar-inner">
+      <a class="board-brand" href="/">Empower<span>Bands</span></a>
+      <nav class="board-navigation" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/products">Products</a>
+        <a href="/partners">Partners</a>
+        <a class="activate-nav-button board-active" href="/activate.html">Activate Band</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="activation-page">
+    <section class="activation-hero">
+      <div class="activation-shell activation-layout">
+        <div class="activation-copy">
+          <p class="activation-eyebrow">Secure band registration</p>
+          <h1>Activate Your <span>EmpowerBand</span></h1>
+          <p class="activation-intro">
+            Connect your band to your account, receive important updates,
+            and unlock the benefits included with your EmpowerBand.
+          </p>
+
+          <div class="activation-benefits" aria-label="Activation benefits">
+            <div><strong>01</strong><span>Verify your band</span></div>
+            <div><strong>02</strong><span>Create your account</span></div>
+            <div><strong>03</strong><span>Receive confirmation</span></div>
+          </div>
+        </div>
+
+        <section class="activation-card" aria-labelledby="form-title">
+          <div class="activation-progress" aria-hidden="true">
+            <span class="is-active"></span><span></span><span></span>
+          </div>
+
+          <h2 id="form-title">Band Registration</h2>
+          <p class="activation-card-intro">
+            Required fields are marked with an asterisk.
+          </p>
+
+          <form id="activation-form" novalidate>
+            <div class="form-section">
+              <h3>Band Information</h3>
+              <div class="field">
+                <label for="serial-number">EmpowerBand Serial Number *</label>
+                <input
+                  id="serial-number"
+                  name="serialNumber"
+                  type="text"
+                  placeholder="EB-000001"
+                  autocomplete="off"
+                  maxlength="40"
+                  required
+                >
+                <small>Printed on your band, package, or activation card.</small>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Account Information</h3>
+
+              <div class="field">
+                <label for="full-name">Full Name *</label>
+                <input id="full-name" name="fullName" type="text" autocomplete="name" required>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="email">Email Address *</label>
+                  <input id="email" name="email" type="email" autocomplete="email" required>
+                </div>
+                <div class="field">
+                  <label for="phone">Phone Number</label>
+                  <input id="phone" name="phone" type="tel" autocomplete="tel">
+                </div>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label for="password">Create a Password *</label>
+                  <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+                </div>
+                <div class="field">
+                  <label for="confirm-password">Confirm Password *</label>
+                  <input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+                </div>
+              </div>
+              <small>Use at least eight characters.</small>
+            </div>
+
+            <div class="form-section">
+              <h3>Communication Preferences</h3>
+              <label class="check-row">
+                <input id="product-updates" type="checkbox">
+                <span>Product updates and EmpowerBand news</span>
+              </label>
+              <label class="check-row">
+                <input id="safety-updates" type="checkbox" checked>
+                <span>Safety and service notices</span>
+              </label>
+              <label class="check-row">
+                <input id="partner-offers" type="checkbox">
+                <span>Partner offers and promotions</span>
+              </label>
+            </div>
+
+            <div class="privacy-panel">
+              <h3>Privacy and Security</h3>
+              <p>
+                We use secure account authentication and controlled database access.
+                We do not sell your personal information.
+              </p>
+              <label class="check-row">
+                <input id="terms" type="checkbox" required>
+                <span>
+                  I agree to the <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
+                  and <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>. *
+                </span>
+              </label>
+            </div>
+
+            <button id="submit-button" class="activation-submit" type="submit">
+              Activate My EmpowerBand
+            </button>
+
+            <div id="form-message" class="form-message" role="alert" aria-live="polite"></div>
+
+            <p class="confirmation-note">
+              After activation, you will receive account and benefit information by email.
+            </p>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="static/js/config.js"></script>
+  <script src="static/js/activate.js"></script>
+</body>
+</html>
 
