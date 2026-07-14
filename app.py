@@ -1113,8 +1113,8 @@ def register_band_page():
 
     
 @app.route("/activate")
-def activate_band():
-    return render_template("activate.html")
+def activate():
+    return redirect(url_for("register_band_page"))
 
 
 # ===============================
