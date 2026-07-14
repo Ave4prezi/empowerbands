@@ -863,6 +863,10 @@ def band_profile_shortcut(band_id):
     "sms-opt-in",
     "donate",
     "im_safe"
+    "register",
+    "activate",
+    "blessing-boxes",
+    "dashboard",
 ]
 
     if band_id.lower() in blocked_routes:
