@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Activate and register your EmpowerBand.">
   <title>Activate Your EmpowerBand</title>
-  <link rel="stylesheet" href="static/css/activate.css">
+  <link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/activate.css') }}"
+>
 </head>
 <body>
   <header class="board-topbar">
@@ -15,7 +18,7 @@
         <a href="/">Home</a>
         <a href="/products">Products</a>
         <a href="/partners">Partners</a>
-        <a class="activate-nav-button board-active" href="/activate.html">Activate Band</a>
+        <a class="activate-nav-button board-active" href="/activate">Activate Band</a>
       </nav>
     </div>
   </header>
@@ -123,7 +126,7 @@
               <label class="check-row">
                 <input id="terms" type="checkbox" required>
                 <span>
-                  I agree to the <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>
+                  I agree to the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>
                   and <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>. *
                 </span>
               </label>
@@ -144,9 +147,9 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="static/js/config.js"></script>
-  <script src="static/js/activate.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="{{ url_for('static', filename='js/config.js') }}"></script>
+<script src="{{ url_for('static', filename='js/activate.js') }}"></script>
 </body>
 </html>
 
