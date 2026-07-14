@@ -792,86 +792,140 @@
                         <legend>1. Band and purchase information</legend>
 
                         <div class="field-grid">
-                            <div class="field full band-id-field">
-                                <label for="bandId">
-                                    EmpowerBand ID
-                                    <span class="required">*</span>
-                                </label>
+    <div class="field full band-id-field">
+        <label for="bandId">
+            EmpowerBand ID
+            <span class="required">*</span>
+        </label>
 
-                                <div class="input-wrap">
-                                    <span class="input-icon">#</span>
+        <div class="input-wrap">
+            <span class="input-icon">#</span>
 
-                                    <input
-                                        class="with-icon"
-                                        type="text"
-                                        id="bandId"
-                                        name="bandId"
-                                        maxlength="50"
-                                        placeholder="EB-PAYLESS-0001"
-                                        autocomplete="off"
-                                        required
-                                    >
-                                </div>
+            <input
+                class="with-icon"
+                type="text"
+                id="bandId"
+                name="bandId"
+                maxlength="50"
+                placeholder="EB-PAYLESS-0001"
+                autocomplete="off"
+                required
+            >
+        </div>
 
-                                <span class="field-help">
-                                    Find this code on the product card,
-                                    packaging, or band label.
-                                </span>
-                            </div>
+        <div class="band-action-row">
+            <button
+                type="button"
+                class="scan-qr-button"
+                id="openScannerButton"
+            >
+                Scan QR Code
+            </button>
+        </div>
 
-                            <div class="field">
-                                <label for="purchaseLocation">
-                                    Purchase location
-                                    <span class="required">*</span>
-                                </label>
+        <span class="field-help">
+            Scan the QR code on your band or enter the Band ID manually.
+        </span>
+    </div>
 
-                                <select
-                                    id="purchaseLocation"
-                                    name="purchaseLocation"
-                                    required
-                                >
-                                    <option value="">
-                                        Select a location
-                                    </option>
+    <div
+        class="qr-scanner-panel field full"
+        id="qrScannerPanel"
+        hidden
+    >
+        <div class="qr-scanner-header">
+            <div>
+                <strong>Scan your EmpowerBand</strong>
 
-                                    <option value="Payless">
-                                        Payless
-                                    </option>
+                <span>
+                    Position the QR code inside the camera view.
+                </span>
+            </div>
 
-                                    <option value="EmpowerBands Website">
-                                        EmpowerBands website
-                                    </option>
+            <button
+                type="button"
+                class="close-scanner-button"
+                id="closeScannerButton"
+                aria-label="Close QR scanner"
+            >
+                ×
+            </button>
+        </div>
 
-                                    <option value="School or Organization">
-                                        School or organization
-                                    </option>
+        <video
+            id="qrVideo"
+            playsinline
+            muted
+        ></video>
 
-                                    <option value="Community Event">
-                                        Community event
-                                    </option>
+        <canvas
+            id="qrCanvas"
+            hidden
+        ></canvas>
 
-                                    <option value="Gift">
-                                        Received as a gift
-                                    </option>
+        <p
+            class="scanner-status"
+            id="scannerStatus"
+            role="status"
+            aria-live="polite"
+        >
+            Camera is ready.
+        </p>
+    </div>
 
-                                    <option value="Other">
-                                        Other
-                                    </option>
-                                </select>
-                            </div>
+    <div class="field">
+        <label for="purchaseLocation">
+            Purchase location
+            <span class="required">*</span>
+        </label>
 
-                            <div class="field">
-                                <label for="purchaseDate">
-                                    Purchase date
-                                </label>
+        <select
+            id="purchaseLocation"
+            name="purchaseLocation"
+            required
+        >
+            <option value="">
+                Select a location
+            </option>
 
-                                <input
-                                    type="date"
-                                    id="purchaseDate"
-                                    name="purchaseDate"
-                                >
-                            </div>
-                        </div>
+            <option value="Payless">
+                Payless
+            </option>
+
+            <option value="EmpowerBands Website">
+                EmpowerBands website
+            </option>
+
+            <option value="School or Organization">
+                School or organization
+            </option>
+
+            <option value="Community Event">
+                Community event
+            </option>
+
+            <option value="Gift">
+                Received as a gift
+            </option>
+
+            <option value="Other">
+                Other
+            </option>
+        </select>
+    </div>
+
+    <div class="field">
+        <label for="purchaseDate">
+            Purchase date
+        </label>
+
+        <input
+            type="date"
+            id="purchaseDate"
+            name="purchaseDate"
+        >
+    </div>
+</div>
                     </fieldset>
 
                     <fieldset class="form-section">
