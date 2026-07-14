@@ -1,155 +1,176 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Activate and register your EmpowerBand.">
-  <title>Activate Your EmpowerBand</title>
-  <link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/activate.css') }}"
->
-</head>
-<body>
-  <header class="board-topbar">
-    <div class="board-topbar-inner">
-      <a class="board-brand" href="/">Empower<span>Bands</span></a>
-      <nav class="board-navigation" aria-label="Main navigation">
-        <a href="/">Home</a>
-        <a href="/products">Products</a>
-        <a href="/partners">Partners</a>
-        <a class="activate-nav-button board-active" href="/activate">Activate Band</a>
-      </nav>
-    </div>
-  </header>
+(() => {
+  "use strict";
 
-  <main class="activation-page">
-    <section class="activation-hero">
-      <div class="activation-shell activation-layout">
-        <div class="activation-copy">
-          <p class="activation-eyebrow">Secure band registration</p>
-          <h1>Activate Your <span>EmpowerBand</span></h1>
-          <p class="activation-intro">
-            Connect your band to your account, receive important updates,
-            and unlock the benefits included with your EmpowerBand.
-          </p>
+  const form = document.getElementById("activation-form");
+  const message = document.getElementById("form-message");
+  const submitButton = document.getElementById("submit-button");
+  const serialInput = document.getElementById("serial-number");
 
-          <div class="activation-benefits" aria-label="Activation benefits">
-            <div><strong>01</strong><span>Verify your band</span></div>
-            <div><strong>02</strong><span>Create your account</span></div>
-            <div><strong>03</strong><span>Receive confirmation</span></div>
-          </div>
-        </div>
+  if (!form || !message || !submitButton || !serialInput) {
+    console.error("EmpowerBands activation form elements were not found.");
+    return;
+  }
 
-        <section class="activation-card" aria-labelledby="form-title">
-          <div class="activation-progress" aria-hidden="true">
-            <span class="is-active"></span><span></span><span></span>
-          </div>
+  const urlParameters = new URLSearchParams(window.location.search);
+  const qrSerialNumber = urlParameters.get("serial");
 
-          <h2 id="form-title">Band Registration</h2>
-          <p class="activation-card-intro">
-            Required fields are marked with an asterisk.
-          </p>
+  if (qrSerialNumber) {
+    serialInput.value = qrSerialNumber.trim().toUpperCase();
+    serialInput.readOnly = true;
+  }
 
-          <form id="activation-form" novalidate>
-            <div class="form-section">
-              <h3>Band Information</h3>
-              <div class="field">
-                <label for="serial-number">EmpowerBand Serial Number *</label>
-                <input
-                  id="serial-number"
-                  name="serialNumber"
-                  type="text"
-                  placeholder="EB-000001"
-                  autocomplete="off"
-                  maxlength="40"
-                  required
-                >
-                <small>Printed on your band, package, or activation card.</small>
-              </div>
-            </div>
+  function showMessage(text, type) {
+    message.textContent = text;
+    message.className = `form-message ${type}`;
+  }
 
-            <div class="form-section">
-              <h3>Account Information</h3>
+  function normalizeSerial(value) {
+    return value.trim().toUpperCase();
+  }
 
-              <div class="field">
-                <label for="full-name">Full Name *</label>
-                <input id="full-name" name="fullName" type="text" autocomplete="name" required>
-              </div>
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-              <div class="field-grid">
-                <div class="field">
-                  <label for="email">Email Address *</label>
-                  <input id="email" name="email" type="email" autocomplete="email" required>
-                </div>
-                <div class="field">
-                  <label for="phone">Phone Number</label>
-                  <input id="phone" name="phone" type="tel" autocomplete="tel">
-                </div>
-              </div>
+    message.textContent = "";
+    message.className = "form-message";
 
-              <div class="field-grid">
-                <div class="field">
-                  <label for="password">Create a Password *</label>
-                  <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
-                </div>
-                <div class="field">
-                  <label for="confirm-password">Confirm Password *</label>
-                  <input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
-                </div>
-              </div>
-              <small>Use at least eight characters.</small>
-            </div>
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
 
-            <div class="form-section">
-              <h3>Communication Preferences</h3>
-              <label class="check-row">
-                <input id="product-updates" type="checkbox">
-                <span>Product updates and EmpowerBand news</span>
-              </label>
-              <label class="check-row">
-                <input id="safety-updates" type="checkbox" checked>
-                <span>Safety and service notices</span>
-              </label>
-              <label class="check-row">
-                <input id="partner-offers" type="checkbox">
-                <span>Partner offers and promotions</span>
-              </label>
-            </div>
+    const password = document.getElementById("password").value;
+    const confirmPassword =
+      document.getElementById("confirm-password").value;
 
-            <div class="privacy-panel">
-              <h3>Privacy and Security</h3>
-              <p>
-                We use secure account authentication and controlled database access.
-                We do not sell your personal information.
-              </p>
-              <label class="check-row">
-                <input id="terms" type="checkbox" required>
-                <span>
-                  I agree to the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>
-                  and <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>. *
-                </span>
-              </label>
-            </div>
+    if (password !== confirmPassword) {
+      showMessage("The passwords do not match.", "error");
+      return;
+    }
 
-            <button id="submit-button" class="activation-submit" type="submit">
-              Activate My EmpowerBand
-            </button>
+    const config = window.EMPOWERBANDS_CONFIG;
 
-            <div id="form-message" class="form-message" role="alert" aria-live="polite"></div>
+    if (
+      !config ||
+      !config.supabaseUrl ||
+      !config.supabaseAnonKey ||
+      config.supabaseUrl.includes("YOUR_PROJECT") ||
+      config.supabaseAnonKey.includes("YOUR_PUBLIC")
+    ) {
+      showMessage(
+        "Your Supabase Project URL and public anon key must be added to config.js.",
+        "error"
+      );
+      return;
+    }
 
-            <p class="confirmation-note">
-              After activation, you will receive account and benefit information by email.
-            </p>
-          </form>
-        </section>
-      </div>
-    </section>
-  </main>
+    if (!window.supabase) {
+      showMessage(
+        "The Supabase library did not load. Refresh the page and try again.",
+        "error"
+      );
+      return;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="{{ url_for('static', filename='js/config.js') }}"></script>
-<script src="{{ url_for('static', filename='js/activate.js') }}"></script>
-</body>
-</html>
+    submitButton.disabled = true;
+    submitButton.textContent = "Activating...";
 
+    try {
+      const supabaseClient = window.supabase.createClient(
+        config.supabaseUrl,
+        config.supabaseAnonKey
+      );
+
+      const registration = {
+        serial_number: normalizeSerial(serialInput.value),
+        full_name: document.getElementById("full-name").value.trim(),
+        phone:
+          document.getElementById("phone").value.trim() || null,
+        product_updates:
+          document.getElementById("product-updates").checked,
+        safety_updates:
+          document.getElementById("safety-updates").checked,
+        partner_offers:
+          document.getElementById("partner-offers").checked
+      };
+
+      const email = document
+        .getElementById("email")
+        .value.trim()
+        .toLowerCase();
+
+      const { data: authData, error: authError } =
+        await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/activate`,
+            data: {
+              full_name: registration.full_name,
+              phone: registration.phone
+            }
+          }
+        });
+
+      if (authError) {
+        throw authError;
+      }
+
+      if (!authData.session) {
+        localStorage.setItem(
+          "empowerbands_pending_activation",
+          JSON.stringify(registration)
+        );
+
+        showMessage(
+          "Check your email to confirm your account. Return to this page after confirmation to complete activation.",
+          "success"
+        );
+
+        return;
+      }
+
+      const { error: activationError } =
+        await supabaseClient.rpc("claim_empowerband", {
+          p_serial_number: registration.serial_number,
+          p_full_name: registration.full_name,
+          p_phone: registration.phone,
+          p_product_updates: registration.product_updates,
+          p_safety_updates: registration.safety_updates,
+          p_partner_offers: registration.partner_offers
+        });
+
+      if (activationError) {
+        throw activationError;
+      }
+
+      localStorage.removeItem(
+        "empowerbands_pending_activation"
+      );
+
+      showMessage(
+        "Your EmpowerBand has been activated successfully.",
+        "success"
+      );
+
+      form.reset();
+
+      if (qrSerialNumber) {
+        serialInput.value =
+          normalizeSerial(qrSerialNumber);
+      }
+    } catch (error) {
+      console.error(error);
+
+      showMessage(
+        error.message ||
+          "Your EmpowerBand could not be activated.",
+        "error"
+      );
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent =
+        "Activate My EmpowerBand";
+    }
+  });
+})();
