@@ -1113,97 +1113,132 @@ EmpowerBands Emergency System
 """
 
 
-@app.route("/login")
-def login():
-    return redirect(url_for("admin"))
+@app.route("/login") 
+def login(): 
+    return redirect(url_for("admin")) 
 
+@app.route("/register", methods=["GET"]) 
+def register_band_page(): 
+    return render_template("register.html") 
 
-
-
-
-@app.route("/register", methods=["GET"])
-def register_band_page():
-    return render_template("register.html")
-
-
-@app.route("/api/register-band", methods=["POST"])
-def register_band_api():
-    """Create a basic customer record and save activation account details."""
-    data = request.get_json(silent=True) or {}
-
-    band_id = str(data.get("bandId", "")).strip().upper()
-    first_name = str(data.get("firstName", "")).strip()
-    last_name = str(data.get("lastName", "")).strip()
-    email = str(data.get("email", "")).strip().lower()
-    phone = str(data.get("phone", "")).strip()
-    password = str(data.get("password", ""))
-    terms_consent = bool(data.get("termsConsent"))
-    marketing_consent = bool(data.get("marketingConsent"))
-    purchase_location = str(data.get("purchaseLocation", "")).strip()
-    purchase_date = str(data.get("purchaseDate") or "").strip()
-
+@app.route("/api/register-band", methods=["POST"]) 
+def register_band_api(): 
+    """Surgically updated activation endpoint with status checks and full profile mapping."""
     import re
-    if not re.fullmatch(r"[A-Z0-9-]{3,50}", band_id):
-        return jsonify({"message": "Enter a valid Band ID using letters, numbers, and hyphens."}), 400
-    if not first_name or not last_name or not email or not phone:
-        return jsonify({"message": "Please complete all required contact fields."}), 400
-    if len(password) < 10:
-        return jsonify({"message": "Your password must contain at least 10 characters."}), 400
-    if not terms_consent:
-        return jsonify({"message": "You must agree to the Terms of Service and Privacy Policy."}), 400
+    import time
+    
+    data = request.get_json(silent=True) or {}
+    
+    # Core variables for validation
+    band_id = str(data.get("bandId", "")).strip().upper()
+    password = str(data.get("password", ""))
+    password_confirm = str(data.get("password_confirm", ""))
 
-    # Prevent the same band from being activated twice.
-    if os.path.exists(file_name):
-        with open(file_name, newline="", encoding="utf-8") as customer_file:
-            for row in csv.DictReader(customer_file):
-                if str(row.get("band_id", "")).strip().upper() == band_id:
-                    return jsonify({"message": "This Band ID has already been activated. Please sign in or contact support."}), 409
+    # Validate baseline rules
+    if not re.fullmatch(r"[A-Z0-9-]{3,50}", band_id): 
+        return jsonify({"message": "Enter a valid Band ID using letters, numbers, and hyphens."}), 400 
+    if len(password) < 10: 
+        return jsonify({"message": "Your password must contain at least 10 characters."}), 400 
+    if password != password_confirm:
+        return jsonify({"message": "Passwords do not match."}), 400
+    if not bool(data.get("termsConsent")): 
+        return jsonify({"message": "You must agree to the Terms of Service and Privacy Policy."}), 400 
 
-    registrations_file = "band_registrations.csv"
-    registration_fields = [
-        "band_id", "first_name", "last_name", "email", "phone",
-        "password_hash", "purchase_location", "purchase_date",
-        "terms_consent", "marketing_consent", "created_at"
+    # 1. Checks band_inventory.csv for the Band ID & 2. Validates status constraints
+    inventory_file = "band_inventory.csv"
+    if not os.path.exists(inventory_file):
+        return jsonify({"message": "Inventory system database missing."}), 500
+
+    inventory_rows = []
+    band_found = False
+    valid_status = False
+
+    with open(inventory_file, mode="r", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames
+        for row in reader:
+            if str(row.get("band_id", "")).strip().upper() == band_id:
+                band_found = True
+                # 2 & 6. Only allows status unassigned or inactive. Blocks second activation.
+                if str(row.get("status", "")).strip().lower() in ["unassigned", "inactive"]:
+                    valid_status = True
+                    row["status"] = "activated" # 5. Changes the inventory status to activated
+            inventory_rows.append(row)
+
+    if not band_found:
+        return jsonify({"message": "Invalid Band ID. Check the identifier and try again."}), 400
+    if not valid_status:
+        return jsonify({"message": "This band is already activated or unavailable."}), 400
+
+    # 3. Saves the full customer profile to customers.csv (mapped from template field names)
+    customers_file = "customers.csv"
+    customer_fields = [
+        "band_id", "name", "phone", "email", "emergency_phones", "emergency_emails", 
+        "age_group", "condition", "public_instructions", "private_notes", "pin", 
+        "address", "race", "gender", "photo"
     ]
-    registration_exists = os.path.exists(registrations_file)
-    with open(registrations_file, "a", newline="", encoding="utf-8") as registration_file:
-        writer = csv.DictWriter(registration_file, fieldnames=registration_fields)
-        if not registration_exists or os.path.getsize(registrations_file) == 0:
+    
+    customer_data = {
+        "band_id": band_id,
+        "name": str(data.get("name", "")).strip(),
+        "phone": str(data.get("phone", "")).strip(),
+        "email": str(data.get("email", "")).strip().lower(),
+        "emergency_phones": str(data.get("emergency_phones", "")).strip(),
+        "emergency_emails": str(data.get("emergency_emails", "")).strip(),
+        "age_group": str(data.get("age_group", "")).strip(),
+        "condition": str(data.get("condition", "")).strip(),
+        "public_instructions": str(data.get("public_instructions", "")).strip(),
+        "private_notes": str(data.get("private_notes", "")).strip(),
+        "pin": str(data.get("pin", "")).strip(),
+        "address": str(data.get("address", "")).strip(),
+        "race": str(data.get("race", "")).strip(),
+        "gender": str(data.get("gender", "")).strip(),
+        "photo": str(data.get("photo", "")).strip()
+    }
+
+    # Ensure all required profile items from the front end exist
+    if not customer_data["name"] or not customer_data["phone"] or not customer_data["email"]:
+        return jsonify({"message": "Please complete all required profile fields."}), 400
+
+    cust_file_exists = os.path.exists(customers_file)
+    with open(customers_file, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=customer_fields)
+        if not cust_file_exists or os.path.getsize(customers_file) == 0:
+            writer.writeheader()
+        writer.writerow(customer_data)
+
+    # 4. Saves the hashed password and core details to band_registrations.csv
+    registrations_file = "band_registrations.csv"
+    registration_fields = ["band_id", "password_hash", "purchase_location", "purchase_date", "created_at"]
+    reg_file_exists = os.path.exists(registrations_file)
+    
+    with open(registrations_file, mode="a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=registration_fields)
+        if not reg_file_exists or os.path.getsize(registrations_file) == 0:
             writer.writeheader()
         writer.writerow({
             "band_id": band_id,
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "phone": phone,
             "password_hash": generate_password_hash(password),
-            "purchase_location": purchase_location,
-            "purchase_date": purchase_date,
-            "terms_consent": "yes",
-            "marketing_consent": "yes" if marketing_consent else "no",
+            "purchase_location": str(data.get("purchaseLocation", "")).strip(),
+            "purchase_date": str(data.get("purchaseDate", "")).strip(),
             "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
         })
 
-    # Add a starter band profile. It can be completed later from the admin dashboard.
-    starter_row = [
-        band_id,
-        f"{first_name} {last_name}".strip(),
-        email,
-        phone,
-        "", "", "", "", "", "", "", "", "", "", ""
-    ]
-    with open(file_name, "a", newline="", encoding="utf-8") as customer_file:
-        csv.writer(customer_file).writerow(starter_row)
+    # Save the updated status change back into band_inventory.csv safely
+    with open(inventory_file, mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(inventory_rows)
 
-    return jsonify({
-        "message": "Your EmpowerBand was activated successfully.",
-        "redirectUrl": f"/{band_id}"
-    }), 201
+    return jsonify({ 
+        "message": "Your EmpowerBand was activated successfully.", 
+        "redirectUrl": f"/{band_id}" 
+    }), 201 
 
-
-@app.route("/activate")
-def activate():
+@app.route("/activate") 
+def activate(): 
     return redirect(url_for("register_band_page"))
+
 
 
 # ===============================
