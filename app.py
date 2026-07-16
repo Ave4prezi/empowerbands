@@ -19,6 +19,7 @@ from email.mime.text import MIMEText
 import qrcode
 from io import BytesIO
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
@@ -1125,7 +1126,81 @@ def register_band_page():
     return render_template("register.html")
 
 
-    
+@app.route("/api/register-band", methods=["POST"])
+def register_band_api():
+    """Create a basic customer record and save activation account details."""
+    data = request.get_json(silent=True) or {}
+
+    band_id = str(data.get("bandId", "")).strip().upper()
+    first_name = str(data.get("firstName", "")).strip()
+    last_name = str(data.get("lastName", "")).strip()
+    email = str(data.get("email", "")).strip().lower()
+    phone = str(data.get("phone", "")).strip()
+    password = str(data.get("password", ""))
+    terms_consent = bool(data.get("termsConsent"))
+    marketing_consent = bool(data.get("marketingConsent"))
+    purchase_location = str(data.get("purchaseLocation", "")).strip()
+    purchase_date = str(data.get("purchaseDate") or "").strip()
+
+    import re
+    if not re.fullmatch(r"[A-Z0-9-]{3,50}", band_id):
+        return jsonify({"message": "Enter a valid Band ID using letters, numbers, and hyphens."}), 400
+    if not first_name or not last_name or not email or not phone:
+        return jsonify({"message": "Please complete all required contact fields."}), 400
+    if len(password) < 10:
+        return jsonify({"message": "Your password must contain at least 10 characters."}), 400
+    if not terms_consent:
+        return jsonify({"message": "You must agree to the Terms of Service and Privacy Policy."}), 400
+
+    # Prevent the same band from being activated twice.
+    if os.path.exists(file_name):
+        with open(file_name, newline="", encoding="utf-8") as customer_file:
+            for row in csv.DictReader(customer_file):
+                if str(row.get("band_id", "")).strip().upper() == band_id:
+                    return jsonify({"message": "This Band ID has already been activated. Please sign in or contact support."}), 409
+
+    registrations_file = "band_registrations.csv"
+    registration_fields = [
+        "band_id", "first_name", "last_name", "email", "phone",
+        "password_hash", "purchase_location", "purchase_date",
+        "terms_consent", "marketing_consent", "created_at"
+    ]
+    registration_exists = os.path.exists(registrations_file)
+    with open(registrations_file, "a", newline="", encoding="utf-8") as registration_file:
+        writer = csv.DictWriter(registration_file, fieldnames=registration_fields)
+        if not registration_exists or os.path.getsize(registrations_file) == 0:
+            writer.writeheader()
+        writer.writerow({
+            "band_id": band_id,
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "phone": phone,
+            "password_hash": generate_password_hash(password),
+            "purchase_location": purchase_location,
+            "purchase_date": purchase_date,
+            "terms_consent": "yes",
+            "marketing_consent": "yes" if marketing_consent else "no",
+            "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+        })
+
+    # Add a starter band profile. It can be completed later from the admin dashboard.
+    starter_row = [
+        band_id,
+        f"{first_name} {last_name}".strip(),
+        email,
+        phone,
+        "", "", "", "", "", "", "", "", "", "", ""
+    ]
+    with open(file_name, "a", newline="", encoding="utf-8") as customer_file:
+        csv.writer(customer_file).writerow(starter_row)
+
+    return jsonify({
+        "message": "Your EmpowerBand was activated successfully.",
+        "redirectUrl": f"/{band_id}"
+    }), 201
+
+
 @app.route("/activate")
 def activate():
     return redirect(url_for("register_band_page"))
