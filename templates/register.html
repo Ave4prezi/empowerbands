@@ -1014,6 +1014,93 @@
         </select>
     </div>
 
+                            <!-- Inside your existing register.html form, below your Band ID and purchase inputs: -->
+
+<!-- New Customer Profile Fields Integration -->
+<div class="form-group">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" name="name" class="form-control" required>
+</div>
+
+<div class="form-group">
+    <label for="phone">Phone Number</label>
+    <input type="tel" id="phone" name="phone" class="form-control" required>
+</div>
+
+<div class="form-group">
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email" class="form-control" required>
+</div>
+
+<div class="form-group">
+    <label for="emergency_phones">Emergency Phone Numbers</label>
+    <input type="text" id="emergency_phones" name="emergency_phones" class="form-control" placeholder="Comma separated values" required>
+</div>
+
+<div class="form-group">
+    <label for="emergency_emails">Emergency Emails</label>
+    <input type="text" id="emergency_emails" name="emergency_emails" class="form-control" placeholder="Comma separated values">
+</div>
+
+<div class="form-group">
+    <label for="age_group">Age Group</label>
+    <input type="text" id="age_group" name="age_group" class="form-control" required>
+</div>
+
+<div class="form-group">
+    <label for="condition">Medical Condition</label>
+    <input type="text" id="condition" name="condition" class="form-control">
+</div>
+
+<div class="form-group">
+    <label for="public_instructions">Public Instructions</label>
+    <textarea id="public_instructions" name="public_instructions" class="form-control"></textarea>
+</div>
+
+<div class="form-group">
+    <label for="private_notes">Private Medical Notes</label>
+    <textarea id="private_notes" name="private_notes" class="form-control"></textarea>
+</div>
+
+<div class="form-group">
+    <label for="pin">Account PIN</label>
+    <input type="password" id="pin" name="pin" class="form-control" maxlength="6" required>
+</div>
+
+<div class="form-group">
+    <label for="address">Home Address</label>
+    <input type="text" id="address" name="address" class="form-control">
+</div>
+
+<div class="form-group">
+    <label for="race">Race</label>
+    <input type="text" id="race" name="race" class="form-control">
+</div>
+
+<div class="form-group">
+    <label for="gender">Gender</label>
+    <input type="text" id="gender" name="gender" class="form-control">
+</div>
+
+<div class="form-group">
+    <label for="photo">Photo URL or Reference</label>
+    <input type="text" id="photo" name="photo" class="form-control">
+</div>
+
+<!-- Security Credentials -->
+<div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" class="form-control" required>
+</div>
+
+<div class="form-group">
+    <label for="password_confirm">Confirm Password</label>
+    <input type="password" id="password_confirm" name="password_confirm" class="form-control" required>
+</div>
+
+<!-- Original Submit / Activation Buttons Continue Below Intact... -->
+
+
     <div class="field">
         <label for="purchaseDate">
             Purchase date
@@ -1460,118 +1547,70 @@
             });
         });
 
-        registrationForm.addEventListener(
-            "submit",
-            async function (event) {
-                event.preventDefault();
+        registrationForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    clearStatus();
 
-                clearStatus();
+    if (!registrationForm.checkValidity()) {
+        registrationForm.reportValidity();
+        return;
+    }
 
-                if (!registrationForm.checkValidity()) {
-                    registrationForm.reportValidity();
-                    return;
-                }
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("password_confirm").value; // Matches our new field ID
 
-                const password =
-                    document.getElementById("password").value;
+    if (password !== confirmPassword) {
+        showStatus("Your passwords do not match. Please enter them again.", "error");
+        document.getElementById("password_confirm").focus();
+        return;
+    }
 
-                const confirmPassword =
-                    document.getElementById(
-                        "confirmPassword"
-                    ).value;
+    if (password.length < 10) {
+        showStatus("Your password must contain at least 10 characters.", "error");
+        document.getElementById("password").focus();
+        return;
+    }
 
-                if (password !== confirmPassword) {
-                    showStatus(
-                        "Your passwords do not match. Please enter them again.",
-                        "error"
-                    );
+    // Bundles all original variables and your new profile fields cleanly
+    const registrationData = {
+        bandId: document.getElementById("bandId").value.trim().toUpperCase(),
+        purchaseLocation: document.getElementById("purchaseLocation").value,
+        purchaseDate: document.getElementById("purchaseDate").value || null,
+        termsConsent: document.getElementById("termsConsent") ? document.getElementById("termsConsent").checked : true,
+        marketingConsent: document.getElementById("marketingConsent") ? document.getElementById("marketingConsent").checked : false,
+        
+        // Surgical addition of new profile field data
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        email: document.getElementById("email").value.trim().toLowerCase(),
+        emergency_phones: document.getElementById("emergency_phones").value.trim(),
+        emergency_emails: document.getElementById("emergency_emails").value.trim(),
+        age_group: document.getElementById("age_group").value.trim(),
+        condition: document.getElementById("condition").value.trim(),
+        public_instructions: document.getElementById("public_instructions").value.trim(),
+        private_notes: document.getElementById("private_notes").value.trim(),
+        pin: document.getElementById("pin").value.trim(),
+        address: document.getElementById("address").value.trim(),
+        race: document.getElementById("race").value.trim(),
+        gender: document.getElementById("gender").value.trim(),
+        photo: document.getElementById("photo").value.trim(),
+        password: password,
+        password_confirm: confirmPassword
+    };
 
-                    document
-                        .getElementById("confirmPassword")
-                        .focus();
+    setLoading(true);
 
-                    return;
-                }
-
-                if (password.length < 10) {
-                    showStatus(
-                        "Your password must contain at least 10 characters.",
-                        "error"
-                    );
-
-                    passwordInput.focus();
-                    return;
-                }
-
-                const registrationData = {
-                    bandId: document
-                        .getElementById("bandId")
-                        .value
-                        .trim()
-                        .toUpperCase(),
-
-                    purchaseLocation: document
-                        .getElementById("purchaseLocation")
-                        .value,
-
-                    purchaseDate:
-                        document
-                            .getElementById("purchaseDate")
-                            .value || null,
-
-                    firstName: document
-                        .getElementById("firstName")
-                        .value
-                        .trim(),
-
-                    lastName: document
-                        .getElementById("lastName")
-                        .value
-                        .trim(),
-
-                    email: document
-                        .getElementById("email")
-                        .value
-                        .trim()
-                        .toLowerCase(),
-
-                    phone: document
-                        .getElementById("phone")
-                        .value
-                        .trim(),
-
-                    password: password,
-
-                    termsConsent: document
-                        .getElementById("termsConsent")
-                        .checked,
-
-                    marketingConsent: document
-                        .getElementById("marketingConsent")
-                        .checked
-                };
-
-                setLoading(true);
-
-                try {
-                    /*
-                     * This sends the form to your secure server route.
-                     */
-                    const response = await fetch(
-                        "/api/register-band",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify(
-                                registrationData
-                            )
-                        }
-                    );
+    try {
+        /*
+         * This sends the form to your secure server route.
+         */
+        const response = await fetch("/api/register-band", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(registrationData)
+        });
 
                     let result = {};
 
