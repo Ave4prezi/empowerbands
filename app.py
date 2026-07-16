@@ -1682,314 +1682,123 @@ function filterBands(){{
 def add():
     if not session.get("logged_in"):
         return redirect("/admin")
-
+        
     if request.method == "POST":
-        photo = request.files.get("photo")
-        photo_url = ""
-        if photo and photo.filename != "":
-            filename = f"{int(time.time())}_{secure_filename(photo.filename)}"
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            photo.save(filepath)
-            photo_url = f"/static/uploads/{filename}"
+        # Form inputs extracted surgically for inventory management
+        band_id = request.form.get("band_id", "").strip().upper()
+        module_id = request.form.get("module_id", "").strip()
+        status = request.form.get("status", "unassigned").strip().lower() # Defaults to unassigned
+        order_reference = request.form.get("order_reference", "").strip() # Optional
 
-        row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form.get("emergency_phones", "").strip(),
-            request.form.get("emergency_emails", "").strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            photo_url
-        ]
+        inventory_file = "band_inventory.csv"
+        file_exists = os.path.exists(inventory_file)
+        
+        # Save strictly to band_inventory.csv, not customers.csv
+        with open(inventory_file, "a", newline="", encoding="utf-8") as f:
+            fieldnames = ["band_id", "module_id", "status", "order_reference"]
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            if not file_exists or os.path.getsize(inventory_file) == 0:
+                writer.writeheader()
+            writer.writerow({
+                "band_id": band_id,
+                "module_id": module_id,
+                "status": status,
+                "order_reference": order_reference
+            })
+            
+        print(f"INVENTORY RECORD SAVED: {band_id}")
+        return redirect("/add") # Redirects back to add page smoothly
 
-        with open(file_name, "a", newline="", encoding="utf-8") as f:
-            csv.writer(f).writerow(row)
-
-        print(f"PROFILE SAVED: {row[0]}")
-
-        return redirect("/" + row[0])
-
+    # Returns your exact original styling but with only the inventory inputs inside the card
     return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Add EmpowerBand Inventory</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body{ margin:0; font-family:Arial,sans-serif; background: radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%); min-height:100vh; color:white; }
+            .page{ min-height:100vh; display:flex; justify-content:center; align-items:center; padding:24px; }
+            .card{ width:100%; max-width:560px; background:rgba(255,255,255,0.08); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.15); border-radius:28px; padding:30px; box-shadow:0 25px 80px rgba(0,0,0,.55); box-sizing:border-box; }
+            h1{ margin:0; font-size:34px; font-weight:800; text-align:center; }
+            .subtitle{ text-align:center; color:#cbd5e1; margin:10px 0 25px; }
+            input, select, textarea{ width:100%; box-sizing:border-box; padding:15px; border:none; outline:none; border-radius:16px; background:rgba(255,255,255,.1); color:white; margin-bottom:14px; font-size:16px; }
+            select option { background: #030712; color: white; }
+            textarea{ min-height:90px; resize:vertical; }
+            input::placeholder, textarea::placeholder{ color:#cbd5e1; }
+            button{ width:100%; padding:16px; border:none; border-radius:16px; background:linear-gradient(135deg,#22c55e,#06b6d4); color:white; font-weight:bold; font-size:17px; cursor:pointer; }
+            .footer{ text-align:center; margin-top:18px; color:#94a3b8; font-size:12px; }
+            .band-row{ display:flex; gap:12px; margin-bottom:16px; }
+            .band-row input{ flex:2; min-width:0; margin-bottom:0; }
+            .generate-btn{ width:auto; min-width:140px; border:none; border-radius:16px; padding:0 18px; background:linear-gradient(135deg,#06b6d4,#2563eb); color:white; font-weight:700; cursor:pointer; }
+            @media(max-width:480px){ .band-row{ flex-direction:column; } .generate-btn{ width:100%; padding:16px; } }
+        </style>
+    </head>
+    <body>
+        <div class="page">
+            <div class="card">
+                <h1>Add Inventory</h1>
+                <div class="subtitle"> Log a new hardware band into the system inventory </div>
+                <form method="POST">
+                    <div class="band-row">
+                        <input type="text" id="band_id" name="band_id" placeholder="Band ID" required >
+                        <button type="button" class="generate-btn" onclick="generateBandId()" > Generate </button>
+                    </div>
+                    
+                    <input type="text" name="module_id" placeholder="Module ID" required>
+                    
+                    <select name="status">
+                        <option value="unassigned">Unassigned (Default)</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="activated">Activated</option>
+                    </select>
+                    
+                    <input type="text" name="order_reference" placeholder="Order Reference (Optional)">
+                    
+                    <button type="submit"> Save Record </button>
+                </form>
+                <div class="footer"> EmpowerBands Admin System </div>
+            </div>
+        </div>
+        <script>
+            async function generateBandId(){
+                try{
+                    const response = await fetch("/next-band-id");
+                    const data = await response.text();
+                    document.getElementById("band_id").value = data;
+                }catch(error){
+                    alert("Could not generate Band ID");
+                }
+            }
+        </script>
+    </body>
+    </html>
+    """
 
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>Add EmpowerBand Profile</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:
-    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
-    min-height:100vh;
-    color:white;
-}
-
-.page{
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:24px;
-}
-
-.card{
-    width:100%;
-    max-width:560px;
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(20px);
-    border:1px solid rgba(255,255,255,0.15);
-    border-radius:28px;
-    padding:30px;
-    box-shadow:0 25px 80px rgba(0,0,0,.55);
-}
-
-h1{
-    margin:0;
-    font-size:34px;
-    font-weight:800;
-    text-align:center;
-}
-
-.subtitle{
-    text-align:center;
-    color:#cbd5e1;
-    margin:10px 0 25px;
-}
-
-input, textarea{
-    width:100%;
-    box-sizing:border-box;
-    padding:15px;
-    border:none;
-    outline:none;
-    border-radius:16px;
-    background:rgba(255,255,255,.1);
-    color:white;
-    margin-bottom:14px;
-    font-size:16px;
-}
-
-textarea{
-    min-height:90px;
-    resize:vertical;
-}
-
-input::placeholder,
-textarea::placeholder{
-    color:#cbd5e1;
-}
-
-button{
-    width:100%;
-    padding:16px;
-    border:none;
-    border-radius:16px;
-    background:linear-gradient(135deg,#22c55e,#06b6d4);
-    color:white;
-    font-weight:bold;
-    font-size:17px;
-    cursor:pointer;
-}
-
-.footer{
-    text-align:center;
-    margin-top:18px;
-    color:#94a3b8;
-    font-size:12px;
-}
-
-
-
-
-.band-row{
-    display:flex;
-    gap:12px;
-    margin-bottom:16px;
-}
-
-.band-row input{
-    flex:2;
-    min-width:0;
-}
-
-.generate-btn{
-    width:auto;
-    min-width:140px;
-    border:none;
-    border-radius:16px;
-    padding:0 18px;
-    background:linear-gradient(135deg,#06b6d4,#2563eb);
-    color:white;
-    font-weight:700;
-    cursor:pointer;
-}
-
-@media(max-width:480px){
-    .band-row{
-        flex-direction:column;
-    }
-
-    .generate-btn{
-        width:100%;
-        padding:16px;
-    }
-}
-</style>
-</head>
-
-<body>
-
-<div class="page">
-
-<div class="card">
-
-<h1>Add Profile</h1>
-
-<div class="subtitle">
-Create a secure EmpowerBand emergency profile
-</div>
-
-<form method="POST" enctype="multipart/form-data">
-
-<div class="band-row">
-
-<input
-type="text"
-id="band_id"
-name="band_id"
-placeholder="Band ID"
-required
->
-
-<button
-type="button"
-class="generate-btn"
-onclick="generateBandId()"
->
-Generate
-</button>
-
-</div>
-
-<input name="name" placeholder="Full Name" required>
-
-<input name="email" placeholder="Email">
-
-<input name="phone" placeholder="Primary Phone">
-
-<input name="emergency_phones" placeholder="Emergency Contacts (comma separated)" required>
-
-<input name="emergency_emails" placeholder="Emergency Emails (comma separated)">
-
-<input name="age_group" placeholder="Child / Adult / Senior">
-
-<input name="condition" placeholder="Public condition example: Autism - Nonverbal">
-
-<textarea name="instructions" placeholder="Public instructions"></textarea>
-
-<textarea name="medical_notes" placeholder="Private medical notes"></textarea>
-
-<input name="pin" placeholder="PIN example: 1234" required>
-
-<input name="address" placeholder="Address">
-
-<input name="race" placeholder="Race">
-
-<input name="gender" placeholder="Gender">
-
-<input type="file" name="photo" placeholder="Photo">
-
-<input name="photo_url" placeholder="Photo URL (if not uploading)">
-
-<label style="display:block; margin-top:15px; font-size:13px;">
-    <input type="checkbox" name="agree_terms" required>
-    I agree to the Privacy Policy and Terms of Service.
-</label>
-
-<label style="display:block; margin-top:10px; font-size:13px;">
-    <input type="checkbox" name="sms_consent" required>
-    I consent to receive emergency SMS alerts from EmpowerBands.
-</label>
-<button type="submit">
-Save Profile
-</button>
-
-</form>
-
-<div class="footer">
-EmpowerBands Admin System
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-async function generateBandId(){
-
-    try{
-
-        const response = await fetch("/next-band-id");
-
-        const data = await response.text();
-
-        document.getElementById("band_id").value = data;
-
-    }catch(error){
-
-        alert("Could not generate Band ID");
-    }
-}
-
-</script>
-</body>
-</html>
 """
-@app.route("/next-band-id")
+@app.route("/next-band-id") 
 def next_band_id():
-
+    """Surgically updated to look up sequential IDs inside band_inventory.csv instead."""
     highest = 0
-
-    try:
-
-        with open(file_name, "r", encoding="utf-8") as f:
-
-            reader = csv.DictReader(f)
-
-            for row in reader:
-
-                band_id = row.get("band_id", "")
-
-                if band_id.startswith("EB"):
-
-                    try:
-                        number = int(band_id.replace("EB", ""))
-
-                        if number > highest:
-                            highest = number
-
-                    except:
-                        pass
-
-    except:
-        pass
-
-    next_id = highest + 1
-
+    inventory_file = "band_inventory.csv" # Switched to target your new inventory database
+    
+    try: 
+        if os.path.exists(inventory_file) and os.path.getsize(inventory_file) > 0:
+            with open(inventory_file, "r", encoding="utf-8") as f: 
+                reader = csv.DictReader(f) 
+                for row in reader: 
+                    band_id = row.get("band_id", "") 
+                    if band_id.startswith("EB"): 
+                        try: 
+                            number = int(band_id.replace("EB", "")) 
+                            if number > highest: 
+                                highest = number 
+                        except: 
+                            pass 
+    except: 
+        pass 
+        
+    next_id = highest + 1 
     return f"EB{next_id:03d}"
 
 # ===============================
