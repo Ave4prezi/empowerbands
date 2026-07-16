@@ -1684,32 +1684,34 @@ def add():
         return redirect("/admin")
         
     if request.method == "POST":
-        # Form inputs extracted surgically for inventory management
+        # Form inputs extracted surgically for your exact four inventory tracking items
         band_id = request.form.get("band_id", "").strip().upper()
-        module_id = request.form.get("module_id", "").strip()
-        status = request.form.get("status", "unassigned").strip().lower() # Defaults to unassigned
-        order_reference = request.form.get("order_reference", "").strip() # Optional
+        module_id_number = request.form.get("module_id_number", "").strip()
+        name = request.form.get("name", "").strip()
+        phone = request.form.get("phone", "").strip()
+        email = request.form.get("email", "").strip().lower()
 
         inventory_file = "band_inventory.csv"
         file_exists = os.path.exists(inventory_file)
         
-        # Save strictly to band_inventory.csv, not customers.csv
+        # Save strictly to band_inventory.csv
         with open(inventory_file, "a", newline="", encoding="utf-8") as f:
-            fieldnames = ["band_id", "module_id", "status", "order_reference"]
+            fieldnames = ["band_id", "module_id_number", "name", "phone", "email"]
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             if not file_exists or os.path.getsize(inventory_file) == 0:
                 writer.writeheader()
             writer.writerow({
                 "band_id": band_id,
-                "module_id": module_id,
-                "status": status,
-                "order_reference": order_reference
+                "module_id_number": module_id_number,
+                "name": name,
+                "phone": phone,
+                "email": email
             })
             
         print(f"INVENTORY RECORD SAVED: {band_id}")
         return redirect("/add") # Redirects back to add page smoothly
 
-    # Returns your exact original styling but with only the inventory inputs inside the card
+    # Returns your exact original styling but with only the 4 specific input boxes inside the card
     return """
     <!DOCTYPE html>
     <html>
@@ -1722,10 +1724,8 @@ def add():
             .card{ width:100%; max-width:560px; background:rgba(255,255,255,0.08); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.15); border-radius:28px; padding:30px; box-shadow:0 25px 80px rgba(0,0,0,.55); box-sizing:border-box; }
             h1{ margin:0; font-size:34px; font-weight:800; text-align:center; }
             .subtitle{ text-align:center; color:#cbd5e1; margin:10px 0 25px; }
-            input, select, textarea{ width:100%; box-sizing:border-box; padding:15px; border:none; outline:none; border-radius:16px; background:rgba(255,255,255,.1); color:white; margin-bottom:14px; font-size:16px; }
-            select option { background: #030712; color: white; }
-            textarea{ min-height:90px; resize:vertical; }
-            input::placeholder, textarea::placeholder{ color:#cbd5e1; }
+            input{ width:100%; box-sizing:border-box; padding:15px; border:none; outline:none; border-radius:16px; background:rgba(255,255,255,.1); color:white; margin-bottom:14px; font-size:16px; }
+            input::placeholder{ color:#cbd5e1; }
             button{ width:100%; padding:16px; border:none; border-radius:16px; background:linear-gradient(135deg,#22c55e,#06b6d4); color:white; font-weight:bold; font-size:17px; cursor:pointer; }
             .footer{ text-align:center; margin-top:18px; color:#94a3b8; font-size:12px; }
             .band-row{ display:flex; gap:12px; margin-bottom:16px; }
@@ -1737,7 +1737,7 @@ def add():
     <body>
         <div class="page">
             <div class="card">
-                <h1>Add Inventory</h1>
+                <h1>Add Hardware Band</h1>
                 <div class="subtitle"> Log a new hardware band into the system inventory </div>
                 <form method="POST">
                     <div class="band-row">
@@ -1745,15 +1745,10 @@ def add():
                         <button type="button" class="generate-btn" onclick="generateBandId()" > Generate </button>
                     </div>
                     
-                    <input type="text" name="module_id" placeholder="Module ID" required>
-                    
-                    <select name="status">
-                        <option value="unassigned">Unassigned (Default)</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="activated">Activated</option>
-                    </select>
-                    
-                    <input type="text" name="order_reference" placeholder="Order Reference (Optional)">
+                    <input type="text" name="module_id_number" placeholder="Module ID Number" required>
+                    <input type="text" name="name" placeholder="Name" required>
+                    <input type="tel" name="phone" placeholder="Phone" required>
+                    <input type="email" name="email" placeholder="Email" required>
                     
                     <button type="submit"> Save Record </button>
                 </form>
@@ -1773,7 +1768,8 @@ def add():
         </script>
     </body>
     </html>
-    """
+    
+
 
 """
 @app.route("/next-band-id") 
