@@ -3,328 +3,727 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Board of Directors | EmpowerBands Worldwide</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="apple-touch-icon" href="https://i.imgur.com/RpBUbHd.png">
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#07111f">
+    <meta name="theme-color" content="#020817">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #020817;
+            color: #e5e7eb;
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           HEADER & NAVIGATION
+           ============================================ */
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(2, 8, 23, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 900;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand span {
+            color: #38bdf8;
+        }
+
+        nav {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        nav a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: #38bdf8;
+        }
+
+        nav a.active {
+            color: #38bdf8;
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+
+        .hero-section {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, 
+                rgba(14, 165, 233, 0.12) 0%,
+                rgba(2, 8, 23, 1) 40%,
+                rgba(37, 99, 235, 0.08) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(14, 165, 233, 0.15), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(48px, 5vw, 64px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .hero-content h1 span {
+            background: linear-gradient(135deg, #06b6d4, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-eyebrow {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #67e8f9;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .hero-text {
+            font-size: 18px;
+            color: #cbd5e1;
+            margin-bottom: 32px;
+            line-height: 1.7;
+            max-width: 520px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+            color: white;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        .hero-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-card-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #67e8f9;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .hero-card blockquote {
+            font-size: 18px;
+            font-style: italic;
+            color: white;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            border-left: 3px solid #38bdf8;
+            padding-left: 16px;
+        }
+
+        .hero-card-divider {
+            height: 1px;
+            background: rgba(56, 189, 248, 0.2);
+            margin: 20px 0;
+        }
+
+        .hero-card p {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           BOARD MEMBERS SECTION
+           ============================================ */
+
+        .members-section {
+            padding: 80px 20px;
+            background: linear-gradient(180deg, 
+                rgba(2, 8, 23, 1) 0%,
+                rgba(14, 165, 233, 0.04) 50%,
+                rgba(2, 8, 23, 1) 100%);
+            position: relative;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-heading h2 {
+            font-size: clamp(36px, 4vw, 48px);
+            font-weight: 900;
+            margin-bottom: 16px;
+            margin-top: 12px;
+        }
+
+        .section-heading p {
+            font-size: 16px;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+        }
+
+        .member-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .member-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 16px 48px rgba(14, 165, 233, 0.2);
+        }
+
+        .member-photo {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(37, 99, 235, 0.1));
+        }
+
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease, filter 0.5s ease;
+        }
+
+        .member-card:hover .member-photo img {
+            transform: scale(1.08);
+            filter: brightness(1.1);
+        }
+
+        .member-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .member-content {
+            padding: 28px;
+        }
+
+        .member-role {
+            font-size: 12px;
+            font-weight: 700;
+            color: #67e8f9;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .member-content h3 {
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .member-content p {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .contact-link {
+            font-size: 13px;
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            gap: 6px;
+        }
+
+        .contact-link:hover {
+            color: #67e8f9;
+            transform: translateX(4px);
+        }
+
+        /* ============================================
+           VALUES SECTION
+           ============================================ */
+
+        .values-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg,
+                rgba(14, 165, 233, 0.08) 0%,
+                rgba(37, 99, 235, 0.06) 100%);
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 50px;
+        }
+
+        .value-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 16px;
+            padding: 32px 24px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .value-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(56, 189, 248, 0.25);
+            transform: translateY(-4px);
+        }
+
+        .value-card span {
+            font-size: 40px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #06b6d4, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .value-card h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+            margin: 16px 0 12px;
+        }
+
+        .value-card p {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           PARTNER SECTION
+           ============================================ */
+
+        .partner-section {
+            padding: 60px 20px;
+        }
+
+        .partner-card {
+            background: linear-gradient(135deg,
+                rgba(14, 165, 233, 0.12) 0%,
+                rgba(37, 99, 235, 0.08) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 24px;
+            padding: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+            box-shadow: 0 12px 40px rgba(14, 165, 233, 0.15);
+        }
+
+        .partner-card h2 {
+            font-size: clamp(28px, 3vw, 36px);
+            font-weight: 900;
+            margin-bottom: 16px;
+        }
+
+        .partner-card p {
+            font-size: 15px;
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+
+        footer {
+            background: rgba(2, 8, 23, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 32px;
+        }
+
+        footer h3 {
+            font-size: 16px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        footer p {
+            font-size: 13px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        footer a {
+            font-size: 13px;
+            color: #67e8f9;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #38bdf8;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+
+        @media (max-width: 768px) {
+            nav {
+                gap: 16px;
+                font-size: 13px;
+            }
+
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .partner-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 32px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .members-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<header class="board-topbar">
-    <div class="board-topbar-inner">
-        <a href="/" class="board-brand">
+<header>
+    <div class="header-inner">
+        <a href="/" class="brand">
             EmpowerBands <span>Worldwide</span>
         </a>
-
-        <nav class="board-navigation">
+        <nav>
             <a href="/">Home</a>
-            <a href="/learn-more">Learn More</a>
-            <a href="/register" class="activate-nav-button">
-    Activate Your Band
-</a>
+            <a href="#values">Values</a>
+            <a href="#members">Leadership</a>
+            <a href="/register" class="active">Activate Your Band</a>
             <a href="/donate">Donate</a>
-            <a href="/board" class="board-active">Board</a>
         </nav>
     </div>
 </header>
 
 <main>
 
-    <section class="board-hero-section">
-        <div class="board-page-container board-hero-layout">
-
-            <div class="board-hero-copy">
-                <p class="board-eyebrow">Leadership with purpose</p>
-
-                <h1>
-                    Board of <span>Directors</span>
-                </h1>
-
-                <p class="board-hero-text">
-                    Meet the leaders guiding EmpowerBands Worldwide as we advance
-                    safety, accessibility, and faster emergency response through
-                    smart wearable technology.
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <p class="hero-eyebrow">Leadership with Purpose</p>
+                <h1>Board of <span>Directors</span></h1>
+                <p class="hero-text">
+                    Meet the leaders guiding EmpowerBands Worldwide as we advance safety, accessibility, and faster emergency response through smart wearable technology.
                 </p>
-
-                <div class="board-hero-buttons">
-                    <a href="#board-members" class="board-button board-button-primary">
-                        Meet Our Board
-                    </a>
-
-                    <a href="/contact" class="board-button board-button-secondary">
-                        Partner With Us
-                    </a>
+                <div class="hero-buttons">
+                    <a href="#members" class="btn btn-primary">Meet Our Board ↓</a>
+                    <a href="mailto:support@empowerbands.org" class="btn btn-secondary">Partner With Us</a>
                 </div>
             </div>
 
-            <div class="board-responsibility-card">
-                <p class="board-card-label">Our responsibility</p>
-
+            <div class="hero-card">
+                <p class="hero-card-label">Our Responsibility</p>
                 <blockquote>
-                    “Protecting people requires trustworthy leadership,
-                    responsible innovation, and a commitment to the communities
-                    we serve.”
+                    "Protecting people requires trustworthy leadership, responsible innovation, and a commitment to the communities we serve."
                 </blockquote>
-
-                <div class="board-card-line"></div>
-
+                <div class="hero-card-divider"></div>
                 <p>
-                    Our board provides strategic guidance, fiscal oversight,
-                    community advocacy, and accountability.
+                    Our board provides strategic guidance, fiscal oversight, community advocacy, and accountability.
                 </p>
             </div>
-
         </div>
     </section>
 
-    <section class="board-members-section" id="board-members">
-        <div class="board-page-container">
-
-            <div class="board-section-heading">
-                <p class="board-eyebrow">The people behind the mission</p>
-
+    <!-- MEMBERS SECTION -->
+    <section class="members-section" id="members">
+        <div class="section-container">
+            <div class="section-heading">
+                <p class="hero-eyebrow">The People Behind The Mission</p>
                 <h2>Our Leadership</h2>
-
-                <p>
-                    Each board member brings experience, compassion, and a
-                    commitment to creating safer and more inclusive communities.
-                </p>
+                <p>Each board member brings experience, compassion, and a commitment to creating safer and more inclusive communities.</p>
             </div>
 
-            <div class="board-members-grid">
+            <div class="members-grid">
 
-                <article class="board-member-card">
-
-                    <div class="board-member-photo">
-                        <img
-                            src="{{ url_for('static', filename='images/april-mcdaniel.png') }}"
-                            alt="April McDaniel, Founder and Chief Executive Officer"
-                        >
-
-                        <span class="board-member-badge">Founder</span>
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="https://i.imgur.com/RpBUbHd.png" alt="April McDaniel">
+                        <span class="member-badge">Founder</span>
                     </div>
-
-                    <div class="board-member-content">
-                        <p class="board-member-role">
-                            Chief Executive Officer
-                        </p>
-
+                    <div class="member-content">
+                        <p class="member-role">Chief Executive Officer</p>
                         <h3>April McDaniel</h3>
-
-                        <p>
-                            April McDaniel founded EmpowerBands Worldwide with a
-                            vision to improve emergency response through innovative
-                            wearable technology. She leads the organization’s
-                            strategic direction, partnerships, fundraising
-                            initiatives, and long-term growth while keeping its
-                            mission centered on protecting vulnerable individuals
-                            and supporting families.
-                        </p>
-
-                        <a href="/contact" class="board-contact-link">
-                            Contact through EmpowerBands →
-                        </a>
+                        <p>April McDaniel founded EmpowerBands Worldwide with a vision to improve emergency response through innovative wearable technology. She leads the organization's strategic direction, partnerships, fundraising initiatives, and long-term growth while keeping its mission centered on protecting vulnerable individuals and supporting families.</p>
+                        <a href="mailto:support@empowerbands.org" class="contact-link">Contact →</a>
                     </div>
-
                 </article>
 
-                <article class="board-member-card">
-
-                    <div class="board-member-photo">
-                        <img
-                            src="{{ url_for('static', filename='images/avery-johnson.png') }}"
-                            alt="Avery Johnson, Co-Founder and Director of Operations"
-                        >
-
-                        <span class="board-member-badge">Co-Founder</span>
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="https://i.imgur.com/bSUxUXa.jpeg" alt="Avery Johnson">
+                        <span class="member-badge">Co-Founder</span>
                     </div>
-
-                    <div class="board-member-content">
-                        <p class="board-member-role">
-                            Director of Operations
-                        </p>
-
+                    <div class="member-content">
+                        <p class="member-role">Director of Operations</p>
                         <h3>Avery Johnson</h3>
-
-                        <p>
-                            Avery Johnson oversees daily operations, community
-                            outreach, strategic partnerships, and organizational
-                            development. He brings leadership, entrepreneurship,
-                            and a commitment to community service while helping
-                            build relationships with schools, healthcare providers,
-                            first responders, and nonprofit organizations.
-                        </p>
-
-                        <a href="/contact" class="board-contact-link">
-                            Contact through EmpowerBands →
-                        </a>
+                        <p>Avery Johnson oversees daily operations, community outreach, strategic partnerships, and organizational development. He brings leadership, entrepreneurship, and a commitment to community service while helping build relationships with schools, healthcare providers, first responders, and nonprofit organizations.</p>
+                        <a href="mailto:support@empowerbands.org" class="contact-link">Contact →</a>
                     </div>
-
                 </article>
 
-                <article class="board-member-card">
-
-                    <div class="board-member-photo">
-                        <img
-                            src="{{ url_for('static', filename='images/selina-dobbins.png') }}"
-                            alt="Selina Dobbins, Treasurer"
-                        >
-
-                        <span class="board-member-badge">Treasurer</span>
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="https://i.imgur.com/RpBUbHd.png" alt="Selina Dobbins">
+                        <span class="member-badge">Treasurer</span>
                     </div>
-
-                    <div class="board-member-content">
-                        <p class="board-member-role">
-                            Financial Oversight
-                        </p>
-
+                    <div class="member-content">
+                        <p class="member-role">Financial Oversight</p>
                         <h3>Selina Dobbins</h3>
-
-                        <p>
-                            Selina provides financial oversight for EmpowerBands
-                            Worldwide, including budgeting, fiscal accountability,
-                            and organizational compliance. She helps ensure that
-                            the organization’s resources are managed responsibly
-                            while supporting long-term sustainability and
-                            mission-driven growth.
-                        </p>
-
-                        <a href="/contact" class="board-contact-link">
-                            Contact through EmpowerBands →
-                        </a>
+                        <p>Selina provides financial oversight for EmpowerBands Worldwide, including budgeting, fiscal accountability, and organizational compliance. She helps ensure that the organization's resources are managed responsibly while supporting long-term sustainability and mission-driven growth.</p>
+                        <a href="mailto:support@empowerbands.org" class="contact-link">Contact →</a>
                     </div>
-
                 </article>
 
             </div>
         </div>
     </section>
 
-    <section class="board-commitment-section">
-        <div class="board-page-container board-commitment-layout">
-
-            <div class="board-commitment-copy">
-                <p class="board-eyebrow">Our commitment</p>
-
-                <h2>
-                    Guided by integrity, innovation, and compassion.
-                </h2>
-
-                <p>
-                    The EmpowerBands Worldwide Board of Directors is committed
-                    to responsible governance, transparency, and thoughtful
-                    growth. Together, we work to develop technology that enhances
-                    safety, supports independence, and strengthens communities.
-                </p>
+    <!-- VALUES SECTION -->
+    <section class="values-section" id="values">
+        <div class="section-container">
+            <div class="section-heading">
+                <p class="hero-eyebrow">Our Commitment</p>
+                <h2>Guided by Integrity, Innovation, and Compassion</h2>
+                <p>The EmpowerBands Worldwide Board of Directors is committed to responsible governance, transparency, and thoughtful growth.</p>
             </div>
 
-            <div class="board-values-grid">
-
-                <div class="board-value-card">
+            <div class="values-grid">
+                <div class="value-card">
                     <span>01</span>
                     <h3>Integrity</h3>
-                    <p>
-                        We lead with honesty, accountability, and responsible
-                        decision-making.
-                    </p>
+                    <p>We lead with honesty, accountability, and responsible decision-making.</p>
                 </div>
-
-                <div class="board-value-card">
+                <div class="value-card">
                     <span>02</span>
                     <h3>Accessibility</h3>
-                    <p>
-                        We design with diverse abilities, needs, and real-world
-                        situations in mind.
-                    </p>
+                    <p>We design with diverse abilities, needs, and real-world situations in mind.</p>
                 </div>
-
-                <div class="board-value-card">
+                <div class="value-card">
                     <span>03</span>
                     <h3>Innovation</h3>
-                    <p>
-                        We pursue practical technology that helps people when
-                        every second matters.
-                    </p>
+                    <p>We pursue practical technology that helps people when every second matters.</p>
                 </div>
-
-                <div class="board-value-card">
+                <div class="value-card">
                     <span>04</span>
                     <h3>Community</h3>
-                    <p>
-                        We collaborate with families, caregivers, schools, and
-                        public-safety partners.
-                    </p>
+                    <p>We collaborate with families, caregivers, schools, and public-safety partners.</p>
                 </div>
-
             </div>
-
         </div>
     </section>
 
-    <section class="board-partner-section">
-        <div class="board-page-container">
-
-            <div class="board-partner-card">
-
+    <!-- PARTNER SECTION -->
+    <section class="partner-section">
+        <div class="section-container">
+            <div class="partner-card">
                 <div>
-                    <p class="board-eyebrow">
-                        Build safer communities with us
-                    </p>
-
-                    <h2>
-                        Interested in partnering with EmpowerBands?
-                    </h2>
-
-                    <p>
-                        We welcome conversations with schools, healthcare
-                        organizations, first responders, disability advocates,
-                        sponsors, and community leaders.
-                    </p>
+                    <p class="hero-eyebrow">Build Safer Communities With Us</p>
+                    <h2>Interested in Partnering?</h2>
+                    <p>We welcome conversations with schools, healthcare organizations, first responders, disability advocates, sponsors, and community leaders.</p>
                 </div>
-
-                <a href="/contact" class="board-button board-button-primary">
-                    Start a Conversation
-                </a>
-
+                <a href="mailto:support@empowerbands.org" class="btn btn-primary" style="white-space: nowrap;">Start a Conversation</a>
             </div>
-
         </div>
     </section>
 
 </main>
 
-<footer class="board-footer">
-    <div class="board-page-container board-footer-grid">
-
+<footer>
+    <div class="footer-content">
         <div>
             <h3>EmpowerBands Worldwide</h3>
             <p>Protect What Matters Most</p>
         </div>
-
-        <div class="board-footer-links">
-            <a href="/">Home</a>
-            <a href="/board">Board of Directors</a>
-            <a href="/privacy">Privacy Policy</a>
-            <a href="/terms">Terms of Service</a>
-        </div>
-
         <div>
-            <p>Decatur, Alabama</p>
-            <a href="mailto:support@empowerbands.org">
-                support@empowerbands.org
-            </a>
+            <h3>Quick Links</h3>
+            <a href="/">Home</a>
+            <a href="#members">Board</a>
+            <a href="/privacy">Privacy</a>
         </div>
-
+        <div>
+            <h3>Contact</h3>
+            <p>Decatur, Alabama</p>
+            <a href="mailto:support@empowerbands.org">support@empowerbands.org</a>
+        </div>
     </div>
-
-    <div class="board-page-container board-footer-bottom">
+    <div class="footer-bottom">
         <p>&copy; 2026 EmpowerBands Worldwide. All rights reserved.</p>
     </div>
 </footer>
 
 </body>
+
 </html>
