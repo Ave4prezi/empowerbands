@@ -3487,7 +3487,48 @@ def blessing_boxes():
             margin:0 auto;
             line-height:1.7;
         }}
-        .page{{max-width:760px;margin:0 auto;padding:0 20px 60px;}}
+        .page{{max-width:900px;margin:0 auto;padding:0 20px 60px;}}
+        .hero-photo{{
+            width:min(900px,calc(100% - 40px));
+            height:clamp(260px,52vw,500px);
+            display:block;
+            margin:0 auto 28px;
+            object-fit:cover;
+            object-position:center 42%;
+            border-radius:22px;
+            border:1px solid rgba(255,255,255,0.16);
+            box-shadow:0 24px 60px rgba(0,0,0,0.38);
+        }}
+        .photo-grid{{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:14px;
+            margin-top:18px;
+        }}
+        .photo-tile{{
+            margin:0;
+            overflow:hidden;
+            border-radius:15px;
+            background:rgba(255,255,255,0.06);
+            border:1px solid rgba(255,255,255,0.12);
+        }}
+        .photo-tile img{{
+            width:100%;
+            aspect-ratio:4/5;
+            object-fit:cover;
+            display:block;
+        }}
+        .photo-tile figcaption{{
+            padding:11px 12px 13px;
+            color:#cbd5e1;
+            font-size:13px;
+            line-height:1.45;
+        }}
+        @media (max-width:680px){{
+            .photo-grid{{grid-template-columns:1fr;}}
+            .photo-tile img{{aspect-ratio:16/11;}}
+            .hero{{padding-top:42px;}}
+        }}
         .card{{
             background:rgba(255,255,255,0.07);
             border:1px solid rgba(255,255,255,0.13);
@@ -3595,6 +3636,9 @@ def blessing_boxes():
     </p>
 </div>
 
+<img class="hero-photo" src="/static/images/blessing-box/volunteers-stocking.webp"
+     alt="Community volunteers stocking an EmpowerBands Blessing Box with food and essential supplies">
+
 <div class="page">
     <a class="back" href="/">← Back to Home</a>
 
@@ -3635,6 +3679,32 @@ def blessing_boxes():
     would like to host a box, see the partnership section below.
 </p>
 </div>
+
+    <!-- COMMUNITY IN ACTION -->
+    <div class="card">
+        <h2>💙 Neighbors Helping Neighbors</h2>
+        <p>
+            Every stocked shelf represents local people showing up for one another.
+            Community members can take what they need and leave what they can.
+        </p>
+        <div class="photo-grid">
+            <figure class="photo-tile">
+                <img src="/static/images/blessing-box/community-donation.webp"
+                     alt="A community member placing donated supplies into a Blessing Box" loading="lazy">
+                <figcaption>Community members help keep each box stocked and ready.</figcaption>
+            </figure>
+            <figure class="photo-tile">
+                <img src="/static/images/blessing-box/food-and-water-donations.webp"
+                     alt="Food, household essentials, and bottled water donated for a Blessing Box" loading="lazy">
+                <figcaption>Food, water, and daily essentials make an immediate difference.</figcaption>
+            </figure>
+            <figure class="photo-tile">
+                <img src="/static/images/blessing-box/empowerbands-blessing-box.webp"
+                     alt="EmpowerBands Worldwide Blessing Box at a community location" loading="lazy">
+                <figcaption>EmpowerBands Blessing Boxes provide free essentials with no questions asked.</figcaption>
+            </figure>
+        </div>
+    </div>
 
     <!-- WHAT'S NEEDED -->
     <div class="card">
