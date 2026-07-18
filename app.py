@@ -1,13 +1,4 @@
-from flask import (
-    Flask,
-    render_template,
-    request,
-    redirect,
-    url_for,
-    session,
-    send_file,
-    jsonify,
-)
+from flask import Flask, request, redirect, session, send_file, jsonify
 import hmac
 import hashlib
 from twilio.rest import Client
@@ -19,7 +10,6 @@ from email.mime.text import MIMEText
 import qrcode
 from io import BytesIO
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
@@ -635,7 +625,6 @@ body{{
         <a href="#how">How It Works</a>
         <a href="#about">About Us</a>
         <a href="#mission">Mission</a>
-        <a href="/board">Board of Directors</a>
         <a href="mailto:support@empowerbands.org">Contact</a>
     </div>
 
@@ -850,10 +839,6 @@ body{{
     
 
 
-@app.route('/board')
-def board():
-    return render_template('board.html')
-
 # ===============================
 # SHORT LINK REDIRECT
 # ===============================
@@ -873,10 +858,6 @@ def band_profile_shortcut(band_id):
     "sms-opt-in",
     "donate",
     "im_safe"
-    "register",
-    "activate",
-    "blessing-boxes",
-    "dashboard",
 ]
 
     if band_id.lower() in blocked_routes:
@@ -1111,135 +1092,6 @@ EmpowerBands Emergency System
 </html>
    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
-
-
-@app.route("/login") 
-def login(): 
-    return redirect(url_for("admin")) 
-
-@app.route("/register", methods=["GET"]) 
-def register_band_page(): 
-    return render_template("register.html") 
-
-@app.route("/api/register-band", methods=["POST"]) 
-def register_band_api(): 
-    """Surgically updated activation endpoint with status checks and full profile mapping."""
-    import re
-    import time
-    
-    data = request.get_json(silent=True) or {}
-    
-    # Core variables for validation
-    band_id = str(data.get("bandId", "")).strip().upper()
-    password = str(data.get("password", ""))
-    password_confirm = str(data.get("password_confirm", ""))
-
-    # Validate baseline rules
-    if not re.fullmatch(r"[A-Z0-9-]{3,50}", band_id): 
-        return jsonify({"message": "Enter a valid Band ID using letters, numbers, and hyphens."}), 400 
-    if len(password) < 10: 
-        return jsonify({"message": "Your password must contain at least 10 characters."}), 400 
-    if password != password_confirm:
-        return jsonify({"message": "Passwords do not match."}), 400
-    if not bool(data.get("termsConsent")): 
-        return jsonify({"message": "You must agree to the Terms of Service and Privacy Policy."}), 400 
-
-    # 1. Checks band_inventory.csv for the Band ID & 2. Validates status constraints
-    inventory_file = "band_inventory.csv"
-    if not os.path.exists(inventory_file):
-        return jsonify({"message": "Inventory system database missing."}), 500
-
-    inventory_rows = []
-    band_found = False
-    valid_status = False
-
-    with open(inventory_file, mode="r", newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        fieldnames = reader.fieldnames
-        for row in reader:
-            if str(row.get("band_id", "")).strip().upper() == band_id:
-                band_found = True
-                # 2 & 6. Only allows status unassigned or inactive. Blocks second activation.
-                if str(row.get("status", "")).strip().lower() in ["unassigned", "inactive"]:
-                    valid_status = True
-                    row["status"] = "activated" # 5. Changes the inventory status to activated
-            inventory_rows.append(row)
-
-    if not band_found:
-        return jsonify({"message": "Invalid Band ID. Check the identifier and try again."}), 400
-    if not valid_status:
-        return jsonify({"message": "This band is already activated or unavailable."}), 400
-
-    # 3. Saves the full customer profile to customers.csv (mapped from template field names)
-    customers_file = "customers.csv"
-    customer_fields = [
-        "band_id", "name", "phone", "email", "emergency_phones", "emergency_emails", 
-        "age_group", "condition", "public_instructions", "private_notes", "pin", 
-        "address", "race", "gender", "photo"
-    ]
-    
-    customer_data = {
-        "band_id": band_id,
-        "name": str(data.get("name", "")).strip(),
-        "phone": str(data.get("phone", "")).strip(),
-        "email": str(data.get("email", "")).strip().lower(),
-        "emergency_phones": str(data.get("emergency_phones", "")).strip(),
-        "emergency_emails": str(data.get("emergency_emails", "")).strip(),
-        "age_group": str(data.get("age_group", "")).strip(),
-        "condition": str(data.get("condition", "")).strip(),
-        "public_instructions": str(data.get("public_instructions", "")).strip(),
-        "private_notes": str(data.get("private_notes", "")).strip(),
-        "pin": str(data.get("pin", "")).strip(),
-        "address": str(data.get("address", "")).strip(),
-        "race": str(data.get("race", "")).strip(),
-        "gender": str(data.get("gender", "")).strip(),
-        "photo": str(data.get("photo", "")).strip()
-    }
-
-    # Ensure all required profile items from the front end exist
-    if not customer_data["name"] or not customer_data["phone"] or not customer_data["email"]:
-        return jsonify({"message": "Please complete all required profile fields."}), 400
-
-    cust_file_exists = os.path.exists(customers_file)
-    with open(customers_file, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=customer_fields)
-        if not cust_file_exists or os.path.getsize(customers_file) == 0:
-            writer.writeheader()
-        writer.writerow(customer_data)
-
-    # 4. Saves the hashed password and core details to band_registrations.csv
-    registrations_file = "band_registrations.csv"
-    registration_fields = ["band_id", "password_hash", "purchase_location", "purchase_date", "created_at"]
-    reg_file_exists = os.path.exists(registrations_file)
-    
-    with open(registrations_file, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=registration_fields)
-        if not reg_file_exists or os.path.getsize(registrations_file) == 0:
-            writer.writeheader()
-        writer.writerow({
-            "band_id": band_id,
-            "password_hash": generate_password_hash(password),
-            "purchase_location": str(data.get("purchaseLocation", "")).strip(),
-            "purchase_date": str(data.get("purchaseDate", "")).strip(),
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
-        })
-
-    # Save the updated status change back into band_inventory.csv safely
-    with open(inventory_file, mode="w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(inventory_rows)
-
-    return jsonify({ 
-        "message": "Your EmpowerBand was activated successfully.", 
-        "redirectUrl": f"/{band_id}" 
-    }), 201 
-
-@app.route("/activate") 
-def activate(): 
-    return redirect(url_for("register_band_page"))
-
-
 
 # ===============================
 # DASHBOARD
@@ -1682,119 +1534,314 @@ function filterBands(){{
 def add():
     if not session.get("logged_in"):
         return redirect("/admin")
-        
+
     if request.method == "POST":
-        # Form inputs extracted surgically for your exact four inventory tracking items
-        band_id = request.form.get("band_id", "").strip().upper()
-        module_id_number = request.form.get("module_id_number", "").strip()
-        name = request.form.get("name", "").strip()
-        phone = request.form.get("phone", "").strip()
-        email = request.form.get("email", "").strip().lower()
+        photo = request.files.get("photo")
+        photo_url = ""
+        if photo and photo.filename != "":
+            filename = f"{int(time.time())}_{secure_filename(photo.filename)}"
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            photo.save(filepath)
+            photo_url = f"/static/uploads/{filename}"
 
-        inventory_file = "band_inventory.csv"
-        file_exists = os.path.exists(inventory_file)
-        
-        # Save strictly to band_inventory.csv
-        with open(inventory_file, "a", newline="", encoding="utf-8") as f:
-            fieldnames = ["band_id", "module_id_number", "name", "phone", "email"]
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            if not file_exists or os.path.getsize(inventory_file) == 0:
-                writer.writeheader()
-            writer.writerow({
-                "band_id": band_id,
-                "module_id_number": module_id_number,
-                "name": name,
-                "phone": phone,
-                "email": email
-            })
-            
-        print(f"INVENTORY RECORD SAVED: {band_id}")
-        return redirect("/add") # Redirects back to add page smoothly
+        row = [
+            request.form["band_id"].strip().upper(),
+            request.form["name"].strip(),
+            request.form["email"].strip(),
+            request.form["phone"].strip(),
+            request.form.get("emergency_phones", "").strip(),
+            request.form.get("emergency_emails", "").strip(),
+            request.form["age_group"].strip(),
+            request.form["condition"].strip(),
+            request.form["instructions"].strip(),
+            request.form["medical_notes"].strip(),
+            request.form["pin"].strip(),
+            request.form["address"].strip(),
+            request.form["race"].strip(),
+            request.form["gender"].strip(),
+            photo_url
+        ]
 
-    # Returns your exact original styling but with only the 4 specific input boxes inside the card
+        with open(file_name, "a", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerow(row)
+
+        print(f"PROFILE SAVED: {row[0]}")
+
+        return redirect("/" + row[0])
+
     return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Add EmpowerBand Inventory</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            body{ margin:0; font-family:Arial,sans-serif; background: radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%); min-height:100vh; color:white; }
-            .page{ min-height:100vh; display:flex; justify-content:center; align-items:center; padding:24px; }
-            .card{ width:100%; max-width:560px; background:rgba(255,255,255,0.08); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.15); border-radius:28px; padding:30px; box-shadow:0 25px 80px rgba(0,0,0,.55); box-sizing:border-box; }
-            h1{ margin:0; font-size:34px; font-weight:800; text-align:center; }
-            .subtitle{ text-align:center; color:#cbd5e1; margin:10px 0 25px; }
-            input{ width:100%; box-sizing:border-box; padding:15px; border:none; outline:none; border-radius:16px; background:rgba(255,255,255,.1); color:white; margin-bottom:14px; font-size:16px; }
-            input::placeholder{ color:#cbd5e1; }
-            button{ width:100%; padding:16px; border:none; border-radius:16px; background:linear-gradient(135deg,#22c55e,#06b6d4); color:white; font-weight:bold; font-size:17px; cursor:pointer; }
-            .footer{ text-align:center; margin-top:18px; color:#94a3b8; font-size:12px; }
-            .band-row{ display:flex; gap:12px; margin-bottom:16px; }
-            .band-row input{ flex:2; min-width:0; margin-bottom:0; }
-            .generate-btn{ width:auto; min-width:140px; border:none; border-radius:16px; padding:0 18px; background:linear-gradient(135deg,#06b6d4,#2563eb); color:white; font-weight:700; cursor:pointer; }
-            @media(max-width:480px){ .band-row{ flex-direction:column; } .generate-btn{ width:100%; padding:16px; } }
-        </style>
-    </head>
-    <body>
-        <div class="page">
-            <div class="card">
-                <h1>Add Hardware Band</h1>
-                <div class="subtitle"> Log a new hardware band into the system inventory </div>
-                <form method="POST">
-                    <div class="band-row">
-                        <input type="text" id="band_id" name="band_id" placeholder="Band ID" required >
-                        <button type="button" class="generate-btn" onclick="generateBandId()" > Generate </button>
-                    </div>
-                    
-                    <input type="text" name="module_id_number" placeholder="Module ID Number" required>
-                    <input type="text" name="name" placeholder="Name" required>
-                    <input type="tel" name="phone" placeholder="Phone" required>
-                    <input type="email" name="email" placeholder="Email" required>
-                    
-                    <button type="submit"> Save Record </button>
-                </form>
-                <div class="footer"> EmpowerBands Admin System </div>
-            </div>
-        </div>
-        <script>
-            async function generateBandId(){
-                try{
-                    const response = await fetch("/next-band-id");
-                    const data = await response.text();
-                    document.getElementById("band_id").value = data;
-                }catch(error){
-                    alert("Could not generate Band ID");
-                }
-            }
-        </script>
-    </body>
-    </html>
-    
 
 
+<!DOCTYPE html>
+<html>
+<head>
+<title>Add EmpowerBand Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    min-height:100vh;
+    color:white;
+}
+
+.page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+}
+
+.card{
+    width:100%;
+    max-width:560px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
+
+h1{
+    margin:0;
+    font-size:34px;
+    font-weight:800;
+    text-align:center;
+}
+
+.subtitle{
+    text-align:center;
+    color:#cbd5e1;
+    margin:10px 0 25px;
+}
+
+input, textarea{
+    width:100%;
+    box-sizing:border-box;
+    padding:15px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    background:rgba(255,255,255,.1);
+    color:white;
+    margin-bottom:14px;
+    font-size:16px;
+}
+
+textarea{
+    min-height:90px;
+    resize:vertical;
+}
+
+input::placeholder,
+textarea::placeholder{
+    color:#cbd5e1;
+}
+
+button{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    color:white;
+    font-weight:bold;
+    font-size:17px;
+    cursor:pointer;
+}
+
+.footer{
+    text-align:center;
+    margin-top:18px;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+
+
+
+.band-row{
+    display:flex;
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.band-row input{
+    flex:2;
+    min-width:0;
+}
+
+.generate-btn{
+    width:auto;
+    min-width:140px;
+    border:none;
+    border-radius:16px;
+    padding:0 18px;
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+}
+
+@media(max-width:480px){
+    .band-row{
+        flex-direction:column;
+    }
+
+    .generate-btn{
+        width:100%;
+        padding:16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="card">
+
+<h1>Add Profile</h1>
+
+<div class="subtitle">
+Create a secure EmpowerBand emergency profile
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+
+<div class="band-row">
+
+<input
+type="text"
+id="band_id"
+name="band_id"
+placeholder="Band ID"
+required
+>
+
+<button
+type="button"
+class="generate-btn"
+onclick="generateBandId()"
+>
+Generate
+</button>
+
+</div>
+
+<input name="name" placeholder="Full Name" required>
+
+<input name="email" placeholder="Email">
+
+<input name="phone" placeholder="Primary Phone">
+
+<input name="emergency_phones" placeholder="Emergency Contacts (comma separated)" required>
+
+<input name="emergency_emails" placeholder="Emergency Emails (comma separated)">
+
+<input name="age_group" placeholder="Child / Adult / Senior">
+
+<input name="condition" placeholder="Public condition example: Autism - Nonverbal">
+
+<textarea name="instructions" placeholder="Public instructions"></textarea>
+
+<textarea name="medical_notes" placeholder="Private medical notes"></textarea>
+
+<input name="pin" placeholder="PIN example: 1234" required>
+
+<input name="address" placeholder="Address">
+
+<input name="race" placeholder="Race">
+
+<input name="gender" placeholder="Gender">
+
+<input type="file" name="photo" placeholder="Photo">
+
+<input name="photo_url" placeholder="Photo URL (if not uploading)">
+
+<label style="display:block; margin-top:15px; font-size:13px;">
+    <input type="checkbox" name="agree_terms" required>
+    I agree to the Privacy Policy and Terms of Service.
+</label>
+
+<label style="display:block; margin-top:10px; font-size:13px;">
+    <input type="checkbox" name="sms_consent" required>
+    I consent to receive emergency SMS alerts from EmpowerBands.
+</label>
+<button type="submit">
+Save Profile
+</button>
+
+</form>
+
+<div class="footer">
+EmpowerBands Admin System
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+async function generateBandId(){
+
+    try{
+
+        const response = await fetch("/next-band-id");
+
+        const data = await response.text();
+
+        document.getElementById("band_id").value = data;
+
+    }catch(error){
+
+        alert("Could not generate Band ID");
+    }
+}
+
+</script>
+</body>
+</html>
 """
-@app.route("/next-band-id") 
+@app.route("/next-band-id")
 def next_band_id():
-    """Surgically updated to look up sequential IDs inside band_inventory.csv instead."""
+
     highest = 0
-    inventory_file = "band_inventory.csv" # Switched to target your new inventory database
-    
-    try: 
-        if os.path.exists(inventory_file) and os.path.getsize(inventory_file) > 0:
-            with open(inventory_file, "r", encoding="utf-8") as f: 
-                reader = csv.DictReader(f) 
-                for row in reader: 
-                    band_id = row.get("band_id", "") 
-                    if band_id.startswith("EB"): 
-                        try: 
-                            number = int(band_id.replace("EB", "")) 
-                            if number > highest: 
-                                highest = number 
-                        except: 
-                            pass 
-    except: 
-        pass 
-        
-    next_id = highest + 1 
+
+    try:
+
+        with open(file_name, "r", encoding="utf-8") as f:
+
+            reader = csv.DictReader(f)
+
+            for row in reader:
+
+                band_id = row.get("band_id", "")
+
+                if band_id.startswith("EB"):
+
+                    try:
+                        number = int(band_id.replace("EB", ""))
+
+                        if number > highest:
+                            highest = number
+
+                    except:
+                        pass
+
+    except:
+        pass
+
+    next_id = highest + 1
+
     return f"EB{next_id:03d}"
 
 # ===============================
@@ -3402,48 +3449,7 @@ def blessing_boxes():
             margin:0 auto;
             line-height:1.7;
         }}
-        .page{{max-width:900px;margin:0 auto;padding:0 20px 60px;}}
-        .hero-photo{{
-            width:min(900px,calc(100% - 40px));
-            height:clamp(260px,52vw,500px);
-            display:block;
-            margin:0 auto 28px;
-            object-fit:cover;
-            object-position:center 42%;
-            border-radius:22px;
-            border:1px solid rgba(255,255,255,0.16);
-            box-shadow:0 24px 60px rgba(0,0,0,0.38);
-        }}
-        .photo-grid{{
-            display:grid;
-            grid-template-columns:repeat(3,1fr);
-            gap:14px;
-            margin-top:18px;
-        }}
-        .photo-tile{{
-            margin:0;
-            overflow:hidden;
-            border-radius:15px;
-            background:rgba(255,255,255,0.06);
-            border:1px solid rgba(255,255,255,0.12);
-        }}
-        .photo-tile img{{
-            width:100%;
-            aspect-ratio:4/5;
-            object-fit:cover;
-            display:block;
-        }}
-        .photo-tile figcaption{{
-            padding:11px 12px 13px;
-            color:#cbd5e1;
-            font-size:13px;
-            line-height:1.45;
-        }}
-        @media (max-width:680px){{
-            .photo-grid{{grid-template-columns:1fr;}}
-            .photo-tile img{{aspect-ratio:16/11;}}
-            .hero{{padding-top:42px;}}
-        }}
+        .page{{max-width:760px;margin:0 auto;padding:0 20px 60px;}}
         .card{{
             background:rgba(255,255,255,0.07);
             border:1px solid rgba(255,255,255,0.13);
@@ -3551,9 +3557,6 @@ def blessing_boxes():
     </p>
 </div>
 
-<img class="hero-photo" src="/static/images/blessing-box/volunteers-stocking.webp"
-     alt="Community volunteers stocking an EmpowerBands Blessing Box with food and essential supplies">
-
 <div class="page">
     <a class="back" href="/">← Back to Home</a>
 
@@ -3594,32 +3597,6 @@ def blessing_boxes():
     would like to host a box, see the partnership section below.
 </p>
 </div>
-
-    <!-- COMMUNITY IN ACTION -->
-    <div class="card">
-        <h2>💙 Neighbors Helping Neighbors</h2>
-        <p>
-            Every stocked shelf represents local people showing up for one another.
-            Community members can take what they need and leave what they can.
-        </p>
-        <div class="photo-grid">
-            <figure class="photo-tile">
-                <img src="/static/images/blessing-box/community-donation.webp"
-                     alt="A community member placing donated supplies into a Blessing Box" loading="lazy">
-                <figcaption>Community members help keep each box stocked and ready.</figcaption>
-            </figure>
-            <figure class="photo-tile">
-                <img src="/static/images/blessing-box/food-and-water-donations.webp"
-                     alt="Food, household essentials, and bottled water donated for a Blessing Box" loading="lazy">
-                <figcaption>Food, water, and daily essentials make an immediate difference.</figcaption>
-            </figure>
-            <figure class="photo-tile">
-                <img src="/static/images/blessing-box/empowerbands-blessing-box.webp"
-                     alt="EmpowerBands Worldwide Blessing Box at a community location" loading="lazy">
-                <figcaption>EmpowerBands Blessing Boxes provide free essentials with no questions asked.</figcaption>
-            </figure>
-        </div>
-    </div>
 
     <!-- WHAT'S NEEDED -->
     <div class="card">
