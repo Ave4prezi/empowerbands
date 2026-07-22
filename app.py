@@ -470,7 +470,7 @@ BOARD_MEMBERS = [
         "name": "Avery Johnson",
         "title": "Co-Founder and Secretary",
         "photo": "/static/images/avery-johnson.png",
-        "bio": "Avery Johnson is the Co-Founder, Secretary, and Director of EmpowerBands Worldwide. Avery Johnson will oversee the organization’s official records, board documentation, administrative communication, and governance records. He is a community-focused leader, entrepreneur, father, artist, and advocate for empowerment. His experiences include walking across America for peace and supporting charitable causes, giving him a deep commitment to service, unity, encouragement, and positive community impact.",
+        "bio": "Avery Johnson is the Co-Founder, Secretary, and Director of EmpowerBands Worldwide. Avery Johnson will oversee the organization’s official records, board documentation, administrative communication, and governance records. He is a community-focused leader, entrepreneur, father, artist, and advocate for empowerment.",
         "links": [],
     },
     {
