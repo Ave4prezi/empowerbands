@@ -622,6 +622,7 @@ body{{
 
     <div class="nav">
         <a class="active" href="/">Home</a>
+        <a href="/traveling-band-movement">🌍 Traveling Band</a>
         <a href="#how">How It Works</a>
         <a href="#about">About Us</a>
         <a href="#mission">Mission</a>
@@ -794,6 +795,19 @@ body{{
     </div>
 </section>
 
+<section class="cta">
+    <img src="{LOGO_URL}">
+
+    <div>
+        <h2>Empowerment Should Never Stop With One Person</h2>
+        <p>The Traveling Band Movement allows one message of hope and encouragement to continue traveling. A band can begin with one person, move through an entire community, and eventually connect people around the world.</p>
+    </div>
+
+    <div class="cta-buttons">
+        <a class="btn" href="/traveling-band-movement">🌍 Join The Movement</a>
+    </div>
+</section>
+
 {spotlight_html}
 
 <div class="footer">
@@ -808,6 +822,7 @@ body{{
     </div>
 
     <div>
+        <a href="/traveling-band-movement">🌍 Traveling Band Movement</a> |
         <a href="/giveaway">🎁 Shirt Giveaway</a> |
         <a href="/blessing-boxes">💛 Blessing Boxes</a> |
         <a href="/sms-opt-in">SMS Opt-In</a> |
@@ -1436,6 +1451,10 @@ body{{
 
         <a class="add-btn" href="/admin/giveaway">
             🎁 Giveaway Entries
+</a>
+
+        <a class="add-btn" href="/admin/traveling-band">
+            🌍 Traveling Band Log
 </a>
 
 </div>
@@ -3971,6 +3990,364 @@ def admin_blessing_box_needs():
 </body>
 </html>
 """
+
+# ===============================
+# TRAVELING BAND MOVEMENT
+# ===============================
+
+TBM_FILE = "traveling_band_log.csv"
+
+def _init_tbm_file():
+    if not os.path.exists(TBM_FILE):
+        with open(TBM_FILE, "w", newline="", encoding="utf-8") as _tf:
+            csv.writer(_tf).writerow(["Name", "Email", "Location", "Story", "Submitted"])
+
+_init_tbm_file()
+
+@app.route("/traveling-band-movement", methods=["GET", "POST"])
+def traveling_band_movement():
+    t_success = False
+    t_error = ""
+
+    if request.method == "POST":
+        t_name = request.form.get("t_name", "").strip()
+        t_email = request.form.get("t_email", "").strip()
+        t_location = request.form.get("t_location", "").strip()
+        t_story = request.form.get("t_story", "").strip()
+
+        if t_name and (t_email or t_location):
+            _init_tbm_file()
+            with open(TBM_FILE, "a", newline="", encoding="utf-8") as _tf:
+                csv.writer(_tf).writerow(
+                    [t_name, t_email, t_location, t_story, time.strftime("%Y-%m-%d %H:%M")]
+                )
+            t_success = True
+        else:
+            t_error = "Please enter your name and either an email or a location."
+
+    t_banner = ""
+    if t_success:
+        t_banner = """<div style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:14px;padding:16px 20px;margin-bottom:20px;color:#86efac;font-size:15px;font-weight:600;">
+            🌍 Thank you! Your band's journey has been logged.
+        </div>"""
+    elif t_error:
+        t_banner = f"""<div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);border-radius:14px;padding:16px 20px;margin-bottom:20px;color:#fca5a5;font-size:14px;">
+            ⚠️ {t_error}
+        </div>"""
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Join the Traveling Band Movement — start or continue a band's journey of hope and encouragement from person to person, community to community.">
+    <title>Traveling Band Movement — EmpowerBands</title>
+    <style>
+        *{{box-sizing:border-box;margin:0;padding:0;}}
+        body{{
+            font-family:Arial,sans-serif;
+            background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+            color:white;
+            min-height:100vh;
+        }}
+        .hero{{
+            text-align:center;
+            padding:60px 20px 40px;
+        }}
+        .hero h1{{
+            font-size:38px;
+            font-weight:900;
+            margin-bottom:14px;
+        }}
+        .hero h1 span{{color:#67e8f9;}}
+        .hero p{{
+            font-size:17px;
+            color:#cbd5e1;
+            max-width:640px;
+            margin:0 auto;
+            line-height:1.7;
+        }}
+        .page{{max-width:760px;margin:0 auto;padding:0 20px 60px;}}
+        .card{{
+            background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.13);
+            border-radius:20px;
+            padding:28px;
+            margin-bottom:22px;
+        }}
+        .card h2{{
+            font-size:20px;
+            font-weight:800;
+            margin-bottom:12px;
+            color:#67e8f9;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }}
+        .card p,.card li{{
+            color:#cbd5e1;
+            line-height:1.75;
+            font-size:15px;
+        }}
+        .steps{{list-style:none;counter-reset:step;margin-top:14px;}}
+        .steps li{{
+            counter-increment:step;
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+            margin-bottom:16px;
+        }}
+        .steps li::before{{
+            content:counter(step);
+            flex:0 0 30px;
+            width:30px;
+            height:30px;
+            border-radius:50%;
+            background:rgba(14,165,233,0.2);
+            border:1px solid rgba(103,232,249,0.35);
+            color:#67e8f9;
+            font-weight:800;
+            font-size:14px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }}
+        .pack-card{{
+            display:flex;
+            gap:24px;
+            align-items:center;
+            flex-wrap:wrap;
+        }}
+        .pack-visual{{
+            flex:0 0 140px;
+            width:140px;
+            height:140px;
+            border-radius:20px;
+            background:rgba(103,232,249,0.1);
+            border:1px solid rgba(103,232,249,0.25);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:56px;
+        }}
+        .pack-info{{flex:1;min-width:200px;}}
+        .price-tag{{
+            display:inline-block;
+            margin-top:10px;
+            background:rgba(216,173,84,0.18);
+            border:1px solid rgba(241,213,143,0.4);
+            color:#f1d58f;
+            border-radius:999px;
+            padding:6px 16px;
+            font-size:13px;
+            font-weight:700;
+        }}
+        .field-group{{display:grid;gap:12px;margin-top:18px;}}
+        .field-group input,
+        .field-group textarea{{
+            padding:13px 16px;
+            border:none;
+            border-radius:12px;
+            background:rgba(255,255,255,0.1);
+            color:white;
+            font-size:15px;
+            outline:none;
+            width:100%;
+            font-family:inherit;
+        }}
+        .field-group textarea{{resize:vertical;}}
+        .field-group input::placeholder,
+        .field-group textarea::placeholder{{color:#94a3b8;}}
+        .submit-btn{{
+            padding:15px;
+            border:none;
+            border-radius:14px;
+            background:linear-gradient(135deg,#0ea5e9,#2563eb);
+            color:white;
+            font-size:16px;
+            font-weight:800;
+            cursor:pointer;
+        }}
+        .fine-print{{color:#64748b;font-size:12.5px;line-height:1.7;}}
+        .back{{
+            display:inline-block;
+            margin:24px 0 0;
+            padding:10px 18px;
+            border-radius:12px;
+            background:rgba(255,255,255,0.1);
+            color:white;
+            text-decoration:none;
+            font-size:14px;
+        }}
+        .btn{{
+            display:inline-block;
+            padding:15px 28px;
+            border-radius:14px;
+            text-decoration:none;
+            font-weight:700;
+            font-size:15px;
+            margin:8px 8px 0 0;
+        }}
+        .btn-cyan{{background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;}}
+        footer{{
+            text-align:center;
+            padding:30px 20px;
+            color:#475569;
+            font-size:13px;
+            border-top:1px solid rgba(255,255,255,0.07);
+        }}
+        footer a{{color:#67e8f9;text-decoration:none;}}
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <img src="{LOGO_URL}" alt="EmpowerBands Logo" style="width:70px;margin-bottom:20px;border-radius:50%;">
+    <h1>The <span>Traveling Band</span> Movement</h1>
+    <p>
+        Empowerment should never stop with one person. A band can begin with one
+        person, move through an entire community, and eventually connect people
+        around the world — one message of hope and encouragement at a time.
+    </p>
+</div>
+
+<div class="page">
+    <a class="back" href="/">← Back to Home</a>
+
+    <div class="card" style="margin-top:20px;">
+        <h2>🌍 How the Movement Works</h2>
+        <ol class="steps">
+            <li><span>Receive or request a band, along with a handwritten story card explaining where it's been and who it's touched so far.</span></li>
+            <li><span>Wear it, carry its story, and let it be a reminder of encouragement in your own life.</span></li>
+            <li><span>When you're ready, pass it forward — write your own note on the story card and hand it to someone who needs it next.</span></li>
+        </ol>
+    </div>
+
+    <div class="card pack-card">
+        <div class="pack-visual">🎗️</div>
+        <div class="pack-info">
+            <h2 style="margin-bottom:6px;">Traveling Band Starter Pack</h2>
+            <p>Everything you need to start your own traveling band journey — a handmade bracelet, a story card, and instructions for passing it forward.</p>
+            <span class="price-tag">$18</span>
+            <div style="margin-top:14px;">
+                <a class="btn btn-cyan" href="mailto:support@empowerbands.org?subject=Order:%20Traveling%20Band%20Starter%20Pack">📦 Order a Starter Pack</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="log">
+        <h2>✍️ Log Your Band's Journey</h2>
+        <p style="margin-bottom:18px;">Started a band, received one, or passed one forward? Tell us where it's been — we love tracking how far encouragement can travel.</p>
+        {t_banner}
+        <form method="POST" action="/traveling-band-movement#log">
+            <div class="field-group">
+                <input type="text" name="t_name" placeholder="Your Name *" required>
+                <input type="email" name="t_email" placeholder="Email Address">
+                <input type="text" name="t_location" placeholder="City / Location">
+                <textarea name="t_story" placeholder="Tell us the story so far (optional)" rows="3"></textarea>
+                <button type="submit" class="submit-btn">🌍 Log This Band</button>
+                <p class="fine-print">Enter your email or location so we can trace the band's path.</p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 EmpowerBands Worldwide &nbsp;|&nbsp; Decatur, Alabama &nbsp;|&nbsp; support@empowerbands.org</p>
+    <p style="margin-top:8px;">
+        <a href="/">Home</a> &nbsp;|&nbsp;
+        <a href="/donate">Donate</a> &nbsp;|&nbsp;
+        <a href="/privacy">Privacy Policy</a>
+    </p>
+</footer>
+
+</body>
+</html>
+"""
+
+# ===============================
+# ADMIN — TRAVELING BAND LOG
+# ===============================
+
+@app.route("/admin/traveling-band")
+def admin_traveling_band():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    logs = []
+    try:
+        with open(TBM_FILE, "r", encoding="utf-8") as _tf:
+            reader = csv.DictReader(_tf)
+            for row in reader:
+                logs.append(row)
+        logs.reverse()
+    except:
+        logs = []
+
+    rows_html = ""
+    for l in logs:
+        rows_html += f"""<tr>
+            <td>{l.get('Name','')}</td>
+            <td>{l.get('Email','')}</td>
+            <td>{l.get('Location','')}</td>
+            <td style="max-width:220px;word-break:break-word;">{l.get('Story','')}</td>
+            <td>{l.get('Submitted','')}</td>
+        </tr>"""
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traveling Band Log — EmpowerBands</title>
+    <style>
+        body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);color:white;min-height:100vh;padding:25px 16px;}}
+        .page{{max-width:960px;margin:auto;}}
+        h1{{font-size:28px;margin-bottom:4px;}}
+        .sub{{color:#94a3b8;font-size:14px;margin-bottom:24px;}}
+        .back{{display:inline-block;margin-bottom:22px;padding:10px 18px;border-radius:12px;background:rgba(255,255,255,0.1);color:white;text-decoration:none;font-size:14px;margin-right:10px;}}
+        .wrap{{overflow-x:auto;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:20px;}}
+        table{{width:100%;border-collapse:collapse;font-size:14px;}}
+        th{{color:#67e8f9;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);}}
+        td{{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:#e5e7eb;vertical-align:top;}}
+        tr:last-child td{{border-bottom:none;}}
+        .empty{{text-align:center;padding:40px;color:#64748b;}}
+        .count{{display:inline-block;background:rgba(103,232,249,0.12);border:1px solid rgba(103,232,249,0.25);border-radius:8px;padding:4px 12px;font-size:13px;color:#67e8f9;margin-bottom:20px;}}
+    </style>
+</head>
+<body>
+<div class="page">
+    <a class="back" href="/dashboard">⬅ Dashboard</a>
+    <a class="back" href="/traveling-band-movement" target="_blank">👁 View Page</a>
+    <a class="back" href="/admin/traveling-band/export">⬇ Export CSV</a>
+    <h1>🌍 Traveling Band Log</h1>
+    <p class="sub">Everyone who has logged a band's journey through the movement.</p>
+    <div class="count">{len(logs)} entr{'y' if len(logs) == 1 else 'ies'} total</div>
+    <div class="wrap">
+        <table>
+            <tr><th>Name</th><th>Email</th><th>Location</th><th>Story</th><th>Submitted</th></tr>
+            {rows_html if rows_html else '<tr><td colspan="5" class="empty">No entries yet.</td></tr>'}
+        </table>
+    </div>
+</div>
+</body>
+</html>
+"""
+
+@app.route("/admin/traveling-band/export")
+def admin_traveling_band_export():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    if not os.path.exists(TBM_FILE):
+        return redirect("/admin/traveling-band")
+    return send_file(
+        TBM_FILE,
+        as_attachment=True,
+        download_name="traveling_band_log.csv",
+        mimetype="text/csv"
+    )
 
 # ===============================
 # SHIRT GIVEAWAY
