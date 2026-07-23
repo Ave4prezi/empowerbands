@@ -243,247 +243,6 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
 
 
 # ===============================
-# SHARED SITE NAVIGATION + FOOTER
-# Used on the Traveling Band Movement, Merch, and Board Members
-# pages (and referenced from the homepage nav) so the site shares
-# one consistent header/footer instead of each page rebuilding it.
-# ===============================
-
-def site_nav_html(active=""):
-    def link(href, label, key, extra_style=""):
-        cls = "active" if key == active else ""
-        style = f' style="{extra_style}"' if extra_style else ""
-        return f'<a class="{cls}" href="{href}"{style}>{label}</a>'
-
-    return f"""
-<a href="#main-content" class="skip-link">Skip to main content</a>
-<div class="site-header">
-    <a class="site-logo" href="/">
-        <img src="{LOGO_URL}" alt="EmpowerBands Worldwide logo">
-        <span>EmpowerBands<em>Worldwide</em></span>
-    </a>
-    <nav class="site-nav" aria-label="Main navigation">
-        {link("/", "Home", "home")}
-        {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
-        {link("/merch", "Shop", "merch")}
-        {link("/board-members", "Board", "board")}
-        {link("/blessing-boxes", "Blessing Boxes", "blessing")}
-        {link("/#about", "About", "about")}
-        {link("mailto:support@empowerbands.org", "Contact", "contact")}
-    </nav>
-    <div class="site-header-buttons">
-        <a class="btn-outline-sm" href="/donate">❤️ Donate</a>
-    </div>
-</div>
-<style>
-.skip-link{{
-    position:absolute;left:-9999px;top:auto;background:#0ea5e9;color:white;
-    padding:12px 18px;border-radius:8px;z-index:999;font-family:Arial,sans-serif;font-weight:700;
-}}
-.skip-link:focus{{left:16px;top:16px;}}
-.site-header{{
-    display:flex;align-items:center;justify-content:space-between;
-    gap:18px;padding:16px 6%;flex-wrap:wrap;
-    background:#020817;border-bottom:1px solid rgba(255,255,255,0.1);
-    font-family:Arial,sans-serif;
-}}
-.site-logo{{display:flex;align-items:center;gap:10px;text-decoration:none;color:white;font-weight:900;font-size:18px;}}
-.site-logo img{{width:38px;height:38px;border-radius:50%;object-fit:cover;box-shadow:0 0 15px rgba(14,165,233,0.7);}}
-.site-logo em{{display:block;font-style:normal;color:#38bdf8;font-size:12px;font-weight:700;}}
-.site-nav{{display:flex;gap:20px;flex-wrap:wrap;}}
-.site-nav a{{color:#e2e8f0;text-decoration:none;font-weight:700;font-size:14px;padding-bottom:4px;}}
-.site-nav a.active{{color:#38bdf8;border-bottom:2px solid #38bdf8;}}
-.site-nav a:hover, .site-nav a:focus{{color:#67e8f9;}}
-.btn-outline-sm{{padding:10px 18px;border-radius:10px;border:1px solid rgba(255,255,255,0.25);color:white;text-decoration:none;font-weight:700;font-size:13px;white-space:nowrap;}}
-.btn-outline-sm:hover{{background:rgba(255,255,255,0.08);}}
-@media(max-width:900px){{
-    .site-header{{flex-direction:column;align-items:flex-start;}}
-    .site-nav{{gap:14px;}}
-}}
-</style>
-"""
-
-
-def site_footer_html():
-    return """
-<footer class="site-footer">
-    <div>
-        <strong>EmpowerBands Worldwide</strong><br>
-        Protect What Matters Most
-    </div>
-    <div>
-        Decatur, Alabama<br>
-        support@empowerbands.org
-    </div>
-    <div>
-        <a href="/traveling-band-movement">Traveling Band Movement</a> |
-        <a href="/merch">Shop</a> |
-        <a href="/board-members">Board Members</a> |
-        <a href="/blessing-boxes">Blessing Boxes</a> |
-        <a href="/sms-opt-in">SMS Opt-In</a> |
-        <a href="/privacy">Privacy Policy</a> |
-        <a href="/terms">Terms of Service</a> |
-        <a href="/delete-request">Data Deletion Request</a>
-    </div>
-    <div style="margin-top:12px;">
-        Contact: support@empowerbands.org<br>
-        Follow Us: <a href="https://linktr.ee/EmpowerBandsWorldwide">Linktree</a>
-    </div>
-</footer>
-<style>
-.site-footer{
-    padding:34px 6% 40px;border-top:1px solid rgba(255,255,255,0.1);
-    color:#94a3b8;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
-    font-family:Arial,sans-serif;font-size:14px;
-}
-.site-footer a{color:#cbd5e1;text-decoration:none;margin:0 6px;}
-.site-footer a:hover{color:#67e8f9;}
-</style>
-"""
-
-
-# ===============================
-# TRAVELING BAND MOVEMENT — DATA
-# Handmade bracelets that travel person to person, city to city.
-# This is a separate, grassroots initiative from the NFC safety
-# bands above — no electronics, just a message and a journey.
-#
-# To publish a real story, add a dict to this list (or, later,
-# swap this list for one loaded from a JSON file / database —
-# every place that uses TRAVELING_BAND_STORIES below just expects
-# a list of dicts with these same keys).
-# ===============================
-TRAVELING_BAND_STORIES = [
-    {
-        "name": "Your Story Could Be Here",
-        "location": "Decatur, Alabama",
-        "band_id": "TB-001",
-        "story": "Every traveling band starts with someone willing to pass encouragement forward. Submit your journey and be one of the first stories featured on this page.",
-        "photo_url": "",
-        "date": "",
-        "destination": "Waiting for its first journey",
-    },
-    {
-        "name": "Your Story Could Be Here",
-        "location": "Somewhere New",
-        "band_id": "TB-002",
-        "story": "Received a band from a friend, a stranger, or a community event? Tell us where it's been and where it's headed next.",
-        "photo_url": "",
-        "date": "",
-        "destination": "Headed to its next city",
-    },
-    {
-        "name": "Your Story Could Be Here",
-        "location": "Your Community",
-        "band_id": "TB-003",
-        "story": "Sponsor a batch of bands for your school, church, or workplace and watch the stories start rolling in.",
-        "photo_url": "",
-        "date": "",
-        "destination": "Ready to begin",
-    },
-]
-
-# ===============================
-# MERCH — DATA
-# Placeholder storefront. Prices/links are placeholders until a
-# checkout platform (Stripe, Square, Shopify, etc.) is connected —
-# each product's "link" can be swapped for a real checkout URL later.
-# ===============================
-MERCH_PRODUCTS = [
-    {
-        "name": "EmpowerBands Wristband",
-        "category": "Wristbands",
-        "description": "The original EmpowerBands wristband — a simple, everyday reminder of encouragement and unity.",
-        "price": "$12",
-        "emoji": "💙",
-        "link": "mailto:support@empowerbands.org?subject=Order:%20EmpowerBands%20Wristband",
-        "featured": False,
-    },
-    {
-        "name": "Traveling Band Starter Pack",
-        "category": "Traveling Band Movement",
-        "description": "Everything you need to start your own traveling band journey — a handmade bracelet, a story card, and instructions for passing it forward.",
-        "price": "$18",
-        "emoji": "🌍",
-        "link": "/traveling-band-movement",
-        "featured": True,
-    },
-    {
-        "name": "EmpowerBands T-Shirt",
-        "category": "Apparel",
-        "description": "Soft, everyday t-shirt featuring the EmpowerBands logo. Wear the mission wherever you go.",
-        "price": "$25",
-        "emoji": "👕",
-        "link": "mailto:support@empowerbands.org?subject=Order:%20EmpowerBands%20T-Shirt",
-        "featured": False,
-    },
-    {
-        "name": "EmpowerBands Hoodie",
-        "category": "Apparel",
-        "description": "Cozy pullover hoodie for supporters who want to share the mission in comfort.",
-        "price": "$42",
-        "emoji": "🧥",
-        "link": "mailto:support@empowerbands.org?subject=Order:%20EmpowerBands%20Hoodie",
-        "featured": False,
-    },
-    {
-        "name": "EmpowerBands Hat",
-        "category": "Apparel",
-        "description": "Adjustable cap with embroidered EmpowerBands logo.",
-        "price": "$20",
-        "emoji": "🧢",
-        "link": "mailto:support@empowerbands.org?subject=Order:%20EmpowerBands%20Hat",
-        "featured": False,
-    },
-    {
-        "name": "Community Sponsor Pack",
-        "category": "Sponsor Packs",
-        "description": "Sponsor a set of bands to be distributed through a community partner, shelter, or outreach event.",
-        "price": "$75",
-        "emoji": "🤝",
-        "link": "mailto:support@empowerbands.org?subject=Order:%20Community%20Sponsor%20Pack",
-        "featured": False,
-    },
-    {
-        "name": "School & Youth Group Band Package",
-        "category": "Sponsor Packs",
-        "description": "A bulk package of bands designed for classrooms, youth groups, and student organizations.",
-        "price": "$120",
-        "emoji": "🎒",
-        "link": "mailto:support@empowerbands.org?subject=Order:%20School%20%26%20Youth%20Group%20Band%20Package",
-        "featured": False,
-    },
-]
-
-# ===============================
-# BOARD MEMBERS — DATA
-# ===============================
-BOARD_MEMBERS = [
-    {
-        "name": "April McDaniel",
-        "title": "Founder",
-        "photo": "/static/images/april-mcdaniel.png",
-        "bio": "April McDaniel is the Founder, President, and Board Chair of EmpowerBands Worldwide. April McDaniel will provide executive leadership and help guide the mission, vision, programs, and long-term development of EmpowerBands Worldwide.",
-        "links": [],
-    },
-    {
-        "name": "Avery Johnson",
-        "title": "Co-Founder and Secretary",
-        "photo": "/static/images/avery-johnson.png",
-        "bio": "Avery Johnson is the Co-Founder, Secretary, and Director of EmpowerBands Worldwide. Avery Johnson will oversee the organization’s official records, board documentation, administrative communication, and governance records. He is a community-focused leader, entrepreneur, father, artist, and advocate for empowerment.",
-        "links": [],
-    },
-    {
-        "name": "Selina Dobbins",
-        "title": "Treasurer",
-        "photo": "/static/images/selina-dobbins.png",
-        "bio": "Selina Dobbins serves as Treasurer and Director of EmpowerBands Worldwide. Selina Dobbins will oversee the financial accountability, reporting, budgeting, and financial-recordkeeping activities of empowerBands Worldwide.",
-        "links": [],
-    },
-]
-
-
-# ===============================
 # HOME PAGE
 # ===============================
 
@@ -863,16 +622,15 @@ body{{
 
     <div class="nav">
         <a class="active" href="/">Home</a>
-        <a href="/traveling-band-movement">Traveling Band Movement</a>
-        <a href="/merch">Shop</a>
         <a href="#how">How It Works</a>
         <a href="#about">About Us</a>
-        <a href="/board-members">Board</a>
+        <a href="#mission">Mission</a>
+        <a href="/giveaway">🎁 Giveaway</a>
         <a href="mailto:support@empowerbands.org">Contact</a>
     </div>
 
     <div class="top-buttons">
-        <a class="btn" href="/EB001">🚀 View Demo</a>
+        <a class="btn" href="/giveaway">🎁 Shirt Giveaway</a>
         <a class="btn dark" href="/admin">🔒 Admin Login</a>
     </div>
 </div>
@@ -950,6 +708,7 @@ body{{
 
         <div style="margin-top:25px;">
             <a class="btn" href="/EB001">🚀 View Live Demo</a>
+            <a class="btn dark" href="/giveaway">🎁 Enter the Shirt Giveaway</a>
             <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Support Our Mission</a>
             <a class="btn dark" href="mailto:support@empowerbands.org">🛡️ Partner With Us</a>
         </div>
@@ -1020,65 +779,6 @@ body{{
     </div>
 </section>
 
-<section class="section" id="traveling-band-highlight">
-    <div class="tbm-highlight">
-        <div class="tbm-highlight-text">
-            <h2 style="text-align:left;">Empowerment Should Never Stop With One Person</h2>
-            <p style="color:#cbd5e1;line-height:1.7;font-size:16px;max-width:560px;">
-                The Traveling Band Movement allows one message of hope and encouragement to
-                continue traveling. A band can begin with one person, move through an entire
-                community, and eventually connect people around the world.
-            </p>
-            <a class="btn" href="/traveling-band-movement" style="margin-top:10px;display:inline-block;">
-                🌍 Join The Movement
-            </a>
-        </div>
-        <div class="tbm-quicklinks">
-            <a class="quick-card" href="/merch">
-                <span>🛍️</span>
-                <strong>Shop EmpowerBands</strong>
-                <p>Wristbands, apparel, and starter packs</p>
-            </a>
-            <a class="quick-card" href="/board-members">
-                <span>🤝</span>
-                <strong>Meet Our Board</strong>
-                <p>The leaders behind the mission</p>
-            </a>
-            <a class="quick-card" href="/traveling-band-movement">
-                <span>🌍</span>
-                <strong>Join the Movement</strong>
-                <p>Start or receive a traveling band</p>
-            </a>
-            <a class="quick-card" href="/donate">
-                <span>❤️</span>
-                <strong>Donate or Support</strong>
-                <p>Help empowerment reach further</p>
-            </a>
-        </div>
-    </div>
-</section>
-<style>
-.tbm-highlight{{
-    display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center;
-    background:rgba(255,255,255,0.04);border:1px solid rgba(56,189,248,0.25);
-    border-radius:22px;padding:34px;box-shadow:0 0 30px rgba(37,99,235,0.15);
-}}
-.tbm-quicklinks{{display:grid;grid-template-columns:1fr 1fr;gap:14px;}}
-.quick-card{{
-    display:block;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
-    border-radius:14px;padding:16px;text-decoration:none;color:white;
-}}
-.quick-card:hover{{border-color:rgba(103,232,249,0.5);}}
-.quick-card span{{font-size:22px;display:block;margin-bottom:6px;}}
-.quick-card strong{{display:block;font-size:14px;margin-bottom:4px;}}
-.quick-card p{{color:#94a3b8;font-size:12.5px;margin:0;line-height:1.4;}}
-@media(max-width:850px){{
-    .tbm-highlight{{grid-template-columns:1fr;text-align:center;}}
-    .tbm-highlight-text h2{{text-align:center !important;}}
-    .tbm-highlight-text p{{margin:0 auto;}}
-}}
-</style>
-
 <section class="cta">
     <img src="https://i.imgur.com/RpBUbHd.png">
 
@@ -1108,6 +808,7 @@ body{{
     </div>
 
     <div>
+        <a href="/giveaway">🎁 Shirt Giveaway</a> |
         <a href="/blessing-boxes">💛 Blessing Boxes</a> |
         <a href="/sms-opt-in">SMS Opt-In</a> |
         <a href="/privacy">Privacy Policy</a> |
@@ -1144,12 +845,6 @@ body{{
 # ===============================
 # SHORT LINK REDIRECT
 # ===============================
-# NOTE: Flask/Werkzeug always matches an exact/static route (like
-# "/merch") before falling back to a converter route like
-# "/<band_id>", regardless of the order routes are defined in, so
-# /traveling-band-movement, /merch, and /board-members can never be
-# swallowed by this handler. The blocked_routes list below is
-# defense-in-depth in case this function is ever reused elsewhere.
 @app.route("/<band_id>")
 def band_profile_shortcut(band_id):
 
@@ -1165,10 +860,7 @@ def band_profile_shortcut(band_id):
     "delete-request",
     "sms-opt-in",
     "donate",
-    "im_safe",
-    "traveling-band-movement",
-    "merch",
-    "board-members"
+    "im_safe"
 ]
 
     if band_id.lower() in blocked_routes:
@@ -1740,6 +1432,10 @@ body{{
 
         <a class="add-btn" href="/admin/spotlight">
             💚 Family Spotlight
+</a>
+
+        <a class="add-btn" href="/admin/giveaway">
+            🎁 Giveaway Entries
 </a>
 
 </div>
@@ -4277,6 +3973,361 @@ def admin_blessing_box_needs():
 """
 
 # ===============================
+# SHIRT GIVEAWAY
+# ===============================
+
+GIVEAWAY_FILE = "giveaway_entries.csv"
+
+def _init_giveaway_file():
+    if not os.path.exists(GIVEAWAY_FILE):
+        with open(GIVEAWAY_FILE, "w", newline="", encoding="utf-8") as _gf:
+            csv.writer(_gf).writerow(["Name", "Email", "Instagram", "Followed", "Submitted"])
+
+_init_giveaway_file()
+
+@app.route("/giveaway", methods=["GET", "POST"])
+def giveaway():
+    g_success = False
+    g_error = ""
+
+    if request.method == "POST":
+        g_name = request.form.get("g_name", "").strip()
+        g_email = request.form.get("g_email", "").strip()
+        g_insta = request.form.get("g_insta", "").strip()
+        g_followed = "Yes" if request.form.get("g_followed") else "No"
+
+        if g_name and g_email:
+            _init_giveaway_file()
+            with open(GIVEAWAY_FILE, "a", newline="", encoding="utf-8") as _gf:
+                csv.writer(_gf).writerow(
+                    [g_name, g_email, g_insta, g_followed, time.strftime("%Y-%m-%d %H:%M")]
+                )
+            g_success = True
+        else:
+            g_error = "Please enter your name and email to enter."
+
+    g_banner = ""
+    if g_success:
+        g_banner = """<div style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);border-radius:14px;padding:16px 20px;margin-bottom:20px;color:#86efac;font-size:15px;font-weight:600;">
+            🎉 You're entered! We'll email winners directly — good luck.
+        </div>"""
+    elif g_error:
+        g_banner = f"""<div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);border-radius:14px;padding:16px 20px;margin-bottom:20px;color:#fca5a5;font-size:14px;">
+            ⚠️ {g_error}
+        </div>"""
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Enter to win a free EmpowerBands t-shirt and help spread the word about safety wristbands that protect what matters most.">
+    <title>Shirt Giveaway — EmpowerBands</title>
+    <style>
+        *{{box-sizing:border-box;margin:0;padding:0;}}
+        body{{
+            font-family:Arial,sans-serif;
+            background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
+            color:white;
+            min-height:100vh;
+        }}
+        .hero{{
+            text-align:center;
+            padding:60px 20px 40px;
+        }}
+        .hero h1{{
+            font-size:38px;
+            font-weight:900;
+            margin-bottom:14px;
+        }}
+        .hero h1 span{{color:#67e8f9;}}
+        .hero p{{
+            font-size:17px;
+            color:#cbd5e1;
+            max-width:600px;
+            margin:0 auto;
+            line-height:1.7;
+        }}
+        .page{{max-width:760px;margin:0 auto;padding:0 20px 60px;}}
+        .card{{
+            background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.13);
+            border-radius:20px;
+            padding:28px;
+            margin-bottom:22px;
+        }}
+        .card h2{{
+            font-size:20px;
+            font-weight:800;
+            margin-bottom:12px;
+            color:#67e8f9;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }}
+        .card p,.card li{{
+            color:#cbd5e1;
+            line-height:1.75;
+            font-size:15px;
+        }}
+        .shirt-card{{
+            display:flex;
+            gap:24px;
+            align-items:center;
+            flex-wrap:wrap;
+        }}
+        .shirt-visual{{
+            flex:0 0 140px;
+            width:140px;
+            height:140px;
+            border-radius:20px;
+            background:rgba(103,232,249,0.1);
+            border:1px solid rgba(103,232,249,0.25);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:56px;
+        }}
+        .shirt-info{{flex:1;min-width:200px;}}
+        .price-tag{{
+            display:inline-block;
+            margin-top:10px;
+            background:rgba(216,173,84,0.18);
+            border:1px solid rgba(241,213,143,0.4);
+            color:#f1d58f;
+            border-radius:999px;
+            padding:6px 16px;
+            font-size:13px;
+            font-weight:700;
+        }}
+        .steps{{list-style:none;counter-reset:step;margin-top:14px;}}
+        .steps li{{
+            counter-increment:step;
+            display:flex;
+            gap:14px;
+            align-items:flex-start;
+            margin-bottom:16px;
+        }}
+        .steps li::before{{
+            content:counter(step);
+            flex:0 0 30px;
+            width:30px;
+            height:30px;
+            border-radius:50%;
+            background:rgba(14,165,233,0.2);
+            border:1px solid rgba(103,232,249,0.35);
+            color:#67e8f9;
+            font-weight:800;
+            font-size:14px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }}
+        .steps a{{color:#67e8f9;font-weight:700;text-decoration:none;}}
+        .field-group{{display:grid;gap:12px;margin-top:18px;}}
+        .field-group input[type="text"],
+        .field-group input[type="email"]{{
+            padding:13px 16px;
+            border:none;
+            border-radius:12px;
+            background:rgba(255,255,255,0.1);
+            color:white;
+            font-size:15px;
+            outline:none;
+            width:100%;
+        }}
+        .field-group input::placeholder{{color:#94a3b8;}}
+        .checkbox-row{{
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            color:#cbd5e1;
+            font-size:14px;
+            line-height:1.5;
+        }}
+        .checkbox-row input{{margin-top:3px;}}
+        .checkbox-row a{{color:#67e8f9;}}
+        .submit-btn{{
+            padding:15px;
+            border:none;
+            border-radius:14px;
+            background:linear-gradient(135deg,#0ea5e9,#2563eb);
+            color:white;
+            font-size:16px;
+            font-weight:800;
+            cursor:pointer;
+        }}
+        .fine-print{{color:#64748b;font-size:12.5px;line-height:1.7;}}
+        .back{{
+            display:inline-block;
+            margin:24px 0 0;
+            padding:10px 18px;
+            border-radius:12px;
+            background:rgba(255,255,255,0.1);
+            color:white;
+            text-decoration:none;
+            font-size:14px;
+        }}
+        footer{{
+            text-align:center;
+            padding:30px 20px;
+            color:#475569;
+            font-size:13px;
+            border-top:1px solid rgba(255,255,255,0.07);
+        }}
+        footer a{{color:#67e8f9;text-decoration:none;}}
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <img src="{LOGO_URL}" alt="EmpowerBands Logo" style="width:70px;margin-bottom:20px;border-radius:50%;">
+    <h1>Free <span>Shirt Giveaway</span></h1>
+    <p>
+        Every entry helps spread the word about EmpowerBands' safety wristbands.
+        One supporter wins a free EmpowerBands tee — and everyone who enters helps
+        a band reach one more community.
+    </p>
+</div>
+
+<div class="page">
+    <a class="back" href="/">← Back to Home</a>
+
+    <div class="card shirt-card" style="margin-top:20px;">
+        <div class="shirt-visual">👕</div>
+        <div class="shirt-info">
+            <h2 style="margin-bottom:6px;">EmpowerBands Tee</h2>
+            <p>Soft, everyday t-shirt featuring the EmpowerBands logo. Wear the mission wherever you go.</p>
+            <span class="price-tag">$25 if you'd rather not wait to win</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🎯 How to Enter</h2>
+        <ol class="steps">
+            <li><span>Follow the mission — <a href="https://linktr.ee/EmpowerBandsWorldwide" target="_blank">every platform is on our Linktree</a>.</span></li>
+            <li><span>Share the word — tag a friend or repost something about EmpowerBands.</span></li>
+            <li><span>Drop your name and email below to lock in your entry.</span></li>
+        </ol>
+    </div>
+
+    <div class="card" id="enter">
+        <h2>🎁 Enter to Win</h2>
+        {g_banner}
+        <form method="POST" action="/giveaway#enter">
+            <div class="field-group">
+                <input type="text" name="g_name" placeholder="Your Name *" required>
+                <input type="email" name="g_email" placeholder="Email Address *" required>
+                <input type="text" name="g_insta" placeholder="Instagram handle (optional)">
+                <label class="checkbox-row">
+                    <input type="checkbox" name="g_followed" value="yes">
+                    <span>I followed EmpowerBands Worldwide on social media</span>
+                </label>
+                <button type="submit" class="submit-btn">🎁 Enter to Win</button>
+                <p class="fine-print">No purchase necessary. One entry per person. Winner selected at random and notified by email. Void where prohibited.</p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 EmpowerBands Worldwide &nbsp;|&nbsp; Decatur, Alabama &nbsp;|&nbsp; support@empowerbands.org</p>
+    <p style="margin-top:8px;">
+        <a href="/">Home</a> &nbsp;|&nbsp;
+        <a href="/donate">Donate</a> &nbsp;|&nbsp;
+        <a href="/privacy">Privacy Policy</a>
+    </p>
+</footer>
+
+</body>
+</html>
+"""
+
+# ===============================
+# ADMIN — GIVEAWAY ENTRIES
+# ===============================
+
+@app.route("/admin/giveaway")
+def admin_giveaway():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    entries = []
+    try:
+        with open(GIVEAWAY_FILE, "r", encoding="utf-8") as _gf:
+            reader = csv.DictReader(_gf)
+            for row in reader:
+                entries.append(row)
+        entries.reverse()
+    except:
+        entries = []
+
+    rows_html = ""
+    for e in entries:
+        rows_html += f"""<tr>
+            <td>{e.get('Name','')}</td>
+            <td>{e.get('Email','')}</td>
+            <td>{e.get('Instagram','')}</td>
+            <td>{e.get('Followed','')}</td>
+            <td>{e.get('Submitted','')}</td>
+        </tr>"""
+
+    return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giveaway Entries — EmpowerBands</title>
+    <style>
+        body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);color:white;min-height:100vh;padding:25px 16px;}}
+        .page{{max-width:960px;margin:auto;}}
+        h1{{font-size:28px;margin-bottom:4px;}}
+        .sub{{color:#94a3b8;font-size:14px;margin-bottom:24px;}}
+        .back{{display:inline-block;margin-bottom:22px;padding:10px 18px;border-radius:12px;background:rgba(255,255,255,0.1);color:white;text-decoration:none;font-size:14px;margin-right:10px;}}
+        .wrap{{overflow-x:auto;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:20px;}}
+        table{{width:100%;border-collapse:collapse;font-size:14px;}}
+        th{{color:#67e8f9;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);}}
+        td{{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:#e5e7eb;vertical-align:top;}}
+        tr:last-child td{{border-bottom:none;}}
+        .empty{{text-align:center;padding:40px;color:#64748b;}}
+        .count{{display:inline-block;background:rgba(103,232,249,0.12);border:1px solid rgba(103,232,249,0.25);border-radius:8px;padding:4px 12px;font-size:13px;color:#67e8f9;margin-bottom:20px;}}
+    </style>
+</head>
+<body>
+<div class="page">
+    <a class="back" href="/dashboard">⬅ Dashboard</a>
+    <a class="back" href="/giveaway" target="_blank">👁 View Page</a>
+    <a class="back" href="/admin/giveaway/export">⬇ Export CSV</a>
+    <h1>🎁 Shirt Giveaway Entries</h1>
+    <p class="sub">Everyone who has entered the free shirt giveaway.</p>
+    <div class="count">{len(entries)} entr{'y' if len(entries) == 1 else 'ies'} total</div>
+    <div class="wrap">
+        <table>
+            <tr><th>Name</th><th>Email</th><th>Instagram</th><th>Followed</th><th>Submitted</th></tr>
+            {rows_html if rows_html else '<tr><td colspan="5" class="empty">No entries yet.</td></tr>'}
+        </table>
+    </div>
+</div>
+</body>
+</html>
+"""
+
+@app.route("/admin/giveaway/export")
+def admin_giveaway_export():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+    if not os.path.exists(GIVEAWAY_FILE):
+        return redirect("/admin/giveaway")
+    return send_file(
+        GIVEAWAY_FILE,
+        as_attachment=True,
+        download_name="giveaway_entries.csv",
+        mimetype="text/csv"
+    )
+
+# ===============================
 # PRIVACY POLICY
 # ===============================
 
@@ -4441,569 +4492,6 @@ a{color:#93c5fd;}
 </body>
 </html>
 """
-
-# ===============================
-# CARD RENDER HELPERS
-# Small f-strings only (no CSS inside), so no brace-escaping needed.
-# ===============================
-
-def _travel_story_card(s):
-    photo = s.get("photo_url") or ""
-    if photo:
-        img_html = f'<img src="{photo}" alt="Photo from {s["name"]}\'s traveling band story" loading="lazy">'
-    else:
-        img_html = '<div class="story-photo-placeholder" aria-hidden="true">🌍</div>'
-    date_html = f'<span class="story-meta-item">📅 {s["date"]}</span>' if s.get("date") else ""
-    return f"""
-<article class="story-card">
-    <div class="story-photo">{img_html}</div>
-    <div class="story-body">
-        <h3>{s['name']}</h3>
-        <p class="story-location">📍 {s['location']}</p>
-        <p class="story-text">{s['story']}</p>
-        <div class="story-meta">
-            <span class="story-meta-item">🎗️ Band {s['band_id']}</span>
-            {date_html}
-            <span class="story-meta-item">➡️ {s['destination']}</span>
-        </div>
-    </div>
-</article>"""
-
-
-def _merch_card(p):
-    featured_cls = " featured-product" if p.get("featured") else ""
-    badge = '<span class="featured-badge">🌍 Featured — Traveling Band Movement</span>' if p.get("featured") else ""
-    return f"""
-<div class="product-card{featured_cls}">
-    {badge}
-    <div class="product-image" aria-hidden="true">{p['emoji']}</div>
-    <div class="product-category">{p['category']}</div>
-    <h3>{p['name']}</h3>
-    <p class="product-desc">{p['description']}</p>
-    <div class="product-footer">
-        <span class="product-price">{p['price']}</span>
-        <a class="btn-cyan btn-sm" href="{p['link']}" aria-label="Purchase {p['name']}">Add to Cart</a>
-    </div>
-</div>"""
-
-
-def _board_card(m):
-    links_html = ""
-    if m.get("links"):
-        links_html = " ".join(f'<a href="{l["url"]}">{l["label"]}</a>' for l in m["links"])
-        links_html = f'<div class="board-links">{links_html}</div>'
-
-    # Confirm the photo actually exists on disk before referencing it —
-    # falls back to an initials placeholder instead of a broken <img>.
-    photo_path = m.get("photo", "")
-    on_disk_path = photo_path.lstrip("/") if photo_path else ""
-    if photo_path and os.path.exists(on_disk_path):
-        initials = "".join(part[0] for part in m["name"].split() if part)[:2].upper()
-        photo_html = (
-            f'<img src="{photo_path}" '
-            f'alt="Portrait of {m["name"]}, {m["title"]} of EmpowerBands Worldwide" '
-            f'class="board-photo" loading="lazy" '
-            f'onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),'
-            f'{{className:\'board-photo board-photo-placeholder\',textContent:\'{initials}\'}}))">'
-        )
-    else:
-        initials = "".join(part[0] for part in m["name"].split() if part)[:2].upper()
-        photo_html = (
-            f'<div class="board-photo board-photo-placeholder" role="img" '
-            f'aria-label="Photo of {m["name"]} not yet available">{initials}</div>'
-        )
-
-    return f"""
-<article class="board-card">
-    {photo_html}
-    <h3>{m['name']}</h3>
-    <p class="board-title">{m['title']}</p>
-    <p class="board-bio">{m['bio']}</p>
-    {links_html}
-</article>"""
-
-
-# ===============================
-# SHARED PAGE-LEVEL CSS
-# Reused by all three new marketing pages so they look/feel like
-# one consistent design system (matches the dark, cyan/blue,
-# card-based look already used across the site).
-# ===============================
-MARKETING_PAGE_CSS = """
-*{box-sizing:border-box;}
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);
-    color:white;
-    min-height:100vh;
-}
-main{max-width:1100px;margin:0 auto;padding:0 6% 20px;}
-.mkt-hero{text-align:center;padding:60px 20px 40px;}
-.mkt-hero h1{font-size:42px;font-weight:900;margin:0 0 16px;line-height:1.15;}
-.mkt-hero h1 span{color:#67e8f9;}
-.mkt-hero p{font-size:17px;color:#dbeafe;max-width:680px;margin:0 auto 26px;line-height:1.7;}
-.mkt-hero-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
-.btn{
-    display:inline-block;padding:15px 26px;border-radius:12px;text-decoration:none;
-    color:white;font-weight:800;font-size:15px;
-    background:linear-gradient(135deg,#06b6d4,#2563eb);
-    box-shadow:0 0 25px rgba(37,99,235,0.4);
-    border:none;cursor:pointer;
-}
-.btn-outline{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);color:white;box-shadow:none;}
-.btn-cyan{background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;text-decoration:none;font-weight:700;border-radius:10px;padding:12px 20px;display:inline-block;}
-.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;text-decoration:none;font-weight:700;border-radius:10px;padding:12px 20px;display:inline-block;}
-.btn-sm{padding:10px 16px;font-size:14px;}
-section.mkt-section{padding:44px 0;}
-section.mkt-section h2{font-size:30px;text-align:center;margin:0 0 10px;}
-.section-intro{text-align:center;color:#cbd5e1;max-width:680px;margin:0 auto 30px;line-height:1.7;}
-.mkt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
-.mkt-card{
-    background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.25);
-    border-radius:16px;padding:24px;box-shadow:0 0 20px rgba(37,99,235,0.12);
-}
-.mkt-card .num{
-    width:42px;height:42px;border-radius:50%;background:#2563eb;
-    display:flex;align-items:center;justify-content:center;margin-bottom:14px;
-    font-weight:900;box-shadow:0 0 18px rgba(37,99,235,0.8);
-}
-.mkt-card h3{margin:6px 0;font-size:18px;}
-.mkt-card p{color:#cbd5e1;line-height:1.55;font-size:14.5px;margin:0;}
-.mkt-card a.card-link{color:#67e8f9;text-decoration:none;font-weight:700;font-size:14px;display:inline-block;margin-top:12px;}
-.divider-cta{
-    margin:10px 0 0;padding:28px;border-radius:18px;border:1px solid #2563eb;
-    box-shadow:0 0 35px rgba(37,99,235,0.35);text-align:center;
-}
-.divider-cta h2{font-size:26px;margin:0 0 10px;}
-.divider-cta p{color:#dbeafe;max-width:600px;margin:0 auto 20px;}
-.divider-cta .buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
-
-/* Traveling band story cards */
-.story-card{
-    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.13);
-    border-radius:18px;overflow:hidden;display:flex;flex-direction:column;
-}
-.story-photo{height:150px;background:linear-gradient(135deg,rgba(14,165,233,0.25),rgba(37,99,235,0.25));display:flex;align-items:center;justify-content:center;}
-.story-photo img{width:100%;height:100%;object-fit:cover;}
-.story-photo-placeholder{font-size:44px;}
-.story-body{padding:20px;}
-.story-body h3{margin:0 0 4px;font-size:17px;}
-.story-location{color:#67e8f9;font-size:13px;margin:0 0 10px;}
-.story-text{color:#cbd5e1;font-size:14px;line-height:1.6;margin:0 0 14px;}
-.story-meta{display:flex;flex-wrap:wrap;gap:8px;}
-.story-meta-item{background:rgba(14,165,233,0.15);border:1px solid rgba(103,232,249,0.25);border-radius:8px;padding:5px 10px;font-size:12px;color:#e0f2fe;}
-
-/* Journey tracker placeholder */
-.tracker-box{
-    border-radius:22px;border:1px solid rgba(56,189,248,0.3);
-    background:radial-gradient(circle at 30% 20%,rgba(37,99,235,0.35),rgba(2,8,23,0.4));
-    padding:44px 30px;text-align:center;position:relative;overflow:hidden;
-}
-.tracker-box h3{font-size:24px;margin:0 0 12px;}
-.tracker-box p{color:#dbeafe;max-width:560px;margin:0 auto 22px;line-height:1.7;}
-.tracker-dots{display:flex;justify-content:center;gap:26px;flex-wrap:wrap;margin:0 0 24px;}
-.tracker-dot{width:14px;height:14px;border-radius:50%;background:#38bdf8;box-shadow:0 0 14px #38bdf8;position:relative;}
-.tracker-dot::after{content:"";position:absolute;top:6px;left:16px;width:60px;height:1px;background:rgba(103,232,249,0.4);}
-.tracker-dot:last-child::after{display:none;}
-.tracker-note{font-size:12.5px;color:#94a3b8;margin-top:10px;}
-
-/* Ways to participate */
-.participate-card{display:flex;flex-direction:column;height:100%;}
-
-/* Merch */
-.merch-featured{
-    display:grid;grid-template-columns:170px 1fr;gap:26px;align-items:center;
-    background:rgba(255,255,255,0.05);border:1px solid rgba(103,232,249,0.35);
-    border-radius:22px;padding:30px;margin-bottom:34px;box-shadow:0 0 30px rgba(37,99,235,0.2);
-}
-.merch-featured .product-image{width:150px;height:150px;font-size:64px;}
-.product-card{
-    background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.22);
-    border-radius:18px;padding:22px;display:flex;flex-direction:column;position:relative;
-}
-.product-card.featured-product{border-color:rgba(103,232,249,0.55);}
-.featured-badge{
-    display:inline-block;background:rgba(34,197,94,0.18);border:1px solid rgba(134,239,172,0.4);
-    color:#86efac;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:8px;margin-bottom:10px;
-}
-.product-image{
-    width:100%;height:120px;border-radius:14px;
-    background:linear-gradient(135deg,rgba(14,165,233,0.25),rgba(37,99,235,0.25));
-    display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:14px;
-}
-.product-category{color:#67e8f9;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;}
-.product-card h3{margin:0 0 8px;font-size:17px;}
-.product-desc{color:#cbd5e1;font-size:14px;line-height:1.55;flex-grow:1;margin:0 0 16px;}
-.product-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.product-price{font-size:18px;font-weight:800;color:white;}
-.mission-strip{
-    text-align:center;background:rgba(34,197,94,0.1);border:1px solid rgba(134,239,172,0.25);
-    border-radius:18px;padding:30px;margin:40px 0;
-}
-.mission-strip h2{margin:0 0 10px;}
-.mission-strip p{color:#dcfce7;max-width:640px;margin:0 auto;line-height:1.7;}
-
-/* Board */
-.board-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px;}
-.board-card{
-    background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.22);
-    border-radius:20px;padding:26px;text-align:center;
-}
-.board-photo{width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 16px;border:3px solid rgba(103,232,249,0.4);background:rgba(255,255,255,0.08);}
-.board-photo-placeholder{
-    display:flex;align-items:center;justify-content:center;
-    font-size:34px;font-weight:800;color:#67e8f9;
-    background:linear-gradient(135deg,rgba(14,165,233,0.25),rgba(37,99,235,0.25));
-}
-.board-title{color:#67e8f9;font-weight:700;font-size:14px;margin:0 0 12px;}
-.board-bio{color:#cbd5e1;font-size:14px;line-height:1.65;margin:0;}
-.board-links{margin-top:14px;}
-.board-links a{color:#67e8f9;text-decoration:none;font-size:13px;margin:0 6px;}
-.board-responsibility{
-    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);
-    border-radius:18px;padding:26px;margin-top:40px;
-}
-.board-responsibility h2{font-size:22px;margin:0 0 12px;text-align:left;}
-.board-responsibility p{color:#cbd5e1;line-height:1.7;margin:0;}
-
-@media(max-width:700px){
-    .mkt-hero h1{font-size:32px;}
-    .merch-featured{grid-template-columns:1fr;text-align:center;}
-    .merch-featured .product-image{margin:0 auto;}
-    .board-responsibility h2{text-align:center;}
-}
-"""
-
-
-# ===============================
-# TRAVELING BAND MOVEMENT PAGE
-# ===============================
-@app.route("/traveling-band-movement")
-def traveling_band_movement():
-    stories_html = "".join(_travel_story_card(s) for s in TRAVELING_BAND_STORIES)
-
-    return """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Traveling Band Movement — EmpowerBands Worldwide</title>
-<meta name="description" content="Join the EmpowerBands Traveling Band Movement and help messages of hope, encouragement, unity, and purpose travel through communities around the world.">
-<meta property="og:title" content="The Traveling Band Movement — EmpowerBands Worldwide">
-<meta property="og:description" content="Join the EmpowerBands Traveling Band Movement and help messages of hope, encouragement, unity, and purpose travel through communities around the world.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://empowerbands.org/traveling-band-movement">
-<meta property="og:image" content="__LOGO_URL__">
-<style>__MARKETING_CSS__</style>
-</head>
-<body>
-__NAV__
-
-<main id="main-content">
-
-<section class="mkt-hero">
-    <h1>One Band. One Story.<br><span>One Worldwide Movement.</span></h1>
-    <p>
-        The Traveling Band Movement connects people through encouragement, purpose, and
-        action. Each handmade band begins a journey, carrying a message of empowerment
-        from one person and community to the next.
-    </p>
-    <div class="mkt-hero-buttons">
-        <a class="btn" href="#participate">Join the Movement</a>
-        <a class="btn btn-outline" href="/donate">Support the Journey</a>
-    </div>
-</section>
-
-<section class="mkt-section" id="how">
-    <h2>How the Movement Works</h2>
-    <p class="section-intro">
-        Every EmpowerBand bracelet in this movement is handmade and passed by hand —
-        no app, no tracking device, just people choosing to keep encouragement moving.
-    </p>
-    <div class="mkt-grid">
-        <div class="mkt-card">
-            <div class="num">1</div>
-            <h3>Receive a Band</h3>
-            <p>A person receives an EmpowerBand along with its message and purpose.</p>
-        </div>
-        <div class="mkt-card">
-            <div class="num">2</div>
-            <h3>Wear and Share</h3>
-            <p>The recipient wears the band, shares its meaning, and documents part of its journey.</p>
-        </div>
-        <div class="mkt-card">
-            <div class="num">3</div>
-            <h3>Pass the Empowerment Forward</h3>
-            <p>The band is passed to another person who needs encouragement, support, or inspiration.</p>
-        </div>
-        <div class="mkt-card">
-            <div class="num">4</div>
-            <h3>Track the Impact</h3>
-            <p>Stories, locations, photos, and community impact become part of the band's worldwide journey.</p>
-        </div>
-    </div>
-</section>
-
-<section class="mkt-section" id="participate">
-    <h2>Ways to Participate</h2>
-    <p class="section-intro">There's a place in this movement for everyone — however much time, space, or support you have to give.</p>
-    <div class="mkt-grid">
-        <div class="mkt-card participate-card">
-            <h3>🌍 Start a Traveling Band Journey</h3>
-            <p>Get your first band and begin its story.</p>
-            <a class="card-link" href="/merch">Get a starter pack →</a>
-        </div>
-        <div class="mkt-card participate-card">
-            <h3>🤲 Receive and Pass a Band</h3>
-            <p>Already have a band? Share your part of the journey and pass it on.</p>
-            <a class="card-link" href="#submit-story">Submit your story →</a>
-        </div>
-        <div class="mkt-card participate-card">
-            <h3>🏫 Sponsor Bands for a School or Community</h3>
-            <p>Fund a batch of bands for a classroom, youth group, or organization.</p>
-            <a class="card-link" href="/merch">See sponsor packs →</a>
-        </div>
-        <div class="mkt-card participate-card">
-            <h3>🤝 Become a Community Partner</h3>
-            <p>Help distribute bands through your organization or outreach program.</p>
-            <a class="card-link" href="mailto:support@empowerbands.org?subject=Community%20Partner%20Interest">Partner with us →</a>
-        </div>
-        <div class="mkt-card participate-card">
-            <h3>🎤 Host an EmpowerBands Event</h3>
-            <p>Bring the movement to your school, church, or community event.</p>
-            <a class="card-link" href="mailto:support@empowerbands.org?subject=Host%20an%20EmpowerBands%20Event">Plan an event →</a>
-        </div>
-        <div class="mkt-card participate-card">
-            <h3>✍️ Submit a Traveling Band Story</h3>
-            <p>Share where your band has been — we'll feature it below.</p>
-            <a class="card-link" href="mailto:support@empowerbands.org?subject=Traveling%20Band%20Story%20Submission">Share your story →</a>
-        </div>
-        <div class="mkt-card participate-card">
-            <h3>❤️ Donate to Help the Movement Reach New Cities</h3>
-            <p>Every donation helps send more bands further.</p>
-            <a class="card-link" href="/donate">Donate now →</a>
-        </div>
-    </div>
-</section>
-
-<section class="mkt-section" id="stories">
-    <h2>Traveling Band Stories</h2>
-    <p class="section-intro">Real stories from real bands will appear here as the movement grows. Here's what's coming.</p>
-    <div class="mkt-grid">
-        __STORIES__
-    </div>
-</section>
-
-<section class="mkt-section" id="tracker">
-    <div class="tracker-box">
-        <h3>See How Far Empowerment Can Travel</h3>
-        <p>
-            Every band has a story. Follow its journey as it moves through homes, schools,
-            workplaces, cities, and communities around the world.
-        </p>
-        <div class="tracker-dots" aria-hidden="true">
-            <span class="tracker-dot"></span>
-            <span class="tracker-dot"></span>
-            <span class="tracker-dot"></span>
-            <span class="tracker-dot"></span>
-            <span class="tracker-dot"></span>
-        </div>
-        <a class="btn btn-outline" href="mailto:support@empowerbands.org?subject=Traveling%20Band%20Story%20Submission">Add Your Band's Location</a>
-        <p class="tracker-note">An interactive band-tracking map is coming soon.</p>
-    </div>
-</section>
-
-<section class="mkt-section" id="submit-story">
-    <div class="divider-cta">
-        <h2>Help Us Send Empowerment Around the World</h2>
-        <p>Every band that travels carries a little more hope with it. Be part of where it goes next.</p>
-        <div class="buttons">
-            <a class="btn" href="/merch">Start a Band Journey</a>
-            <a class="btn btn-outline" href="/merch">Sponsor a Band</a>
-            <a class="btn btn-outline" href="mailto:support@empowerbands.org?subject=Traveling%20Band%20Story%20Submission">Share Your Story</a>
-            <a class="btn btn-outline" href="/donate">Donate</a>
-        </div>
-    </div>
-</section>
-
-</main>
-
-__FOOTER__
-
-</body>
-</html>
-""".replace("__NAV__", site_nav_html("travel")).replace("__FOOTER__", site_footer_html()).replace("__MARKETING_CSS__", MARKETING_PAGE_CSS).replace("__LOGO_URL__", LOGO_URL).replace("__STORIES__", stories_html)
-
-
-# ===============================
-# MERCH / SHOP PAGE
-# ===============================
-@app.route("/merch")
-def merch():
-    featured = [p for p in MERCH_PRODUCTS if p.get("featured")]
-    regular = [p for p in MERCH_PRODUCTS if not p.get("featured")]
-
-    featured_html = ""
-    if featured:
-        f = featured[0]
-        featured_html = f"""
-<div class="merch-featured">
-    <div class="product-image" aria-hidden="true">{f['emoji']}</div>
-    <div>
-        <span class="featured-badge">🌍 Featured — Traveling Band Movement</span>
-        <h2 style="margin:8px 0 8px;text-align:left;">{f['name']}</h2>
-        <p class="product-desc" style="margin-bottom:16px;">{f['description']}</p>
-        <div class="product-footer" style="justify-content:flex-start;gap:20px;">
-            <span class="product-price">{f['price']}</span>
-            <a class="btn-cyan" href="{f['link']}">Add to Cart</a>
-        </div>
-    </div>
-</div>"""
-
-    products_html = "".join(_merch_card(p) for p in regular)
-
-    return """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shop EmpowerBands — Merchandise & Traveling Band Packs</title>
-<meta name="description" content="Shop EmpowerBands wristbands, apparel, and Traveling Band Movement starter packs. Every purchase helps EmpowerBands provide encouragement, resources, and traveling bands to communities.">
-<meta property="og:title" content="Shop EmpowerBands — Merchandise & Traveling Band Packs">
-<meta property="og:description" content="Shop EmpowerBands wristbands, apparel, and Traveling Band Movement starter packs. Every purchase supports the mission.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://empowerbands.org/merch">
-<meta property="og:image" content="__LOGO_URL__">
-<style>__MARKETING_CSS__</style>
-</head>
-<body>
-__NAV__
-
-<main id="main-content">
-
-<section class="mkt-hero">
-    <h1>Wear the Mission. <span>Share the Movement.</span></h1>
-    <p>
-        Every purchase helps EmpowerBands provide encouragement, resources, programs,
-        and traveling bands to individuals and communities.
-    </p>
-</section>
-
-<section class="mkt-section" id="featured">
-    __FEATURED__
-</section>
-
-<section class="mkt-section" id="products">
-    <h2>Shop All</h2>
-    <div class="mkt-grid">
-        __PRODUCTS__
-    </div>
-</section>
-
-<section class="mission-strip">
-    <h2>How Your Purchase Helps</h2>
-    <p>
-        EmpowerBands Worldwide is a nonprofit-driven mission. Proceeds from merchandise
-        support the Traveling Band Movement, safety-band programs for families and
-        schools, and community outreach like Blessing Boxes. Checkout links here are
-        placeholders while we connect a secure payment processor — orders currently
-        route to our support inbox so we can confirm every purchase by hand.
-    </p>
-</section>
-
-<section class="mkt-section">
-    <div class="divider-cta">
-        <h2>Want to Support Without Buying?</h2>
-        <p>Donations go just as far as merchandise sales in helping bands reach new communities.</p>
-        <div class="buttons">
-            <a class="btn" href="/donate">Donate</a>
-            <a class="btn btn-outline" href="/traveling-band-movement">Explore the Movement</a>
-        </div>
-    </div>
-</section>
-
-</main>
-
-__FOOTER__
-
-</body>
-</html>
-""".replace("__NAV__", site_nav_html("merch")).replace("__FOOTER__", site_footer_html()).replace("__MARKETING_CSS__", MARKETING_PAGE_CSS).replace("__LOGO_URL__", LOGO_URL).replace("__FEATURED__", featured_html).replace("__PRODUCTS__", products_html)
-
-
-# ===============================
-# BOARD MEMBERS PAGE
-# ===============================
-@app.route("/board-members")
-def board_members():
-    board_html = "".join(_board_card(m) for m in BOARD_MEMBERS)
-
-    return """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Board Members — EmpowerBands Worldwide</title>
-<meta name="description" content="Meet the board of EmpowerBands Worldwide — the leaders responsible for guiding, growing, and protecting the mission.">
-<meta property="og:title" content="Board Members — EmpowerBands Worldwide">
-<meta property="og:description" content="Meet the board of EmpowerBands Worldwide — the leaders responsible for guiding, growing, and protecting the mission.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://empowerbands.org/board-members">
-<meta property="og:image" content="__LOGO_URL__">
-<style>__MARKETING_CSS__</style>
-</head>
-<body>
-__NAV__
-
-<main id="main-content">
-
-<section class="mkt-hero">
-    <h1>Meet Our <span>Board</span></h1>
-    <p>
-        The leaders guiding EmpowerBands Worldwide's mission of safety, empowerment,
-        and community connection.
-    </p>
-</section>
-
-<section class="mkt-section">
-    <div class="board-grid">
-        __BOARD__
-    </div>
-
-    <div class="board-responsibility">
-        <h2>Board Responsibilities</h2>
-        <p>
-            EmpowerBands Worldwide's board is responsible for organizational leadership,
-            accountability, and financial stewardship. Board members guide the organization's
-            growth, ensure resources are used responsibly, and help protect the mission of
-            EmpowerBands as it grows into new communities.
-        </p>
-    </div>
-</section>
-
-<section class="mkt-section">
-    <div class="divider-cta">
-        <h2>Interested in Supporting the Board's Work?</h2>
-        <p>Partner with EmpowerBands Worldwide or reach out directly to our leadership team.</p>
-        <div class="buttons">
-            <a class="btn" href="mailto:support@empowerbands.org?subject=Board%20%2F%20Partnership%20Inquiry">Contact the Board</a>
-            <a class="btn btn-outline" href="/donate">Support the Mission</a>
-        </div>
-    </div>
-</section>
-
-</main>
-
-__FOOTER__
-
-</body>
-</html>
-""".replace("__NAV__", site_nav_html("board")).replace("__FOOTER__", site_footer_html()).replace("__MARKETING_CSS__", MARKETING_PAGE_CSS).replace("__LOGO_URL__", LOGO_URL).replace("__BOARD__", board_html)
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
