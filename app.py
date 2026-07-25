@@ -2292,6 +2292,13 @@ button{{
     margin-top:15px;
     color:#7dd3fc;
 }}
+label{
+    display:block;
+    margin:14px 0 6px;
+    color:#cbd5e1;
+    font-size:14px;
+    font-weight:600;
+}
 </style>
 </head>
 
@@ -2303,26 +2310,29 @@ button{{
 
 <form method="POST">
 
-<input name="band_id" value="{found_row[0]}" required>
+<label>Full Name</label>
 <input name="name" value="{found_row[1]}" required>
+
+<label>Email</label>
 <input name="email" value="{found_row[2]}">
+
+<label>Emergency Phone Number</label>
 <input name="phone" value="{found_row[3]}">
-<input name="emergency_phones" value="{found_row[4]}" required>
-<input name="emergency_emails" value="{found_row[5]}">
-<input name="age_group" value="{found_row[6]}">
-<input name="condition" value="{found_row[7]}">
 
-<textarea name="instructions">{found_row[8]}</textarea>
-<textarea name="medical_notes">{found_row[9]}</textarea>
+<label>Age Group</label>
+<input name="age_group" value="{found_row[4]}">
 
-<input name="pin" value="{found_row[10]}" required>
-<input name="address" value="{found_row[11]}">
-<input name="race" value="{found_row[12]}">
-<input name="gender" value="{found_row[13]}">
-<input name="photo_url" value="{found_row[14]}" placeholder="Photo URL">
+<label>Public Condition</label>
+<input name="condition" value="{found_row[5]}">
 
-<button type="submit">Save Changes</button>
+<label>Public Instructions</label>
+<textarea name="instructions">{found_row[6]}</textarea>
 
+<label>Private Medical Notes</label>
+<textarea name="medical_notes">{found_row[7]}</textarea>
+
+<label>PIN</label>
+<input name="pin" value="{found_row[8]}" required>
 </form>
 
 <a class="back" href="/dashboard">Back to Dashboard</a>
@@ -2330,6 +2340,7 @@ button{{
 </div>
 </div>
 </body>
+
 </html>
     <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
