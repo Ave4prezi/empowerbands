@@ -2315,10 +2315,16 @@ button{{
 }}
 label{
     display:block;
-    margin:14px 0 6px;
+    margin:16px 0 6px;
     color:#cbd5e1;
     font-size:14px;
     font-weight:600;
+}
+
+input,
+textarea{
+    width:100%;
+    box-sizing:border-box;
 }
 </style>
 </head>
