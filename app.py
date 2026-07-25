@@ -2187,24 +2187,45 @@ def edit_profile(band_id):
 
     if request.method == "POST":
 
-        updated_row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form["emergency_phones"].strip(),
-            request.form.get("emergency_emails", "").strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            request.form.get("photo_url", "").strip()
-        ]
+       <label>Band ID</label>
+<input name="band_id" value="{found_row[0]}" readonly>
 
+<label>Full Name</label>
+<input name="name" value="{found_row[1]}" required>
+
+<label>Email Address</label>
+<input name="email" value="{found_row[2]}">
+
+<label>Emergency Phone Number</label>
+<input name="phone" value="{found_row[3]}" required>
+
+<label>Age Group</label>
+<input name="age_group" value="{found_row[4]}">
+
+<label>Public Medical Condition</label>
+<input name="condition" value="{found_row[5]}">
+
+<label>Public Emergency Instructions</label>
+<textarea name="instructions">{found_row[6]}</textarea>
+
+<label>Private Medical Notes</label>
+<textarea name="medical_notes">{found_row[7]}</textarea>
+
+<label>PIN</label>
+<input name="pin" value="{found_row[8]}" required>
+
+<label>Gender</label>
+<input name="gender" value="{found_row[9]}">
+
+<label>Race / Ethnicity</label>
+<input name="race" value="{found_row[10]}">
+
+<label>Profile Photo URL</label>
+<input name="photo" value="{found_row[11]}">
+
+<button type="submit">
+    Save Changes
+</button>
         new_rows = [header]
 
         for row in data_rows:
