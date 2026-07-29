@@ -186,8 +186,8 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
     location_text = f"\nLocation:\n{maps_link}" if maps_link else ""
     
     message = (
-        f"EmpowerBands Emergency Alert\n\n"
-        f"{name}'s emergency profile was accessed.\n\n"
+        f"🚨 EMPOWERBANDS EMERGENCY ALERT 🚨\n\n"
+        f"{name}'s emergency profile was triggered.\n\n"
         f"Profile:\n{profile_url}"
         f"{location_text}\n\n"
         f"This person may need assistance"
