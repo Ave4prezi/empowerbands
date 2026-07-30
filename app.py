@@ -20,14 +20,29 @@ import hashlib
 import hmac
 from io import BytesIO
 
+import psycopg
+from psycopg.rows import dict_row
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 
-file_name = "customers.csv"
-scan_log_file = "scan_log.csv"
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+def get_db():
+    if DATABASE_URL:
+        return psycopg.connect(DATABASE_URL, row_factory=dict_row)
+    return psycopg.connect(
+        host=os.environ.get("PGHOST", "localhost"),
+        port=os.environ.get("PGPORT", "5432"),
+        dbname=os.environ.get("PGDATABASE", "empowerbands"),
+        user=os.environ.get("PGUSER", "postgres"),
+        password=os.environ.get("PGPASSWORD", ""),
+        row_factory=dict_row,
+    )
 
 BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.org")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
@@ -43,53 +58,74 @@ UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ===============================
-# CREATE FILES
+# DATABASE
 # ===============================
 
-header = [
-    "band_id",
-    "name",
-    "email",
-    "phone",
-    "emergency_phones",
-    "emergency_emails",
-    "age_group",
-    "condition",
-    "instructions",
-    "medical_notes",
-    "pin",
-    "address",
-    "race",
-    "gender",
-    "photo_url"
-]
+def init_db():
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS members (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                band_id VARCHAR(100) NOT NULL UNIQUE,
+                full_name VARCHAR(200) NOT NULL,
+                email VARCHAR(255),
+                primary_phone VARCHAR(25),
+                emergency_contacts TEXT,
+                emergency_emails TEXT,
+                age_group VARCHAR(20),
+                public_condition TEXT,
+                public_instructions TEXT,
+                private_medical_notes TEXT,
+                pin_hash TEXT NOT NULL,
+                address TEXT,
+                race VARCHAR(100),
+                gender VARCHAR(100),
+                photo_url TEXT,
+                status VARCHAR(30) NOT NULL DEFAULT 'active',
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS scan_logs (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                band_id VARCHAR(100) NOT NULL,
+                member_name VARCHAR(200),
+                scan_type VARCHAR(50) NOT NULL,
+                ip_address VARCHAR(100),
+                scanned_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
 
-# Create customers.csv only if missing
-if not os.path.exists(file_name):
+def member_aliases(row):
+    if not row:
+        return None
+    d = dict(row)
+    d.update({
+        "name": d.get("full_name", ""),
+        "phone": d.get("primary_phone", ""),
+        "emergency_phones": d.get("emergency_contacts", ""),
+        "condition": d.get("public_condition", ""),
+        "instructions": d.get("public_instructions", ""),
+        "medical_notes": d.get("private_medical_notes", ""),
+        "pin": "",
+    })
+    return d
 
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+def get_member(band_id):
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM members WHERE UPPER(band_id)=UPPER(%s)", (band_id,))
+        return member_aliases(cur.fetchone())
 
-        writer.writerow(header)
+def get_all_members():
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM members ORDER BY created_at DESC")
+        return [member_aliases(r) for r in cur.fetchall()]
 
-        # Optional demo profile
-        writer.writerow([
-    "EB001",
-    "Jaden",
-    "email@test.com",
-    "+12565551234",
-    "+19382655364,+12566121274",
-    "mom@test.com,dad@test.com",
-    "Child",
-    "Autism – Nonverbal",
-    "Please stay calm. I may not respond verbally. Call emergency contacts immediately.",
-    "No allergies",
-    "1234",
-    "123 Hope Street, Decatur AL 35601",
-    "Black / African American",
-    "Male",
-    "https://i.imgur.com/7A4KvOJ.jpeg"
-])
+try:
+    init_db()
+except Exception as exc:
+    print("Database initialization failed:", exc)
 
 # Create family spotlight file if missing
 _spotlight_file = "family_spotlight.json"
@@ -126,29 +162,16 @@ if not os.path.exists(_bb_needs_file):
     with open(_bb_needs_file, "w") as _f:
         _bb_json_init.dump(_bb_defaults, _f)
 
-# Create scan log only if missing
-if not os.path.exists(scan_log_file):
-
-    with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-
-        writer.writerow([
-            "BandID",
-            "Name",
-            "Time",
-            "Type",
-            "IP"
-        ])
-
 # ===============================
 # FUNCTIONS
 # ===============================
 
 def log_scan(band_id, name, scan_type, ip):
-    now = time.strftime("%Y-%m-%d %H:%M:%S")
-    with open(scan_log_file, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow([band_id, name, now, scan_type, ip])
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO scan_logs (band_id, member_name, scan_type, ip_address) VALUES (%s,%s,%s,%s)",
+            (band_id, name, scan_type, ip),
+        )
 
 
 def send_safe_notification(name, phones, emails, band_id):
@@ -1431,8 +1454,11 @@ def dashboard():
         return redirect("/admin")
 
     customers = []
-    total_bands = count_rows(file_name)
-    total_scans = count_rows(scan_log_file)
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) AS total FROM members")
+        total_bands = cur.fetchone()["total"]
+        cur.execute("SELECT COUNT(*) AS total FROM scan_logs")
+        total_scans = cur.fetchone()["total"]
 
     # Read visitor counter
     _vc_file = "visit_count.txt"
@@ -1493,15 +1519,7 @@ def dashboard():
     except:
         pass
 
-    try:
-        with open(file_name, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-
-            for row in reader:
-                customers.append(row)
-
-    except:
-        customers = []
+    customers = get_all_members()
 
     customer_cards = ""
     
@@ -1865,30 +1883,26 @@ def add():
             photo.save(filepath)
             photo_url = f"/static/uploads/{filename}"
 
-        row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form.get("emergency_phones", "").strip(),
-            request.form.get("emergency_emails", "").strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            photo_url
-        ]
-
-        with open(file_name, "a", newline="", encoding="utf-8") as f:
-            csv.writer(f).writerow(row)
-
-        print(f"PROFILE SAVED: {row[0]}")
-
-        return redirect("/" + row[0])
+        band_id = request.form["band_id"].strip().upper()
+        pin = request.form["pin"].strip()
+        with get_db() as conn, conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO members (
+                    band_id, full_name, email, primary_phone, emergency_contacts,
+                    emergency_emails, age_group, public_condition, public_instructions,
+                    private_medical_notes, pin_hash, address, race, gender, photo_url
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                band_id, request.form["name"].strip(), request.form["email"].strip(),
+                request.form["phone"].strip(), request.form.get("emergency_phones", "").strip(),
+                request.form.get("emergency_emails", "").strip(), request.form["age_group"].strip(),
+                request.form["condition"].strip(), request.form["instructions"].strip(),
+                request.form["medical_notes"].strip(), generate_password_hash(pin),
+                request.form["address"].strip(), request.form["race"].strip(),
+                request.form["gender"].strip(), photo_url
+            ))
+        print(f"PROFILE SAVED: {band_id}")
+        return redirect("/" + band_id)
 
     return """
 
@@ -2134,36 +2148,13 @@ async function generateBandId(){
 """
 @app.route("/next-band-id")
 def next_band_id():
-
-    highest = 0
-
-    try:
-
-        with open(file_name, "r", encoding="utf-8") as f:
-
-            reader = csv.DictReader(f)
-
-            for row in reader:
-
-                band_id = row.get("band_id", "")
-
-                if band_id.startswith("EB"):
-
-                    try:
-                        number = int(band_id.replace("EB", ""))
-
-                        if number > highest:
-                            highest = number
-
-                    except:
-                        pass
-
-    except:
-        pass
-
-    next_id = highest + 1
-
-    return f"EB{next_id:03d}"
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT COALESCE(MAX(CAST(SUBSTRING(band_id FROM 3) AS INTEGER)), 0) AS highest
+            FROM members WHERE band_id ~ '^EB[0-9]+$'
+        """)
+        highest = cur.fetchone()["highest"]
+    return f"EB{highest + 1:03d}"
 
 # ===============================
 # EDIT PROFILE
@@ -2177,56 +2168,43 @@ def edit_profile(band_id):
 
     band_id = band_id.strip().upper()
 
-    with open(file_name, "r", newline="", encoding="utf-8") as f:
-        rows = list(csv.reader(f))
-
-    header = rows[0]
-    data_rows = rows[1:]
-
-    found_row = None
-
-    for row in data_rows:
-        if row[0].strip().upper() == band_id:
-            while len(row) < 15:
-                row.append("")
-            found_row = row
-            break
-
-    if not found_row:
+    member = get_member(band_id)
+    if not member:
         return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
 
+    found_row = [
+        member.get("band_id", ""), member.get("full_name", ""), member.get("email", ""),
+        member.get("primary_phone", ""), member.get("emergency_contacts", ""),
+        member.get("emergency_emails", ""), member.get("age_group", ""),
+        member.get("public_condition", ""), member.get("public_instructions", ""),
+        member.get("private_medical_notes", ""), "", member.get("address", ""),
+        member.get("race", ""), member.get("gender", ""), member.get("photo_url", "")
+    ]
+
     if request.method == "POST":
-
-        updated_row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form["emergency_phones"].strip(),
-            request.form.get("emergency_emails", "").strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            request.form.get("photo_url", "").strip()
+        new_band_id = request.form["band_id"].strip().upper()
+        pin = request.form.get("pin", "").strip()
+        fields = [
+            new_band_id, request.form["name"].strip(), request.form["email"].strip(),
+            request.form["phone"].strip(), request.form["emergency_phones"].strip(),
+            request.form.get("emergency_emails", "").strip(), request.form["age_group"].strip(),
+            request.form["condition"].strip(), request.form["instructions"].strip(),
+            request.form["medical_notes"].strip(), request.form["address"].strip(),
+            request.form["race"].strip(), request.form["gender"].strip(),
+            request.form.get("photo_url", "").strip(), band_id
         ]
-
-        new_rows = [header]
-
-        for row in data_rows:
-            if row[0].strip().upper() == band_id:
-                new_rows.append(updated_row)
+        with get_db() as conn, conn.cursor() as cur:
+            if pin:
+                cur.execute("""UPDATE members SET band_id=%s, full_name=%s, email=%s, primary_phone=%s,
+                    emergency_contacts=%s, emergency_emails=%s, age_group=%s, public_condition=%s,
+                    public_instructions=%s, private_medical_notes=%s, address=%s, race=%s, gender=%s,
+                    photo_url=%s, pin_hash=%s, updated_at=CURRENT_TIMESTAMP WHERE UPPER(band_id)=UPPER(%s)""",
+                    tuple(fields[:-1] + [generate_password_hash(pin), fields[-1]]))
             else:
-                new_rows.append(row)
-
-        with open(file_name, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerows(new_rows)
-
+                cur.execute("""UPDATE members SET band_id=%s, full_name=%s, email=%s, primary_phone=%s,
+                    emergency_contacts=%s, emergency_emails=%s, age_group=%s, public_condition=%s,
+                    public_instructions=%s, private_medical_notes=%s, address=%s, race=%s, gender=%s,
+                    photo_url=%s, updated_at=CURRENT_TIMESTAMP WHERE UPPER(band_id)=UPPER(%s)""", tuple(fields))
         return redirect("/dashboard")
 
     return f"""
@@ -2325,7 +2303,7 @@ button{{
 <textarea name="instructions">{found_row[8]}</textarea>
 <textarea name="medical_notes">{found_row[9]}</textarea>
 
-<input name="pin" value="{found_row[10]}" required>
+<input name="pin" type="password" value="" placeholder="New PIN (leave blank to keep current PIN)">
 <input name="address" value="{found_row[11]}">
 <input name="race" value="{found_row[12]}">
 <input name="gender" value="{found_row[13]}">
@@ -2359,22 +2337,8 @@ def delete_profile(band_id):
 
     band_id = band_id.strip().upper()
 
-    with open(file_name, "r", newline="", encoding="utf-8") as f:
-        rows = list(csv.reader(f))
-
-    header = rows[0]
-    data_rows = rows[1:]
-
-    updated_rows = [header]
-
-    for row in data_rows:
-        if row[0].strip().upper() != band_id:
-            updated_rows.append(row)
-
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerows(updated_rows)
-
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM members WHERE UPPER(band_id)=UPPER(%s)", (band_id,))
     return redirect("/dashboard")
 
 # ===============================
@@ -2387,102 +2351,98 @@ def profile(band_id):
     confirm_alert = request.args.get("confirm_alert") == "yes"
     alert_mode = request.args.get("alert") == "yes"
 
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
+    member = get_member(band_id)
+    if member:
+        name = member["full_name"]
+        email = member.get("email", "")
+        phone = member.get("primary_phone", "")
+        emergency_phones = member.get("emergency_contacts", "")
+        emergency_emails = member.get("emergency_emails", "")
+        age_group = member.get("age_group", "")
+        condition = member.get("public_condition", "")
+        instructions = member.get("public_instructions", "")
+        medical_notes = member.get("private_medical_notes", "")
+        pin_hash = member.get("pin_hash", "")
+        address = member.get("address", "")
+        race = member.get("race", "")
+        gender = member.get("gender", "")
+        photo_url = member.get("photo_url", "")
 
-        for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                age_group = row[6] if len(row) > 6 else ""
-                condition = row[7] if len(row) > 7 else ""
-                instructions = row[8] if len(row) > 8 else ""
-                medical_notes = row[9] if len(row) > 9 else ""
-                pin = row[10] if (len(row) > 10 and row[10]) else "1234"
-                address = row[11] if len(row) > 11 else ""
-                race = row[12] if len(row) > 12 else ""
-                gender = row[13] if len(row) > 13 else ""
-                photo_url = row[14] if len(row) > 14 else ""
-
-                visitor_ip = request.remote_addr
-                log_scan(
-                    band_id,
-                    name,
-                    "PROFILE_VIEW",
-                    visitor_ip
-                )
+        visitor_ip = request.remote_addr
+        log_scan(
+            band_id,
+            name,
+            "PROFILE_VIEW",
+            visitor_ip
+        )
 
     
 
-                entered_pin = request.args.get("pin")
-                if alert_mode:
-                    success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
+        entered_pin = request.args.get("pin")
+        if alert_mode:
+            success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
 
-                    if success:
-                        return f"""
-                        <h1>✅ Alert Sent</h1>
-                        <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/im_safe/{band_id}" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">✅ I'm Safe — Notify Contacts It Was a False Alarm</a></p>
-                        <p style="margin-top:14px;"><a href="/{band_id}">Go Back</a></p>
-                        """
-                    else:
-                        return f"""
-                        <h1>❌ Alert Failed</h1>
-                        <p>There was a problem sending the alert.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
-                        """
+            if success:
+                return f"""
+                <h1>✅ Alert Sent</h1>
+                <p>Emergency contact(s) have been notified.</p>
+                <p><a href="/im_safe/{band_id}" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">✅ I'm Safe — Notify Contacts It Was a False Alarm</a></p>
+                <p style="margin-top:14px;"><a href="/{band_id}">Go Back</a></p>
+                """
+            else:
+                return f"""
+                <h1>❌ Alert Failed</h1>
+                <p>There was a problem sending the alert.</p>
+                <p><a href="/{band_id}">Go Back</a></p>
+                """
 
-                if confirm_alert:
-                    return f"""
-                    <html>
-                    <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                    </head>
-                    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
-                        <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
-                            <h2>⚠️ Emergency Alert</h2>
-                            <p>This will notify the designated emergency contact(s) on file.</p>
+        if confirm_alert:
+            return f"""
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+            </head>
+            <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
+                <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
+                    <h2>⚠️ Emergency Alert</h2>
+                    <p>This will notify the designated emergency contact(s) on file.</p>
 
-                            <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
-                                <strong>Important:</strong><br>
-                                This system does <b>NOT contact 911 or emergency services</b>.<br><br>
-                                If this is a life-threatening emergency, please call <b>911 immediately</b>.
-                            </div>
+                    <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
+                        <strong>Important:</strong><br>
+                        This system does <b>NOT contact 911 or emergency services</b>.<br><br>
+                        If this is a life-threatening emergency, please call <b>911 immediately</b>.
+                    </div>
 
-                            <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
-                                🚨 Send Alert With Location
-                            </button>
+                    <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
+                        🚨 Send Alert With Location
+                    </button>
 
-                            <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
-                                Cancel
-                            </a>
-                        </div>
+                    <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+                        Cancel
+                    </a>
+                </div>
 
-                        <script>
-                        function sendAlertWithLocation(){{
-                            if (navigator.geolocation) {{
-                                navigator.geolocation.getCurrentPosition(function(pos){{
-                                    let lat = pos.coords.latitude;
-                                    let lon = pos.coords.longitude;
-                                    window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
-                                }}, function(){{
-                                    window.location.href = "/{band_id}?alert=yes";
-                                }});
-                            }} else {{
-                                window.location.href = "/{band_id}?alert=yes";
-                            }}
-                        }}
-                        </script>
-                    </body>
-                    </html>
-                    """
+                <script>
+                function sendAlertWithLocation(){{
+                    if (navigator.geolocation) {{
+                        navigator.geolocation.getCurrentPosition(function(pos){{
+                            let lat = pos.coords.latitude;
+                            let lon = pos.coords.longitude;
+                            window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+                        }}, function(){{
+                            window.location.href = "/{band_id}?alert=yes";
+                        }});
+                    }} else {{
+                        window.location.href = "/{band_id}?alert=yes";
+                    }}
+                }}
+                </script>
+            </body>
+            </html>
+            """
 
-                if entered_pin == pin:
-                    return f"""
+        if entered_pin and check_password_hash(pin_hash, entered_pin):
+            return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -2728,7 +2688,7 @@ PIN verified • EmpowerBands Emergency Response System
 </body>
 </html>
 """
-                return f"""
+        return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -3038,7 +2998,6 @@ Unlock Full Info
     <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
-
     return """
     <h1>Band Not Found</h1>
     <p>This band ID has not been added yet.</p>
@@ -3052,20 +3011,14 @@ def donate():
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
     band_id = band_id.strip().upper()
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                send_safe_notification(name, emergency_phones, emergency_emails, band_id)
-                return f"""
-                <h1>✅ Marked as Safe</h1>
-                <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
-                <p><a href="/{band_id}">Go Back</a></p>
-                """
+    member = get_member(band_id)
+    if member:
+        send_safe_notification(member["full_name"], member.get("emergency_contacts", ""), member.get("emergency_emails", ""), band_id)
+        return f"""
+        <h1>✅ Marked as Safe</h1>
+        <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
+        <p><a href="/{band_id}">Go Back</a></p>
+        """
     return """
     <h1>Band Not Found</h1>
     <p><a href="/">Home</a></p>
@@ -3117,19 +3070,13 @@ def scans():
 
     scans_list = []
 
-    try:
-
-        with open(scan_log_file, "r", encoding="utf-8") as f:
-
-            reader = csv.DictReader(f)
-
-            for row in reader:
-                scans_list.append(row)
-
-        scans_list.reverse()
-
-    except:
-        scans_list = []
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT band_id, member_name, scanned_at, scan_type, ip_address FROM scan_logs ORDER BY scanned_at DESC")
+        scans_list = [{
+            "BandID": r["band_id"], "Name": r["member_name"],
+            "Time": r["scanned_at"].strftime("%Y-%m-%d %H:%M:%S"),
+            "Type": r["scan_type"], "IP": r["ip_address"]
+        } for r in cur.fetchall()]
 
     rows_html = ""
 
@@ -3319,22 +3266,14 @@ def alert_with_location():
 
     maps_link = f"https://maps.google.com/?q={lat},{lon}"
 
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
+    member = get_member(band_id)
+    if member:
+        name = member["full_name"]
+        emergency_phones = member.get("emergency_contacts", "")
+        emergency_emails = member.get("emergency_emails", "")
+        send_full_alert(name, emergency_phones, emergency_emails, band_id, maps_link)
 
-        for row in reader:
-            if row[0].strip().upper() == band_id:
-
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-
-                send_full_alert(name, emergency_phones, emergency_emails, band_id, maps_link)
-
-                return f"""
+        return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -3428,20 +3367,20 @@ def manifest():
         "theme_color": "#07111f",
         "icons": [
             {
-                "src": LOGO_URL,
-                "sizes": "192x192",
-                "type": "image/png",
-                "purpose": "any maskable"
+        "src": LOGO_URL,
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
             },
             {
-                "src": LOGO_URL,
-                "sizes": "512x512",
-                "type": "image/png",
-                "purpose": "any maskable"
+        "src": LOGO_URL,
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
             }
         ]
     }) 
-                
+        
 
 # ===============================
 # EDIT HISTORY PAGE
@@ -3458,9 +3397,9 @@ def edit_history():
         req = urllib.request.Request(
             f"https://api.github.com/repos/{repo}/commits?per_page=30",
             headers={
-                "Authorization": f"token {gh_token}",
-                "Accept": "application/vnd.github.v3+json",
-                "User-Agent": "EmpowerBands-App"
+        "Authorization": f"token {gh_token}",
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "EmpowerBands-App"
             }
         )
         with urllib.request.urlopen(req, timeout=8) as resp:
@@ -3474,12 +3413,12 @@ def edit_history():
             url = c.get("html_url","#")
             commits_html += f"""
             <div class="commit">
-                <div class="commit-msg">{msg}</div>
-                <div class="commit-meta">
-                    <span class="sha"><a href="{url}" target="_blank">{sha}</a></span>
-                    <span>{author}</span>
-                    <span>{date}</span>
-                </div>
+        <div class="commit-msg">{msg}</div>
+        <div class="commit-meta">
+            <span class="sha"><a href="{url}" target="_blank">{sha}</a></span>
+            <span>{author}</span>
+            <span>{date}</span>
+        </div>
             </div>"""
     except Exception as e:
         commits_html = f'<p style="color:#f87171;">Could not load history: {e}</p>'
@@ -3645,7 +3584,7 @@ def mark_seen():
         _req3 = _ur2.Request(
             "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
             headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
-                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+             "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
         )
         with _ur2.urlopen(_req3, timeout=5) as _r3:
             _cc3 = _jj2.loads(_r3.read().decode())
@@ -3970,27 +3909,27 @@ def blessing_boxes():
         {vol_banner}
         <form method="POST" action="/blessing-boxes#volunteer">
             <div style="display:grid;gap:12px;">
-                <input type="text" name="v_name" placeholder="Your Name *" required
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                <input type="email" name="v_email" placeholder="Email Address"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                <input type="tel" name="v_phone" placeholder="Phone Number"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                <select name="v_avail"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(30,41,59,0.9);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                    <option value="">When are you available?</option>
-                    <option>Weekday mornings</option>
-                    <option>Weekday afternoons</option>
-                    <option>Weekday evenings</option>
-                    <option>Weekends</option>
-                    <option>Flexible / Any time</option>
-                </select>
-                <textarea name="v_msg" placeholder="Anything else you'd like us to know? (optional)" rows="3"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;resize:vertical;"></textarea>
-                <button type="submit"
-                    style="padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-size:16px;font-weight:700;cursor:pointer;">
-                    ✋ Submit Sign Up
-                </button>
+        <input type="text" name="v_name" placeholder="Your Name *" required
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+        <input type="email" name="v_email" placeholder="Email Address"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+        <input type="tel" name="v_phone" placeholder="Phone Number"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+        <select name="v_avail"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(30,41,59,0.9);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+            <option value="">When are you available?</option>
+            <option>Weekday mornings</option>
+            <option>Weekday afternoons</option>
+            <option>Weekday evenings</option>
+            <option>Weekends</option>
+            <option>Flexible / Any time</option>
+        </select>
+        <textarea name="v_msg" placeholder="Anything else you'd like us to know? (optional)" rows="3"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+        <button type="submit"
+            style="padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-size:16px;font-weight:700;cursor:pointer;">
+            ✋ Submit Sign Up
+        </button>
             </div>
         </form>
     </div>
@@ -4005,10 +3944,10 @@ def blessing_boxes():
         </p>
         <div class="partner-box">
             <p>
-                <strong style="color:white;">What hosting looks like:</strong><br>
-                We provide the box and handle restocking. You provide a visible outdoor or
-                entryway space. Your business gets recognized as a community partner on our
-                website and social media.
+        <strong style="color:white;">What hosting looks like:</strong><br>
+        We provide the box and handle restocking. You provide a visible outdoor or
+        entryway space. Your business gets recognized as a community partner on our
+        website and social media.
             </p>
         </div>
         <br>
@@ -4175,8 +4114,8 @@ def admin_spotlight():
     <div class="card">
         <form method="POST">
             <div class="toggle-row">
-                <input type="checkbox" name="active" id="active" {'checked' if current.get('active') else ''} style="width:20px;height:20px;">
-                <label for="active" style="margin:0;">Show on homepage</label>
+        <input type="checkbox" name="active" id="active" {'checked' if current.get('active') else ''} style="width:20px;height:20px;">
+        <label for="active" style="margin:0;">Show on homepage</label>
             </div>
             <label>Month (e.g. "July 2026")</label>
             <input type="text" name="month" value="{current.get('month','')}" placeholder="July 2026">
@@ -4290,8 +4229,8 @@ def admin_blessing_box_needs():
         <form method="POST">
             <textarea name="needs_text" rows="14" placeholder="One item per line. Start each line with an emoji, then the item name.&#10;Example:&#10;🥫 Canned Food&#10;🧴 Shampoo">{current_text}</textarea>
             <p class="hint">
-                One item per line · Start with an emoji, then a space, then the item name<br>
-                Example: <code style="color:#67e8f9;">🥫 Canned Soup</code> &nbsp;|&nbsp; <code style="color:#67e8f9;">🧼 Hand Soap</code>
+        One item per line · Start with an emoji, then a space, then the item name<br>
+        Example: <code style="color:#67e8f9;">🥫 Canned Soup</code> &nbsp;|&nbsp; <code style="color:#67e8f9;">🧼 Hand Soap</code>
             </p>
             <button class="save-btn" type="submit">💾 Save & Publish</button>
         </form>
