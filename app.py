@@ -2947,11 +2947,12 @@ margin-bottom:20px;
 >
 
 <h1>{name}</h1>
-<img src="/qr/{band_id}" style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
+<img src="/qr/{band_id}"
+     style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
 
-<p>Scan QR backup if NFC is unavailable.</p>
+<br><br>
 
-<a class="btn btn-blue" href="/qr/{band_id}" download="{band_id}-qr.png">
+<a class="btn btn-blue" href="/qr/{band_id}?download=1">
     ⬇️ Download QR Code
 </a>
 
@@ -3073,16 +3074,37 @@ def im_safe(band_id):
 @app.route("/qr/<band_id>")
 def qr_code(band_id):
     band_id = band_id.strip().upper()
-    url = f"{BASE_URL}/{band_id}"
 
-    img = qrcode.make(url)
+    # Only allow normal EmpowerBands IDs
+    if not band_id.startswith("EB") or not band_id[2:].isdigit():
+        abort(400, description="Invalid band ID")
+
+    # Remove a trailing slash so the QR URL is formatted correctly
+    profile_url = f"{BASE_URL.rstrip('/')}/{band_id}"
+
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+
+    qr.add_data(profile_url)
+    qr.make(fit=True)
+
+    image = qr.make_image(fill_color="black", back_color="white")
 
     buffer = BytesIO()
-    img.save(buffer, format="PNG")
+    image.save(buffer, format="PNG")
     buffer.seek(0)
 
-    return send_file(buffer, mimetype="image/png")
-
+    return send_file(
+        buffer,
+        mimetype="image/png",
+        as_attachment=request.args.get("download") == "1",
+        download_name=f"{band_id}-qr.png",
+        max_age=3600,
+    )
 # ===============================
 # SCAN LOGS PAGE
 # ===============================
