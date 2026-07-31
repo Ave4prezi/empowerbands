@@ -1,51 +1,46 @@
-"""
-Create the EmpowerBands bulk-band database tables.
-
-For production, set DATABASE_URL to the PostgreSQL connection
-string before running this script.
-
-Run:
-    python migrate_to_db.py
-"""
-
 import os
 import sys
+from pathlib import Path
 
-import bulk_bands_db as bulk_db
+import psycopg2
 
 
-def main():
-    database_url = os.environ.get("DATABASE_URL", "").strip()
+def migrate():
+    database_url = os.environ.get("DATABASE_URL")
 
     if not database_url:
-        print(
-            "ERROR: DATABASE_URL is not set.\n"
-            "Add the PostgreSQL connection string to your environment "
-            "before running this migration.",
-            file=sys.stderr,
-        )
-        return 1
+        raise RuntimeError("DATABASE_URL environment variable is not set.")
 
-    if not bulk_db._USING_POSTGRES:
-        print(
-            "ERROR: bulk_bands_db is not using PostgreSQL.\n"
-            "Check that DATABASE_URL begins with postgres:// "
-            "or postgresql://.",
-            file=sys.stderr,
-        )
-        return 1
+    schema_file = Path(__file__).with_name("schema_postgres.sql")
 
-    print("Creating EmpowerBands database tables...")
+    if not schema_file.exists():
+        raise FileNotFoundError(
+            f"Could not find schema file: {schema_file}"
+        )
+
+    schema_sql = schema_file.read_text(encoding="utf-8")
+
+    print("Creating EmpowerBands PostgreSQL database tables...", flush=True)
+
+    connection = psycopg2.connect(database_url)
 
     try:
-        bulk_db.init_db()
-    except Exception as error:
-        print(f"Database migration failed: {error}", file=sys.stderr)
-        return 1
+        cursor = connection.cursor()
+        cursor.execute(schema_sql)
+        connection.commit()
+        cursor.close()
+    except Exception:
+        connection.rollback()
+        raise
+    finally:
+        connection.close()
 
-    print("Database migration completed successfully.")
-    return 0
+    print("Database migration completed successfully.", flush=True)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        migrate()
+    except Exception as error:
+        print(f"Database migration failed: {error}", file=sys.stderr, flush=True)
+        sys.exit(1)
