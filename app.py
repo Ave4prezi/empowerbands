@@ -1,4 +1,3 @@
-
 from flask import Flask, request, redirect, session, send_file, jsonify
 import hmac
 import hashlib
@@ -22,16 +21,47 @@ app = Flask(__name__)
 
 # ===============================
 # SECRET KEY / ADMIN CREDENTIALS
-# LOCAL PYDROID TESTING ONLY
+# Per security requirements: no hardcoded production passwords.
+# Both SECRET_KEY and ADMIN_PASSWORD_HASH must come from the
+# environment. Set EMPOWERBANDS_ALLOW_DEV_DEFAULTS=1 for local
+# development only — never in production.
 # ===============================
+_DEV_DEFAULTS_ALLOWED = os.environ.get("EMPOWERBANDS_ALLOW_DEV_DEFAULTS") == "1"
 
-app.secret_key = "change-this-secret-key"
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    if _DEV_DEFAULTS_ALLOWED:
+        app.secret_key = "dev-only-insecure-secret-key-change-me"
+        print("WARNING: SECRET_KEY not set — using an insecure development-only key. "
+              "Set SECRET_KEY before deploying.")
+    else:
+        raise RuntimeError(
+            "SECRET_KEY environment variable is not set. Refusing to start with an "
+            "insecure default. Set SECRET_KEY (e.g. `python -c \"import secrets; "
+            "print(secrets.token_hex(32))\"`), or set "
+            "EMPOWERBANDS_ALLOW_DEV_DEFAULTS=1 for local development only."
+        )
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD_HASH = generate_password_hash("empower123")
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
+if not ADMIN_PASSWORD_HASH:
+    if _DEV_DEFAULTS_ALLOWED:
+        ADMIN_PASSWORD_HASH = generate_password_hash("empower123-dev-only")
+        print("WARNING: ADMIN_PASSWORD_HASH not set — using an insecure development-only "
+              "admin password ('empower123-dev-only'). Set ADMIN_PASSWORD_HASH before deploying.")
+    else:
+        raise RuntimeError(
+            "ADMIN_PASSWORD_HASH environment variable is not set. Refusing to start with "
+            "a default admin password. Generate one with:\n"
+            "  python -c \"from werkzeug.security import generate_password_hash; "
+            "print(generate_password_hash('your-new-password'))\"\n"
+            "and set the result as ADMIN_PASSWORD_HASH, or set "
+            "EMPOWERBANDS_ALLOW_DEV_DEFAULTS=1 for local development only."
+        )
 
 file_name = "customers.csv"
 scan_log_file = "scan_log.csv"
+
 # Single PayPal payment link currently used site-wide for /donate.
 # Reused below for merch/Traveling Band Movement checkout since no
 # itemized processor (Stripe/Square/Shopify) is connected yet — see
