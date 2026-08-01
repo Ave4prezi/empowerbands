@@ -1,3 +1,4 @@
+
 from flask import Flask, request, redirect, session, send_file, jsonify
 import hmac
 import hashlib
@@ -17,6 +18,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 import bulk_bands_db as bulk_db
 
+# LOCAL PYDROID ADMIN SETTINGS
+
+os.environ["EMPOWERBANDS_ALLOW_DEV_DEFAULTS"] = "1"
 app = Flask(__name__)
 
 # ===============================
