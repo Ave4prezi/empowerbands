@@ -1,72 +1,48 @@
-from flask import Flask, request, redirect, session, send_file, jsonify
-import hmac
-import hashlib
+from flask import (
+    Flask,
+    request,
+    redirect,
+    session,
+    send_file,
+    jsonify,
+    abort,
+)
 from twilio.rest import Client
+from werkzeug.utils import secure_filename
+
 import csv
 import os
 import time
-import secrets
-import zipfile
 import smtplib
 from email.mime.text import MIMEText
 import qrcode
-from io import BytesIO, StringIO
-from collections import defaultdict
-from werkzeug.utils import secure_filename
+import hashlib
+import hmac
+from io import BytesIO
+
+import psycopg
+from psycopg.rows import dict_row
 from werkzeug.security import generate_password_hash, check_password_hash
 
-import bulk_bands_db as bulk_db
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
-# ===============================
-# SECRET KEY / ADMIN CREDENTIALS
-# Per security requirements: no hardcoded production passwords.
-# Both SECRET_KEY and ADMIN_PASSWORD_HASH must come from the
-# environment. Set EMPOWERBANDS_ALLOW_DEV_DEFAULTS=1 for local
-# development only — never in production.
-# ===============================
-_DEV_DEFAULTS_ALLOWED = os.environ.get("EMPOWERBANDS_ALLOW_DEV_DEFAULTS") == "1"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 
-app.secret_key = os.environ.get("SECRET_KEY")
-if not app.secret_key:
-    if _DEV_DEFAULTS_ALLOWED:
-        app.secret_key = "dev-only-insecure-secret-key-change-me"
-        print("WARNING: SECRET_KEY not set — using an insecure development-only key. "
-              "Set SECRET_KEY before deploying.")
-    else:
-        raise RuntimeError(
-            "SECRET_KEY environment variable is not set. Refusing to start with an "
-            "insecure default. Set SECRET_KEY (e.g. `python -c \"import secrets; "
-            "print(secrets.token_hex(32))\"`), or set "
-            "EMPOWERBANDS_ALLOW_DEV_DEFAULTS=1 for local development only."
-        )
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
-if not ADMIN_PASSWORD_HASH:
-    if _DEV_DEFAULTS_ALLOWED:
-        ADMIN_PASSWORD_HASH = generate_password_hash("empower123-dev-only")
-        print("WARNING: ADMIN_PASSWORD_HASH not set — using an insecure development-only "
-              "admin password ('empower123-dev-only'). Set ADMIN_PASSWORD_HASH before deploying.")
-    else:
-        raise RuntimeError(
-            "ADMIN_PASSWORD_HASH environment variable is not set. Refusing to start with "
-            "a default admin password. Generate one with:\n"
-            "  python -c \"from werkzeug.security import generate_password_hash; "
-            "print(generate_password_hash('your-new-password'))\"\n"
-            "and set the result as ADMIN_PASSWORD_HASH, or set "
-            "EMPOWERBANDS_ALLOW_DEV_DEFAULTS=1 for local development only."
-        )
-
-file_name = "customers.csv"
-scan_log_file = "scan_log.csv"
-
-# Single PayPal payment link currently used site-wide for /donate.
-# Reused below for merch/Traveling Band Movement checkout since no
-# itemized processor (Stripe/Square/Shopify) is connected yet — see
-# the /checkout route for the caveat this implies.
-PAYPAL_URL = "https://www.paypal.com/ncp/payment/6ZT5B9XMXD3K6"
+def get_db():
+    if DATABASE_URL:
+        return psycopg.connect(DATABASE_URL, row_factory=dict_row)
+    return psycopg.connect(
+        host=os.environ.get("PGHOST", "localhost"),
+        port=os.environ.get("PGPORT", "5432"),
+        dbname=os.environ.get("PGDATABASE", "empowerbands"),
+        user=os.environ.get("PGUSER", "postgres"),
+        password=os.environ.get("PGPASSWORD", ""),
+        row_factory=dict_row,
+    )
 
 BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.org")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
@@ -81,130 +57,75 @@ LOGO_URL = "https://i.imgur.com/bSUxUXa.jpeg"
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Bulk band provisioning uses its own SQLite (or Postgres, via
-# DATABASE_URL) database — see bulk_bands_db.py. Auto-create the
-# SQLite schema on boot for local/dev convenience; in production with
-# DATABASE_URL set to Postgres, run `python migrate_to_db.py` once
-# instead (auto-creating prod schema on every boot is intentionally
-# not done here).
-# Bulk band provisioning uses its own database (SQLite by default, or
-# Postgres if DATABASE_URL is set — see bulk_bands_db.py). Always
-# ensure the schema exists at boot, for whichever engine ends up
-# active — this used to only run for SQLite and skip Postgres, which
-# meant a host that unexpectedly sets DATABASE_URL (some platforms do
-# this automatically) would silently boot with no bands/audit_log
-# tables at all, and the first audit-logged action (e.g. admin login)
-# would crash with a 500. ensure_schema() is idempotent and safe to
-# run on every boot for both engines.
+# ===============================
+# DATABASE
+# ===============================
+
+def init_db():
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS members (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                band_id VARCHAR(100) NOT NULL UNIQUE,
+                full_name VARCHAR(200) NOT NULL,
+                email VARCHAR(255),
+                primary_phone VARCHAR(25),
+                emergency_contacts TEXT,
+                emergency_emails TEXT,
+                age_group VARCHAR(20),
+                public_condition TEXT,
+                public_instructions TEXT,
+                private_medical_notes TEXT,
+                pin_hash TEXT NOT NULL,
+                address TEXT,
+                race VARCHAR(100),
+                gender VARCHAR(100),
+                photo_url TEXT,
+                status VARCHAR(30) NOT NULL DEFAULT 'active',
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS scan_logs (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                band_id VARCHAR(100) NOT NULL,
+                member_name VARCHAR(200),
+                scan_type VARCHAR(50) NOT NULL,
+                ip_address VARCHAR(100),
+                scanned_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+def member_aliases(row):
+    if not row:
+        return None
+    d = dict(row)
+    d.update({
+        "name": d.get("full_name", ""),
+        "phone": d.get("primary_phone", ""),
+        "emergency_phones": d.get("emergency_contacts", ""),
+        "condition": d.get("public_condition", ""),
+        "instructions": d.get("public_instructions", ""),
+        "medical_notes": d.get("private_medical_notes", ""),
+        "pin": "",
+    })
+    return d
+
+def get_member(band_id):
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM members WHERE UPPER(band_id)=UPPER(%s)", (band_id,))
+        return member_aliases(cur.fetchone())
+
+def get_all_members():
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT * FROM members ORDER BY created_at DESC")
+        return [member_aliases(r) for r in cur.fetchall()]
+
 try:
-    bulk_db.ensure_schema()
-except Exception as _bulk_db_init_err:
-    print("Bulk band DB schema check failed:", _bulk_db_init_err)
-
-
-# ===============================
-# CSRF PROTECTION (lightweight, dependency-free)
-# Applied to the new bulk-provisioning / activation forms below, plus
-# the admin login form. Uses Flask's signed session cookie to store
-# the expected token — same-site + signed cookie already gives solid
-# baseline protection; this adds the standard double-submit check on
-# top for state-changing POST requests.
-# ===============================
-def get_csrf_token():
-    token = session.get("_csrf_token")
-    if not token:
-        token = secrets.token_urlsafe(24)
-        session["_csrf_token"] = token
-    return token
-
-
-def csrf_input_html():
-    return f'<input type="hidden" name="csrf_token" value="{get_csrf_token()}">'
-
-
-def csrf_valid():
-    expected = session.get("_csrf_token")
-    provided = request.form.get("csrf_token", "")
-    return bool(expected) and bool(provided) and secrets.compare_digest(expected, provided)
-
-
-# ===============================
-# RATE LIMITING (lightweight, dependency-free, in-memory)
-# NOTE: state lives in this process's memory. With multiple gunicorn
-# workers, each worker enforces its own limit independently (so the
-# effective limit is roughly max_calls * worker_count). That's an
-# acceptable tradeoff for a single-worker deployment; swap this for
-# Flask-Limiter backed by Redis (or similar shared store) before
-# running with more than one worker in production.
-# ===============================
-_rate_limit_hits = defaultdict(list)
-
-
-def is_rate_limited(key, max_calls, period_seconds):
-    now = time.time()
-    hits = _rate_limit_hits[key]
-    while hits and hits[0] < now - period_seconds:
-        hits.pop(0)
-    if len(hits) >= max_calls:
-        return True
-    hits.append(now)
-    return False
-
-
-def audit_actor():
-    """Best-effort identity for audit logging — the logged-in admin
-    username if there is a session, otherwise 'anonymous'."""
-    return session.get("admin_username", "anonymous") if session.get("logged_in") else "anonymous"
-
-
-# ===============================
-# CREATE FILES
-# ===============================
-
-header = [
-    "band_id",
-    "name",
-    "email",
-    "phone",
-    "emergency_phones",
-    "emergency_emails",
-    "age_group",
-    "condition",
-    "instructions",
-    "medical_notes",
-    "pin",
-    "address",
-    "race",
-    "gender",
-    "photo_url"
-]
-
-# Create customers.csv only if missing
-if not os.path.exists(file_name):
-
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-
-        writer.writerow(header)
-
-        # Optional demo profile
-        writer.writerow([
-    "EB001",
-    "Jaden",
-    "email@test.com",
-    "+12565551234",
-    "+19382655364,+12566121274",
-    "mom@test.com,dad@test.com",
-    "Child",
-    "Autism – Nonverbal",
-    "Please stay calm. I may not respond verbally. Call emergency contacts immediately.",
-    "No allergies",
-    "1234",
-    "123 Hope Street, Decatur AL 35601",
-    "Black / African American",
-    "Male",
-    "https://i.imgur.com/7A4KvOJ.jpeg"
-])
+    init_db()
+except Exception as exc:
+    print("Database initialization failed:", exc)
 
 # Create family spotlight file if missing
 _spotlight_file = "family_spotlight.json"
@@ -241,29 +162,16 @@ if not os.path.exists(_bb_needs_file):
     with open(_bb_needs_file, "w") as _f:
         _bb_json_init.dump(_bb_defaults, _f)
 
-# Create scan log only if missing
-if not os.path.exists(scan_log_file):
-
-    with open(scan_log_file, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-
-        writer.writerow([
-            "BandID",
-            "Name",
-            "Time",
-            "Type",
-            "IP"
-        ])
-
 # ===============================
 # FUNCTIONS
 # ===============================
 
 def log_scan(band_id, name, scan_type, ip):
-    now = time.strftime("%Y-%m-%d %H:%M:%S")
-    with open(scan_log_file, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow([band_id, name, now, scan_type, ip])
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO scan_logs (band_id, member_name, scan_type, ip_address) VALUES (%s,%s,%s,%s)",
+            (band_id, name, scan_type, ip),
+        )
 
 
 def send_safe_notification(name, phones, emails, band_id):
@@ -311,8 +219,8 @@ def send_full_alert(name, phones, emails, band_id, maps_link=None):
     location_text = f"\nLocation:\n{maps_link}" if maps_link else ""
     
     message = (
-        f"EmpowerBands Emergency Alert\n\n"
-        f"{name}'s emergency profile was accessed.\n\n"
+        f"🚨 EMPOWERBANDS EMERGENCY ALERT 🚨\n\n"
+        f"{name}'s emergency profile was triggered.\n\n"
         f"Profile:\n{profile_url}"
         f"{location_text}\n\n"
         f"This person may need assistance"
@@ -588,21 +496,21 @@ BOARD_MEMBERS = [
         "name": "April McDaniel",
         "title": "Founder",
         "photo": "/static/images/april-mcdaniel.png",
-        "bio": "April McDaniel is the Founder of EmpowerBands Worldwide. A full biography will be added here soon.",
+        "bio": "April McDaniel is the Founder, President, and Board Chair of EmpowerBands Worldwide. April McDaniel will provide executive leadership and help guide the mission, vision, programs, and long-term development of EmpowerBands Worldwide.",
         "links": [],
     },
     {
         "name": "Avery Johnson",
         "title": "Co-Founder and Secretary",
         "photo": "/static/images/avery-johnson.png",
-        "bio": "Avery Johnson is the Co-Founder and Secretary of EmpowerBands Worldwide. He is a community-focused leader, entrepreneur, father, artist, and advocate for empowerment. His experiences include walking across America for peace and supporting charitable causes, giving him a deep commitment to service, unity, encouragement, and positive community impact.",
+        "bio": "Avery Johnson is the Co-Founder, Secretary, and Director of EmpowerBands Worldwide. Avery Johnson will oversee the organization’s official records, board documentation, administrative communication, and governance records. He is a community-focused leader, entrepreneur, father, artist, and advocate for empowerment.",
         "links": [],
     },
     {
         "name": "Selina Dobbins",
         "title": "Treasurer",
         "photo": "/static/images/selina-dobbins.png",
-        "bio": "Selina Dobbins serves as Treasurer of EmpowerBands Worldwide. A full biography will be added here soon.",
+        "bio": "Selina Dobbins serves as Treasurer and Director of EmpowerBands Worldwide. Selina Dobbins will oversee the financial accountability, reporting, budgeting, and financial-recordkeeping activities of empowerBands Worldwide.",
         "links": [],
     },
 ]
@@ -818,16 +726,6 @@ body{{
     max-width:620px;
 }}
 
-.hero-copy{{
-    grid-column:1 / -1;
-    text-align:center;
-}}
-
-.hero-copy p{{
-    margin-left:auto;
-    margin-right:auto;
-}}
-
 .hero-logo{{
     width:100%;
     max-width:520px;
@@ -1014,6 +912,8 @@ body{{
 
 <section class="hero">
 
+
+
 <div class="hero-banner">
     <img
         src="https://i.imgur.com/bSUxUXa.jpeg"
@@ -1045,29 +945,17 @@ body{{
 }}
 </style>
 
-<div class="hero-copy">
     <h1>EmpowerBands <span>Worldwide</span></h1>
 
     <h3>Smart Wearable Safety Technology</h3>
 
     <p>
         EmpowerBands Worldwide is committed to safety inclusion,
-        and rapid emergency response through smart wearable technology.
+        and rapid emergency response through smart wearable technology....
     </p>
-
-    <div style="margin-top:25px;">
-        <a class="btn" href="/EB001">🚀 View Live Demo</a>
-        <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Support Our Mission</a>
-        <a class="btn dark" href="mailto:support@empowerbands.org">🛡️ Partner With Us</a>
-    </div>
-
-    <div class="trust">
-        <div class="trust-card">📡 NFC + QR Technology</div>
-        <div class="trust-card">♿ Accessibility Focused</div>
-        <div class="trust-card">❤️ Nonprofit Organization</div>
-        <div class="trust-card">🏫 School & Caregiver Ready</div>
-    </div>
 </div>
+
+</section>
 
 </section>
 
@@ -1091,6 +979,22 @@ body{{
         that give people greater peace of mind at home, at school, while traveling,
         and throughout everyday life.
     </p>
+</section>
+
+        <div style="margin-top:25px;">
+            <a class="btn" href="/EB001">🚀 View Live Demo</a>
+            <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Support Our Mission</a>
+            <a class="btn dark" href="mailto:support@empowerbands.org">🛡️ Partner With Us</a>
+        </div>
+
+        <div class="trust">
+            <div class="trust-card">📡 NFC + QR Technology</div>
+            <div class="trust-card">♿ Accessibility Focused</div>
+            <div class="trust-card">❤️ Nonprofit Organization</div>
+            <div class="trust-card">🏫 School & Caregiver Ready</div>
+        </div>
+    </div>
+
 </section>
 
 <section class="section" id="how">
@@ -1263,9 +1167,9 @@ body{{
     👁 <strong style="color:rgba(255,255,255,0.7);">{visit_count}</strong> visitors and counting
 </div>
 
-<script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 </body>
 </html>
+    <script src="//code.tidio.co/p4dgrg4dt5tkoaz3wfwi72xbttfvvkzr.js" async></script>
 """
     
 
@@ -1314,40 +1218,8 @@ def admin():
 
     if request.method == "POST":
 
-        login_key = f"admin-login:{request.remote_addr}"
-        if is_rate_limited(login_key, max_calls=8, period_seconds=300):
-            bulk_db.log_audit("anonymous", "admin_login_rate_limited", "/admin",
-                               "", request.remote_addr)
-            return """
-            <h2 style='color:white;text-align:center;margin-top:100px;'>
-            Too Many Attempts
-            </h2>
-            <p style='text-align:center;color:#cbd5e1;'>
-            Please wait a few minutes before trying again.
-            </p>
-            """, 429
-
-        if not csrf_valid():
-            return """
-            <h2 style='color:white;text-align:center;margin-top:100px;'>
-            Session Expired
-            </h2>
-            <p style='text-align:center;'>
-            <a href='/admin'>Try Again</a>
-            </p>
-            """, 400
-
-        submitted_username = request.form.get("username", "").strip()
-        submitted_password = request.form.get("password", "")
-
-        valid_username = secrets.compare_digest(submitted_username, ADMIN_USERNAME)
-        valid_password = check_password_hash(ADMIN_PASSWORD_HASH, submitted_password)
-
-        if valid_username and valid_password:
+        if request.form.get("password") == ADMIN_PASSWORD:
             session["logged_in"] = True
-            session["admin_username"] = submitted_username
-            bulk_db.log_audit(submitted_username, "admin_login_success", "/admin",
-                               "", request.remote_addr)
             # Store latest commit SHA at login time so we can detect new changes
             try:
                 import urllib.request as _ulr, json as _jj
@@ -1363,11 +1235,9 @@ def admin():
                 session["last_seen_sha"] = ""
             return redirect("/dashboard")
 
-        bulk_db.log_audit(submitted_username or "anonymous", "admin_login_failed", "/admin",
-                           "", request.remote_addr)
         return """
         <h2 style='color:white;text-align:center;margin-top:100px;'>
-        Wrong Username Or Password
+        Wrong Password
         </h2>
 
         <p style='text-align:center;'>
@@ -1376,7 +1246,7 @@ def admin():
         """
 
     
-    page_html = """
+    return """
 <!DOCTYPE html>
 <html>
 <head>
@@ -1529,22 +1399,11 @@ Secure Admin Access Portal
 <form method="POST">
 
 <input
-type="text"
-name="username"
-placeholder="Admin username"
-autocomplete="username"
-required
->
-
-<input
 type="password"
 name="password"
 placeholder="Enter admin password"
-autocomplete="current-password"
 required
 >
-
-__CSRF__
 
 <button class="btn" type="submit">
 Login To Dashboard
@@ -1573,12 +1432,10 @@ EmpowerBands Emergency System
 
 </div>
 
-<script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 </body>
 </html>
+   <script src="//code.tidio.co/p4dgrg4dt5tkoaz3wfwi72xbttfvvkzr.js" async></script>
 """
-
-    return page_html.replace("__CSRF__", csrf_input_html())
 
 # ===============================
 # DASHBOARD
@@ -1597,8 +1454,11 @@ def dashboard():
         return redirect("/admin")
 
     customers = []
-    total_bands = count_rows(file_name)
-    total_scans = count_rows(scan_log_file)
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) AS total FROM members")
+        total_bands = cur.fetchone()["total"]
+        cur.execute("SELECT COUNT(*) AS total FROM scan_logs")
+        total_scans = cur.fetchone()["total"]
 
     # Read visitor counter
     _vc_file = "visit_count.txt"
@@ -1659,15 +1519,7 @@ def dashboard():
     except:
         pass
 
-    try:
-        with open(file_name, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-
-            for row in reader:
-                customers.append(row)
-
-    except:
-        customers = []
+    customers = get_all_members()
 
     customer_cards = ""
     
@@ -2007,9 +1859,10 @@ function filterBands(){{
 }}
 </script>
 
-<script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 </body>
-</html>
+
+</html
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>.
 """
 
 # ===============================
@@ -2030,30 +1883,26 @@ def add():
             photo.save(filepath)
             photo_url = f"/static/uploads/{filename}"
 
-        row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form.get("emergency_phones", "").strip(),
-            request.form.get("emergency_emails", "").strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            photo_url
-        ]
-
-        with open(file_name, "a", newline="", encoding="utf-8") as f:
-            csv.writer(f).writerow(row)
-
-        print(f"PROFILE SAVED: {row[0]}")
-
-        return redirect("/" + row[0])
+        band_id = request.form["band_id"].strip().upper()
+        pin = request.form["pin"].strip()
+        with get_db() as conn, conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO members (
+                    band_id, full_name, email, primary_phone, emergency_contacts,
+                    emergency_emails, age_group, public_condition, public_instructions,
+                    private_medical_notes, pin_hash, address, race, gender, photo_url
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                band_id, request.form["name"].strip(), request.form["email"].strip(),
+                request.form["phone"].strip(), request.form.get("emergency_phones", "").strip(),
+                request.form.get("emergency_emails", "").strip(), request.form["age_group"].strip(),
+                request.form["condition"].strip(), request.form["instructions"].strip(),
+                request.form["medical_notes"].strip(), generate_password_hash(pin),
+                request.form["address"].strip(), request.form["race"].strip(),
+                request.form["gender"].strip(), photo_url
+            ))
+        print(f"PROFILE SAVED: {band_id}")
+        return redirect("/" + band_id)
 
     return """
 
@@ -2299,36 +2148,13 @@ async function generateBandId(){
 """
 @app.route("/next-band-id")
 def next_band_id():
-
-    highest = 0
-
-    try:
-
-        with open(file_name, "r", encoding="utf-8") as f:
-
-            reader = csv.DictReader(f)
-
-            for row in reader:
-
-                band_id = row.get("band_id", "")
-
-                if band_id.startswith("EB"):
-
-                    try:
-                        number = int(band_id.replace("EB", ""))
-
-                        if number > highest:
-                            highest = number
-
-                    except:
-                        pass
-
-    except:
-        pass
-
-    next_id = highest + 1
-
-    return f"EB{next_id:03d}"
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT COALESCE(MAX(CAST(SUBSTRING(band_id FROM 3) AS INTEGER)), 0) AS highest
+            FROM members WHERE band_id ~ '^EB[0-9]+$'
+        """)
+        highest = cur.fetchone()["highest"]
+    return f"EB{highest + 1:03d}"
 
 # ===============================
 # EDIT PROFILE
@@ -2342,56 +2168,43 @@ def edit_profile(band_id):
 
     band_id = band_id.strip().upper()
 
-    with open(file_name, "r", newline="", encoding="utf-8") as f:
-        rows = list(csv.reader(f))
-
-    header = rows[0]
-    data_rows = rows[1:]
-
-    found_row = None
-
-    for row in data_rows:
-        if row[0].strip().upper() == band_id:
-            while len(row) < 15:
-                row.append("")
-            found_row = row
-            break
-
-    if not found_row:
+    member = get_member(band_id)
+    if not member:
         return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
 
+    found_row = [
+        member.get("band_id", ""), member.get("full_name", ""), member.get("email", ""),
+        member.get("primary_phone", ""), member.get("emergency_contacts", ""),
+        member.get("emergency_emails", ""), member.get("age_group", ""),
+        member.get("public_condition", ""), member.get("public_instructions", ""),
+        member.get("private_medical_notes", ""), "", member.get("address", ""),
+        member.get("race", ""), member.get("gender", ""), member.get("photo_url", "")
+    ]
+
     if request.method == "POST":
-
-        updated_row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form["emergency_phones"].strip(),
-            request.form.get("emergency_emails", "").strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            request.form.get("photo_url", "").strip()
+        new_band_id = request.form["band_id"].strip().upper()
+        pin = request.form.get("pin", "").strip()
+        fields = [
+            new_band_id, request.form["name"].strip(), request.form["email"].strip(),
+            request.form["phone"].strip(), request.form["emergency_phones"].strip(),
+            request.form.get("emergency_emails", "").strip(), request.form["age_group"].strip(),
+            request.form["condition"].strip(), request.form["instructions"].strip(),
+            request.form["medical_notes"].strip(), request.form["address"].strip(),
+            request.form["race"].strip(), request.form["gender"].strip(),
+            request.form.get("photo_url", "").strip(), band_id
         ]
-
-        new_rows = [header]
-
-        for row in data_rows:
-            if row[0].strip().upper() == band_id:
-                new_rows.append(updated_row)
+        with get_db() as conn, conn.cursor() as cur:
+            if pin:
+                cur.execute("""UPDATE members SET band_id=%s, full_name=%s, email=%s, primary_phone=%s,
+                    emergency_contacts=%s, emergency_emails=%s, age_group=%s, public_condition=%s,
+                    public_instructions=%s, private_medical_notes=%s, address=%s, race=%s, gender=%s,
+                    photo_url=%s, pin_hash=%s, updated_at=CURRENT_TIMESTAMP WHERE UPPER(band_id)=UPPER(%s)""",
+                    tuple(fields[:-1] + [generate_password_hash(pin), fields[-1]]))
             else:
-                new_rows.append(row)
-
-        with open(file_name, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerows(new_rows)
-
+                cur.execute("""UPDATE members SET band_id=%s, full_name=%s, email=%s, primary_phone=%s,
+                    emergency_contacts=%s, emergency_emails=%s, age_group=%s, public_condition=%s,
+                    public_instructions=%s, private_medical_notes=%s, address=%s, race=%s, gender=%s,
+                    photo_url=%s, updated_at=CURRENT_TIMESTAMP WHERE UPPER(band_id)=UPPER(%s)""", tuple(fields))
         return redirect("/dashboard")
 
     return f"""
@@ -2490,7 +2303,7 @@ button{{
 <textarea name="instructions">{found_row[8]}</textarea>
 <textarea name="medical_notes">{found_row[9]}</textarea>
 
-<input name="pin" value="{found_row[10]}" required>
+<input name="pin" type="password" value="" placeholder="New PIN (leave blank to keep current PIN)">
 <input name="address" value="{found_row[11]}">
 <input name="race" value="{found_row[12]}">
 <input name="gender" value="{found_row[13]}">
@@ -2504,9 +2317,9 @@ button{{
 
 </div>
 </div>
-<script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 </body>
 </html>
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
 
@@ -2524,100 +2337,13 @@ def delete_profile(band_id):
 
     band_id = band_id.strip().upper()
 
-    with open(file_name, "r", newline="", encoding="utf-8") as f:
-        rows = list(csv.reader(f))
-
-    header = rows[0]
-    data_rows = rows[1:]
-
-    updated_rows = [header]
-
-    for row in data_rows:
-        if row[0].strip().upper() != band_id:
-            updated_rows.append(row)
-
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerows(updated_rows)
-
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM members WHERE UPPER(band_id)=UPPER(%s)", (band_id,))
     return redirect("/dashboard")
 
 # ===============================
 # BAND PROFILE
 # ===============================
-
-def _band_not_found_or_pending(band_id):
-    """Used when a scanned/visited band_id isn't in customers.csv.
-    Before showing a generic 'not found', check whether it's a real
-    bulk-provisioned band that just hasn't been activated yet (or has
-    been marked lost/replaced) and show something more useful."""
-    band_id = band_id.strip().upper()
-
-    try:
-        bulk_record = bulk_db.get_band(band_id)
-    except Exception:
-        bulk_record = None
-
-    if not bulk_record:
-        return """
-        <h1>Band Not Found</h1>
-        <p>This band ID has not been added yet.</p>
-        <p><a href="/admin">Admin Login</a></p>
-        """
-
-    status = bulk_record["status"]
-
-    if status == "unassigned":
-        return f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Activate This EmpowerBand — {band_id}</title>
-<meta name="description" content="Set up your EmpowerBands emergency profile.">
-</head>
-<body style="margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
-<div style="max-width:480px;width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:36px;text-align:center;box-sizing:border-box;">
-    <div style="font-size:44px;margin-bottom:14px;" aria-hidden="true">🎗️</div>
-    <h1 style="font-size:24px;margin:0 0 12px;">This Band Hasn't Been Activated Yet</h1>
-    <p style="color:#cbd5e1;line-height:1.7;font-size:15px;">
-        Band <strong>{band_id}</strong> is a genuine EmpowerBand, but its owner
-        hasn't set up their emergency profile yet.
-    </p>
-    <p style="color:#cbd5e1;line-height:1.7;font-size:15px;">
-        If this is your band, use the activation code included with your order
-        to set up your profile.
-    </p>
-    <a href="/activate" style="display:inline-block;margin-top:14px;padding:14px 24px;border-radius:12px;background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;text-decoration:none;font-weight:700;">
-        Activate My Band
-    </a>
-    <p style="color:#64748b;font-size:13px;margin-top:20px;line-height:1.6;">
-        Found this band and it isn't yours? Please contact
-        <a href="mailto:support@empowerbands.org" style="color:#67e8f9;">support@empowerbands.org</a>
-        so we can help reunite it with its owner.
-    </p>
-</div>
-</body>
-</html>
-"""
-
-    if status in ("lost", "replaced"):
-        return f"""
-        <h1 style='color:white;text-align:center;margin-top:80px;font-family:Arial,sans-serif;'>Band Marked {status.title()}</h1>
-        <p style='text-align:center;color:#cbd5e1;font-family:Arial,sans-serif;'>Band {band_id} has been marked {status} and no longer has an active profile.</p>
-        <p style='text-align:center;font-family:Arial,sans-serif;'>If you found this band, please contact <a href="mailto:support@empowerbands.org" style="color:#67e8f9;">support@empowerbands.org</a>.</p>
-        """
-
-    # status == "active" but somehow missing from customers.csv — shouldn't
-    # normally happen (activation writes to both), fail safe with the
-    # original message rather than guessing.
-    return """
-    <h1>Band Not Found</h1>
-    <p>This band ID has not been added yet.</p>
-    <p><a href="/admin">Admin Login</a></p>
-    """
-
 
 @app.route("/customer/<band_id>")
 def profile(band_id):
@@ -2625,102 +2351,98 @@ def profile(band_id):
     confirm_alert = request.args.get("confirm_alert") == "yes"
     alert_mode = request.args.get("alert") == "yes"
 
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
+    member = get_member(band_id)
+    if member:
+        name = member["full_name"]
+        email = member.get("email", "")
+        phone = member.get("primary_phone", "")
+        emergency_phones = member.get("emergency_contacts", "")
+        emergency_emails = member.get("emergency_emails", "")
+        age_group = member.get("age_group", "")
+        condition = member.get("public_condition", "")
+        instructions = member.get("public_instructions", "")
+        medical_notes = member.get("private_medical_notes", "")
+        pin_hash = member.get("pin_hash", "")
+        address = member.get("address", "")
+        race = member.get("race", "")
+        gender = member.get("gender", "")
+        photo_url = member.get("photo_url", "")
 
-        for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                age_group = row[6] if len(row) > 6 else ""
-                condition = row[7] if len(row) > 7 else ""
-                instructions = row[8] if len(row) > 8 else ""
-                medical_notes = row[9] if len(row) > 9 else ""
-                pin = row[10] if (len(row) > 10 and row[10]) else "1234"
-                address = row[11] if len(row) > 11 else ""
-                race = row[12] if len(row) > 12 else ""
-                gender = row[13] if len(row) > 13 else ""
-                photo_url = row[14] if len(row) > 14 else ""
-
-                visitor_ip = request.remote_addr
-                log_scan(
-                    band_id,
-                    name,
-                    "PROFILE_VIEW",
-                    visitor_ip
-                )
+        visitor_ip = request.remote_addr
+        log_scan(
+            band_id,
+            name,
+            "PROFILE_VIEW",
+            visitor_ip
+        )
 
     
 
-                entered_pin = request.args.get("pin")
-                if alert_mode:
-                    success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
+        entered_pin = request.args.get("pin")
+        if alert_mode:
+            success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
 
-                    if success:
-                        return f"""
-                        <h1>✅ Alert Sent</h1>
-                        <p>Emergency contact(s) have been notified.</p>
-                        <p><a href="/im_safe/{band_id}" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">✅ I'm Safe — Notify Contacts It Was a False Alarm</a></p>
-                        <p style="margin-top:14px;"><a href="/{band_id}">Go Back</a></p>
-                        """
-                    else:
-                        return f"""
-                        <h1>❌ Alert Failed</h1>
-                        <p>There was a problem sending the alert.</p>
-                        <p><a href="/{band_id}">Go Back</a></p>
-                        """
+            if success:
+                return f"""
+                <h1>✅ Alert Sent</h1>
+                <p>Emergency contact(s) have been notified.</p>
+                <p><a href="/im_safe/{band_id}" style="display:inline-block;margin-top:14px;padding:14px 22px;border-radius:12px;background:#16a34a;color:white;text-decoration:none;font-weight:bold;">✅ I'm Safe — Notify Contacts It Was a False Alarm</a></p>
+                <p style="margin-top:14px;"><a href="/{band_id}">Go Back</a></p>
+                """
+            else:
+                return f"""
+                <h1>❌ Alert Failed</h1>
+                <p>There was a problem sending the alert.</p>
+                <p><a href="/{band_id}">Go Back</a></p>
+                """
 
-                if confirm_alert:
-                    return f"""
-                    <html>
-                    <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1">
-                    </head>
-                    <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
-                        <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
-                            <h2>⚠️ Emergency Alert</h2>
-                            <p>This will notify the designated emergency contact(s) on file.</p>
+        if confirm_alert:
+            return f"""
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+            </head>
+            <body style="font-family:Arial;background:#f3f4f6;text-align:center;padding:30px;">
+                <div style="background:white;padding:25px;border-radius:12px;max-width:420px;margin:auto;">
+                    <h2>⚠️ Emergency Alert</h2>
+                    <p>This will notify the designated emergency contact(s) on file.</p>
 
-                            <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
-                                <strong>Important:</strong><br>
-                                This system does <b>NOT contact 911 or emergency services</b>.<br><br>
-                                If this is a life-threatening emergency, please call <b>911 immediately</b>.
-                            </div>
+                    <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:10px;font-size:14px;margin:15px 0;text-align:left;">
+                        <strong>Important:</strong><br>
+                        This system does <b>NOT contact 911 or emergency services</b>.<br><br>
+                        If this is a life-threatening emergency, please call <b>911 immediately</b>.
+                    </div>
 
-                            <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
-                                🚨 Send Alert With Location
-                            </button>
+                    <button onclick="sendAlertWithLocation()" style="display:block;width:100%;padding:15px;border-radius:10px;border:none;background:#dc2626;color:white;font-weight:bold;font-size:16px;">
+                        🚨 Send Alert With Location
+                    </button>
 
-                            <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
-                                Cancel
-                            </a>
-                        </div>
+                    <a href="/{band_id}" style="display:block;margin-top:12px;padding:15px;border-radius:10px;background:#111827;color:white;text-decoration:none;font-weight:bold;">
+                        Cancel
+                    </a>
+                </div>
 
-                        <script>
-                        function sendAlertWithLocation(){{
-                            if (navigator.geolocation) {{
-                                navigator.geolocation.getCurrentPosition(function(pos){{
-                                    let lat = pos.coords.latitude;
-                                    let lon = pos.coords.longitude;
-                                    window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
-                                }}, function(){{
-                                    window.location.href = "/{band_id}?alert=yes";
-                                }});
-                            }} else {{
-                                window.location.href = "/{band_id}?alert=yes";
-                            }}
-                        }}
-                        </script>
-                    </body>
-                    </html>
-                    """
+                <script>
+                function sendAlertWithLocation(){{
+                    if (navigator.geolocation) {{
+                        navigator.geolocation.getCurrentPosition(function(pos){{
+                            let lat = pos.coords.latitude;
+                            let lon = pos.coords.longitude;
+                            window.location.href = "/alert_with_location?band_id={band_id}&lat=" + lat + "&lon=" + lon;
+                        }}, function(){{
+                            window.location.href = "/{band_id}?alert=yes";
+                        }});
+                    }} else {{
+                        window.location.href = "/{band_id}?alert=yes";
+                    }}
+                }}
+                </script>
+            </body>
+            </html>
+            """
 
-                if entered_pin == pin:
-                    return f"""
+        if entered_pin and check_password_hash(pin_hash, entered_pin):
+            return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -2966,7 +2688,7 @@ PIN verified • EmpowerBands Emergency Response System
 </body>
 </html>
 """
-                return f"""
+        return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -3185,11 +2907,12 @@ margin-bottom:20px;
 >
 
 <h1>{name}</h1>
-<img src="/qr/{band_id}" style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
+<img src="/qr/{band_id}"
+     style="width:180px; border-radius:14px; background:white; padding:10px; margin-top:20px;">
 
-<p>Scan QR backup if NFC is unavailable.</p>
+<br><br>
 
-<a class="btn btn-blue" href="/qr/{band_id}" download="{band_id}-qr.png">
+<a class="btn btn-blue" href="/qr/{band_id}?download=1">
     ⬇️ Download QR Code
 </a>
 
@@ -3270,35 +2993,32 @@ Unlock Full Info
 
 </div>
 
-<script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 </body>
 </html>
+    <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
-
-    return _band_not_found_or_pending(band_id)
+    return """
+    <h1>Band Not Found</h1>
+    <p>This band ID has not been added yet.</p>
+    <p><a href="/admin">Admin Login</a></p>
+    """
 
 @app.route("/donate")
 def donate():
-    return redirect(PAYPAL_URL)
+    return redirect("https://www.paypal.com/ncp/payment/6ZT5B9XMXD3K6")
 
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
     band_id = band_id.strip().upper()
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                send_safe_notification(name, emergency_phones, emergency_emails, band_id)
-                return f"""
-                <h1>✅ Marked as Safe</h1>
-                <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
-                <p><a href="/{band_id}">Go Back</a></p>
-                """
+    member = get_member(band_id)
+    if member:
+        send_safe_notification(member["full_name"], member.get("emergency_contacts", ""), member.get("emergency_emails", ""), band_id)
+        return f"""
+        <h1>✅ Marked as Safe</h1>
+        <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
+        <p><a href="/{band_id}">Go Back</a></p>
+        """
     return """
     <h1>Band Not Found</h1>
     <p><a href="/">Home</a></p>
@@ -3307,16 +3027,37 @@ def im_safe(band_id):
 @app.route("/qr/<band_id>")
 def qr_code(band_id):
     band_id = band_id.strip().upper()
-    url = f"{BASE_URL}/{band_id}"
 
-    img = qrcode.make(url)
+    # Only allow normal EmpowerBands IDs
+    if not band_id.startswith("EB") or not band_id[2:].isdigit():
+        abort(400, description="Invalid band ID")
+
+    # Remove a trailing slash so the QR URL is formatted correctly
+    profile_url = f"{BASE_URL.rstrip('/')}/{band_id}"
+
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+
+    qr.add_data(profile_url)
+    qr.make(fit=True)
+
+    image = qr.make_image(fill_color="black", back_color="white")
 
     buffer = BytesIO()
-    img.save(buffer, format="PNG")
+    image.save(buffer, format="PNG")
     buffer.seek(0)
 
-    return send_file(buffer, mimetype="image/png")
-
+    return send_file(
+        buffer,
+        mimetype="image/png",
+        as_attachment=request.args.get("download") == "1",
+        download_name=f"{band_id}-qr.png",
+        max_age=3600,
+    )
 # ===============================
 # SCAN LOGS PAGE
 # ===============================
@@ -3329,19 +3070,13 @@ def scans():
 
     scans_list = []
 
-    try:
-
-        with open(scan_log_file, "r", encoding="utf-8") as f:
-
-            reader = csv.DictReader(f)
-
-            for row in reader:
-                scans_list.append(row)
-
-        scans_list.reverse()
-
-    except:
-        scans_list = []
+    with get_db() as conn, conn.cursor() as cur:
+        cur.execute("SELECT band_id, member_name, scanned_at, scan_type, ip_address FROM scan_logs ORDER BY scanned_at DESC")
+        scans_list = [{
+            "BandID": r["band_id"], "Name": r["member_name"],
+            "Time": r["scanned_at"].strftime("%Y-%m-%d %H:%M:%S"),
+            "Type": r["scan_type"], "IP": r["ip_address"]
+        } for r in cur.fetchall()]
 
     rows_html = ""
 
@@ -3466,9 +3201,9 @@ td{{
 
 </div>
 
-<script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 </body>
 </html>
+   <script src="//code.tidio.co/5wtnltojqfvgeld8mqgrsjopkkkwqgxd.js" async></script>
 """
 
 # ===============================
@@ -3531,22 +3266,14 @@ def alert_with_location():
 
     maps_link = f"https://maps.google.com/?q={lat},{lon}"
 
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
+    member = get_member(band_id)
+    if member:
+        name = member["full_name"]
+        emergency_phones = member.get("emergency_contacts", "")
+        emergency_emails = member.get("emergency_emails", "")
+        send_full_alert(name, emergency_phones, emergency_emails, band_id, maps_link)
 
-        for row in reader:
-            if row[0].strip().upper() == band_id:
-
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-
-                send_full_alert(name, emergency_phones, emergency_emails, band_id, maps_link)
-
-                return f"""
+        return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -3640,20 +3367,20 @@ def manifest():
         "theme_color": "#07111f",
         "icons": [
             {
-                "src": LOGO_URL,
-                "sizes": "192x192",
-                "type": "image/png",
-                "purpose": "any maskable"
+        "src": LOGO_URL,
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
             },
             {
-                "src": LOGO_URL,
-                "sizes": "512x512",
-                "type": "image/png",
-                "purpose": "any maskable"
+        "src": LOGO_URL,
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
             }
         ]
     }) 
-                
+        
 
 # ===============================
 # EDIT HISTORY PAGE
@@ -3670,9 +3397,9 @@ def edit_history():
         req = urllib.request.Request(
             f"https://api.github.com/repos/{repo}/commits?per_page=30",
             headers={
-                "Authorization": f"token {gh_token}",
-                "Accept": "application/vnd.github.v3+json",
-                "User-Agent": "EmpowerBands-App"
+        "Authorization": f"token {gh_token}",
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "EmpowerBands-App"
             }
         )
         with urllib.request.urlopen(req, timeout=8) as resp:
@@ -3686,12 +3413,12 @@ def edit_history():
             url = c.get("html_url","#")
             commits_html += f"""
             <div class="commit">
-                <div class="commit-msg">{msg}</div>
-                <div class="commit-meta">
-                    <span class="sha"><a href="{url}" target="_blank">{sha}</a></span>
-                    <span>{author}</span>
-                    <span>{date}</span>
-                </div>
+        <div class="commit-msg">{msg}</div>
+        <div class="commit-meta">
+            <span class="sha"><a href="{url}" target="_blank">{sha}</a></span>
+            <span>{author}</span>
+            <span>{date}</span>
+        </div>
             </div>"""
     except Exception as e:
         commits_html = f'<p style="color:#f87171;">Could not load history: {e}</p>'
@@ -3857,7 +3584,7 @@ def mark_seen():
         _req3 = _ur2.Request(
             "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
             headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
-                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
+             "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
         )
         with _ur2.urlopen(_req3, timeout=5) as _r3:
             _cc3 = _jj2.loads(_r3.read().decode())
@@ -4162,6 +3889,30 @@ def blessing_boxes():
         </div>
     </div>
 
+
+    <!-- COMMUNITY PHOTOS -->
+    <div class="card">
+        <h2>📸 Community in Action</h2>
+        <p style="color:#cbd5e1;margin-bottom:18px;">See our volunteers and neighbors making a difference in Hartselle and the surrounding area.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
+            <div style="border-radius:14px;overflow:hidden;line-height:0;">
+                <img src="/static/images/blessing-box.png"
+                     alt="EmpowerBands Blessing Box"
+                     style="width:100%;height:220px;object-fit:cover;border-radius:14px;display:block;">
+            </div>
+            <div style="border-radius:14px;overflow:hidden;line-height:0;">
+                <img src="/static/images/blessing-box-donation.png"
+                     alt="Community member donating to blessing box"
+                     style="width:100%;height:220px;object-fit:cover;border-radius:14px;display:block;">
+            </div>
+            <div style="border-radius:14px;overflow:hidden;line-height:0;">
+                <img src="/static/images/community-donations.png"
+                     alt="Volunteers stocking the blessing box"
+                     style="width:100%;height:220px;object-fit:cover;border-radius:14px;display:block;">
+            </div>
+        </div>
+    </div>
+
     <!-- HOW TO HELP -->
     <div class="card">
         <h2>🤝 How You Can Help</h2>
@@ -4182,27 +3933,27 @@ def blessing_boxes():
         {vol_banner}
         <form method="POST" action="/blessing-boxes#volunteer">
             <div style="display:grid;gap:12px;">
-                <input type="text" name="v_name" placeholder="Your Name *" required
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                <input type="email" name="v_email" placeholder="Email Address"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                <input type="tel" name="v_phone" placeholder="Phone Number"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                <select name="v_avail"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(30,41,59,0.9);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
-                    <option value="">When are you available?</option>
-                    <option>Weekday mornings</option>
-                    <option>Weekday afternoons</option>
-                    <option>Weekday evenings</option>
-                    <option>Weekends</option>
-                    <option>Flexible / Any time</option>
-                </select>
-                <textarea name="v_msg" placeholder="Anything else you'd like us to know? (optional)" rows="3"
-                    style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;resize:vertical;"></textarea>
-                <button type="submit"
-                    style="padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-size:16px;font-weight:700;cursor:pointer;">
-                    ✋ Submit Sign Up
-                </button>
+        <input type="text" name="v_name" placeholder="Your Name *" required
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+        <input type="email" name="v_email" placeholder="Email Address"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+        <input type="tel" name="v_phone" placeholder="Phone Number"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+        <select name="v_avail"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(30,41,59,0.9);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;">
+            <option value="">When are you available?</option>
+            <option>Weekday mornings</option>
+            <option>Weekday afternoons</option>
+            <option>Weekday evenings</option>
+            <option>Weekends</option>
+            <option>Flexible / Any time</option>
+        </select>
+        <textarea name="v_msg" placeholder="Anything else you'd like us to know? (optional)" rows="3"
+            style="padding:13px 16px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;outline:none;width:100%;box-sizing:border-box;resize:vertical;"></textarea>
+        <button type="submit"
+            style="padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-size:16px;font-weight:700;cursor:pointer;">
+            ✋ Submit Sign Up
+        </button>
             </div>
         </form>
     </div>
@@ -4217,10 +3968,10 @@ def blessing_boxes():
         </p>
         <div class="partner-box">
             <p>
-                <strong style="color:white;">What hosting looks like:</strong><br>
-                We provide the box and handle restocking. You provide a visible outdoor or
-                entryway space. Your business gets recognized as a community partner on our
-                website and social media.
+        <strong style="color:white;">What hosting looks like:</strong><br>
+        We provide the box and handle restocking. You provide a visible outdoor or
+        entryway space. Your business gets recognized as a community partner on our
+        website and social media.
             </p>
         </div>
         <br>
@@ -4387,8 +4138,8 @@ def admin_spotlight():
     <div class="card">
         <form method="POST">
             <div class="toggle-row">
-                <input type="checkbox" name="active" id="active" {'checked' if current.get('active') else ''} style="width:20px;height:20px;">
-                <label for="active" style="margin:0;">Show on homepage</label>
+        <input type="checkbox" name="active" id="active" {'checked' if current.get('active') else ''} style="width:20px;height:20px;">
+        <label for="active" style="margin:0;">Show on homepage</label>
             </div>
             <label>Month (e.g. "July 2026")</label>
             <input type="text" name="month" value="{current.get('month','')}" placeholder="July 2026">
@@ -4502,8 +4253,8 @@ def admin_blessing_box_needs():
         <form method="POST">
             <textarea name="needs_text" rows="14" placeholder="One item per line. Start each line with an emoji, then the item name.&#10;Example:&#10;🥫 Canned Food&#10;🧴 Shampoo">{current_text}</textarea>
             <p class="hint">
-                One item per line · Start with an emoji, then a space, then the item name<br>
-                Example: <code style="color:#67e8f9;">🥫 Canned Soup</code> &nbsp;|&nbsp; <code style="color:#67e8f9;">🧼 Hand Soap</code>
+        One item per line · Start with an emoji, then a space, then the item name<br>
+        Example: <code style="color:#67e8f9;">🥫 Canned Soup</code> &nbsp;|&nbsp; <code style="color:#67e8f9;">🧼 Hand Soap</code>
             </p>
             <button class="save-btn" type="submit">💾 Save & Publish</button>
         </form>
@@ -4714,11 +4465,6 @@ def _travel_story_card(s):
 </article>"""
 
 
-def _checkout_link(name, price):
-    from urllib.parse import quote
-    return f"/checkout?item={quote(name)}&price={quote(price)}"
-
-
 def _merch_card(p):
     featured_cls = " featured-product" if p.get("featured") else ""
     badge = '<span class="featured-badge">🌍 Featured — Traveling Band Movement</span>' if p.get("featured") else ""
@@ -4731,7 +4477,7 @@ def _merch_card(p):
     <p class="product-desc">{p['description']}</p>
     <div class="product-footer">
         <span class="product-price">{p['price']}</span>
-        <a class="btn-cyan btn-sm" href="{_checkout_link(p['name'], p['price'])}" aria-label="Purchase {p['name']}">Add to Cart</a>
+        <a class="btn-cyan btn-sm" href="{p['link']}" aria-label="Purchase {p['name']}">Add to Cart</a>
     </div>
 </div>"""
 
@@ -5106,7 +4852,7 @@ def merch():
         <p class="product-desc" style="margin-bottom:16px;">{f['description']}</p>
         <div class="product-footer" style="justify-content:flex-start;gap:20px;">
             <span class="product-price">{f['price']}</span>
-            <a class="btn-cyan" href="{_checkout_link(f['name'], f['price'])}">Add to Cart</a>
+            <a class="btn-cyan" href="{f['link']}">Add to Cart</a>
         </div>
     </div>
 </div>"""
@@ -5252,744 +4998,6 @@ __FOOTER__
 </body>
 </html>
 """.replace("__NAV__", site_nav_html("board")).replace("__FOOTER__", site_footer_html()).replace("__MARKETING_CSS__", MARKETING_PAGE_CSS).replace("__LOGO_URL__", LOGO_URL).replace("__BOARD__", board_html)
-
-
-# ===============================
-# BULK BAND PROVISIONING — ADMIN
-# For partner orders like the 500-band Payless Pharmacy order.
-# Every route below requires session["logged_in"]; every POST is
-# CSRF-checked; every state change is written to the audit_log table
-# via bulk_db.log_audit().
-# ===============================
-
-ADMIN_PAGE_CSS = """
-*{box-sizing:border-box;}
-body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);color:white;min-height:100vh;}
-.wrap{max-width:1100px;margin:0 auto;padding:30px 20px 60px;}
-h1{font-size:26px;margin:0 0 6px;}
-.subtitle{color:#94a3b8;margin:0 0 26px;font-size:14px;}
-.card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:20px;padding:26px;margin-bottom:22px;}
-.card h2{margin:0 0 16px;font-size:18px;color:#67e8f9;}
-label{display:block;font-size:13px;color:#cbd5e1;margin:14px 0 6px;font-weight:700;}
-input, select{width:100%;box-sizing:border-box;padding:13px;border:none;outline:none;border-radius:12px;background:rgba(255,255,255,0.1);color:white;font-size:15px;}
-input::placeholder{color:#94a3b8;}
-.hint{color:#64748b;font-size:12.5px;margin-top:6px;}
-.btn{display:inline-block;padding:13px 22px;border-radius:12px;text-decoration:none;color:white;font-weight:700;font-size:14.5px;background:linear-gradient(135deg,#06b6d4,#2563eb);border:none;cursor:pointer;}
-.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);}
-.btn-outline{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);}
-.btn-sm{padding:8px 13px;font-size:12.5px;}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
-.error-banner{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:14px 18px;border-radius:12px;margin-bottom:18px;font-size:14px;}
-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-th, td{text-align:left;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);}
-th{color:#67e8f9;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;}
-.status-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;}
-.status-unassigned{background:rgba(148,163,184,0.2);color:#cbd5e1;}
-.status-active{background:rgba(34,197,94,0.2);color:#86efac;}
-.status-lost{background:rgba(239,68,68,0.2);color:#fca5a5;}
-.status-replaced{background:rgba(234,179,8,0.2);color:#fde047;}
-.status-pending{background:rgba(148,163,184,0.2);color:#cbd5e1;}
-.status-passed{background:rgba(34,197,94,0.2);color:#86efac;}
-.status-failed{background:rgba(239,68,68,0.2);color:#fca5a5;}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;}
-.stat-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:16px;text-align:center;}
-.stat-box .n{font-size:24px;font-weight:900;}
-.stat-box .l{font-size:11.5px;color:#94a3b8;margin-top:4px;}
-.back{display:inline-block;margin-bottom:18px;color:#67e8f9;text-decoration:none;font-size:14px;}
-.top-actions{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:10px;}
-@media(max-width:700px){ table{display:block;overflow-x:auto;white-space:nowrap;} }
-"""
-
-
-def _admin_page(title, body_html):
-    return f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title} — EmpowerBands Admin</title>
-<meta name="robots" content="noindex, nofollow">
-<style>{ADMIN_PAGE_CSS}</style>
-</head>
-<body>
-<div class="wrap">
-{body_html}
-</div>
-</body>
-</html>
-"""
-
-
-def _status_pill(status):
-    return f'<span class="status-pill status-{status}">{status}</span>'
-
-
-@app.route("/admin/bulk-bands", methods=["GET", "POST"])
-def admin_bulk_bands():
-    if not session.get("logged_in"):
-        return redirect("/admin")
-
-    error = ""
-
-    if request.method == "POST":
-        if is_rate_limited(f"bulk-generate:{request.remote_addr}", max_calls=10, period_seconds=600):
-            error = "Too many batch-generation attempts. Please wait a few minutes."
-        elif not csrf_valid():
-            error = "Your session expired — please try again."
-        else:
-            try:
-                created = bulk_db.create_bulk_batch(
-                    quantity=request.form.get("quantity", "").strip(),
-                    partner_org=request.form.get("partner_org", "").strip(),
-                    batch_number=request.form.get("batch_number", "").strip(),
-                    starting_number=(request.form.get("starting_number", "").strip() or None),
-                    base_url=BASE_URL,
-                    actor=audit_actor(),
-                    ip_address=request.remote_addr,
-                )
-                return redirect(f"/admin/bulk-bands/{created[0]['batch_number']}")
-            except bulk_db.BulkGenerationError as e:
-                error = str(e)
-
-    try:
-        next_id_preview = f"EB{bulk_db.get_next_band_number():03d}"
-    except Exception:
-        next_id_preview = "EB???"
-
-    try:
-        batches = bulk_db.list_batches()
-    except Exception:
-        batches = []
-
-    batches_rows = "".join(
-        f"""<tr>
-            <td><a href="/admin/bulk-bands/{b['batch_number']}" style="color:#67e8f9;text-decoration:none;">{b['batch_number']}</a></td>
-            <td>{b['partner_org']}</td>
-            <td>{b['total']}</td>
-            <td>{(b['date_created'] or '')[:10]}</td>
-        </tr>"""
-        for b in batches
-    ) or '<tr><td colspan="4" style="color:#64748b;">No batches yet.</td></tr>'
-
-    error_html = f'<div class="error-banner">⚠️ {error}</div>' if error else ""
-
-    body = f"""
-<a class="back" href="/dashboard">← Dashboard</a>
-<h1>Bulk Band Generator</h1>
-<p class="subtitle">Create a batch of new EmpowerBands for a partner order (e.g. Payless Pharmacy). Every band starts <strong>unassigned</strong> — no customer data is attached until the customer activates it themselves.</p>
-
-{error_html}
-
-<div class="card">
-<h2>New Batch</h2>
-<form method="POST">
-    {csrf_input_html()}
-    <label for="quantity">Quantity</label>
-    <input type="number" id="quantity" name="quantity" min="1" max="{bulk_db.MAX_BULK_QUANTITY}" placeholder="e.g. 500" required>
-
-    <label for="partner_org">Partner Organization</label>
-    <input type="text" id="partner_org" name="partner_org" placeholder="e.g. Payless Pharmacy" required>
-
-    <label for="batch_number">Batch Number</label>
-    <input type="text" id="batch_number" name="batch_number" placeholder="e.g. PYP-2026-001" required>
-    <p class="hint">Letters, numbers, and hyphens only. Must be unique per order.</p>
-
-    <label for="starting_number">Starting Band ID Number (optional)</label>
-    <input type="number" id="starting_number" name="starting_number" min="1" placeholder="Leave blank to auto-continue from {next_id_preview}">
-    <p class="hint">Next available ID right now: <strong>{next_id_preview}</strong></p>
-
-    <div class="btn-row">
-        <button class="btn" type="submit">Generate Batch</button>
-    </div>
-</form>
-</div>
-
-<div class="card">
-<h2>Existing Batches</h2>
-<table>
-<thead><tr><th>Batch</th><th>Partner</th><th>Bands</th><th>Created</th></tr></thead>
-<tbody>{batches_rows}</tbody>
-</table>
-</div>
-
-<div class="btn-row">
-    <a class="btn btn-outline btn-sm" href="/admin/partners">📊 Partner Dashboard</a>
-    <a class="btn btn-outline btn-sm" href="/admin/inventory">🔎 Inventory Search</a>
-</div>
-"""
-    return _admin_page("Bulk Band Generator", body)
-
-
-@app.route("/admin/bulk-bands/<batch_number>")
-def admin_bulk_batch_detail(batch_number):
-    if not session.get("logged_in"):
-        return redirect("/admin")
-
-    batch_number = batch_number.strip().upper()
-    bands = bulk_db.list_bands(batch_number=batch_number, limit=5000)
-    if not bands:
-        body = f'<a class="back" href="/admin/bulk-bands">← Bulk Band Generator</a><div class="card"><h2>No bands found for batch {batch_number}</h2></div>'
-        return _admin_page("Batch Not Found", body), 404
-
-    partner = bands[0]["partner_org"]
-    total = len(bands)
-    unassigned = sum(1 for b in bands if b["status"] == "unassigned")
-    active = sum(1 for b in bands if b["status"] == "active")
-    lost = sum(1 for b in bands if b["status"] in ("lost", "replaced"))
-
-    rows_html = "".join(
-        f"""<tr>
-            <td>{b['band_id']}</td>
-            <td>{_status_pill(b['status'])}</td>
-            <td>{'✅' if b['qc_tested_nfc'] else '—'} / {'✅' if b['qc_tested_qr'] else '—'}</td>
-            <td>{_status_pill(b['qc_status'])}</td>
-            <td>{b['assigned_customer_id'] or '—'}</td>
-        </tr>"""
-        for b in bands[:200]
-    )
-    more_note = f'<p class="hint">Showing first 200 of {total} bands. Use Inventory Search to find a specific one.</p>' if total > 200 else ""
-
-    body = f"""
-<a class="back" href="/admin/bulk-bands">← Bulk Band Generator</a>
-<div class="top-actions">
-    <div>
-        <h1>Batch {batch_number}</h1>
-        <p class="subtitle">{partner}</p>
-    </div>
-</div>
-
-<div class="card">
-<div class="stat-grid">
-    <div class="stat-box"><div class="n">{total}</div><div class="l">Total Bands</div></div>
-    <div class="stat-box"><div class="n">{unassigned}</div><div class="l">Unassigned</div></div>
-    <div class="stat-box"><div class="n">{active}</div><div class="l">Activated</div></div>
-    <div class="stat-box"><div class="n">{lost}</div><div class="l">Lost / Replaced</div></div>
-</div>
-</div>
-
-<div class="card">
-<h2>Downloads</h2>
-<div class="btn-row">
-    <a class="btn btn-green" href="/admin/bulk-bands/{batch_number}/nfc-csv">⬇️ NFC Programming CSV</a>
-    <a class="btn btn-outline" href="/admin/bulk-bands/{batch_number}/qr-codes.zip">⬇️ QR Codes (.zip)</a>
-    <a class="btn btn-outline" href="/admin/bulk-bands/{batch_number}/labels">🖨️ Printable Labels</a>
-</div>
-<p class="hint">The NFC CSV contains only the Band ID, public NFC URL, and batch number — no personal or medical data is ever written to a chip.</p>
-</div>
-
-<div class="card">
-<h2>Bands In This Batch</h2>
-{more_note}
-<table>
-<thead><tr><th>Band ID</th><th>Status</th><th>QC: NFC / QR Tested</th><th>QC Status</th><th>Customer</th></tr></thead>
-<tbody>{rows_html}</tbody>
-</table>
-</div>
-"""
-    return _admin_page(f"Batch {batch_number}", body)
-
-
-@app.route("/admin/bulk-bands/<batch_number>/nfc-csv")
-def admin_bulk_nfc_csv(batch_number):
-    if not session.get("logged_in"):
-        return redirect("/admin")
-
-    batch_number = batch_number.strip().upper()
-    bands = bulk_db.list_bands(batch_number=batch_number, limit=5000)
-    if not bands:
-        return redirect("/admin/bulk-bands")
-
-    text_buf = StringIO()
-    writer = csv.writer(text_buf)
-    writer.writerow(["Band ID", "NFC URL", "Batch Number"])
-    for b in bands:
-        writer.writerow([b["band_id"], b["nfc_url"], b["batch_number"]])
-
-    bulk_db.log_audit(audit_actor(), "download_nfc_csv", batch_number, f"{len(bands)} rows", request.remote_addr)
-
-    byte_buf = BytesIO(text_buf.getvalue().encode("utf-8"))
-    byte_buf.seek(0)
-    return send_file(
-        byte_buf,
-        mimetype="text/csv",
-        as_attachment=True,
-        download_name=f"empowerbands-nfc-{batch_number}.csv",
-    )
-
-
-@app.route("/admin/bulk-bands/<batch_number>/qr-codes.zip")
-def admin_bulk_qr_zip(batch_number):
-    if not session.get("logged_in"):
-        return redirect("/admin")
-
-    batch_number = batch_number.strip().upper()
-    bands = bulk_db.list_bands(batch_number=batch_number, limit=5000)
-    if not bands:
-        return redirect("/admin/bulk-bands")
-
-    zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        for b in bands:
-            img = qrcode.make(b["nfc_url"])
-            png_buf = BytesIO()
-            img.save(png_buf, format="PNG")
-            zf.writestr(f"{b['band_id']}.png", png_buf.getvalue())
-    zip_buffer.seek(0)
-
-    bulk_db.log_audit(audit_actor(), "download_qr_zip", batch_number, f"{len(bands)} QR codes", request.remote_addr)
-
-    return send_file(
-        zip_buffer,
-        mimetype="application/zip",
-        as_attachment=True,
-        download_name=f"empowerbands-qr-{batch_number}.zip",
-    )
-
-
-@app.route("/admin/bulk-bands/<batch_number>/labels")
-def admin_bulk_labels(batch_number):
-    if not session.get("logged_in"):
-        return redirect("/admin")
-
-    batch_number = batch_number.strip().upper()
-    bands = bulk_db.list_bands(batch_number=batch_number, limit=5000)
-    if not bands:
-        return redirect("/admin/bulk-bands")
-
-    labels_html = "".join(
-        f"""<div class="label">
-            <img src="/qr/{b['band_id']}" alt="QR code for {b['band_id']}" width="64" height="64">
-            <div class="label-text">
-                <strong>{b['band_id']}</strong>
-                <span>{b['partner_org']}</span>
-                <span class="url">empowerbands.org/{b['band_id']}</span>
-            </div>
-        </div>"""
-        for b in bands
-    )
-
-    bulk_db.log_audit(audit_actor(), "view_labels", batch_number, f"{len(bands)} labels", request.remote_addr)
-
-    return f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Printable Labels — {batch_number}</title>
-<meta name="robots" content="noindex, nofollow">
-<style>
-*{{box-sizing:border-box;}}
-body{{font-family:Arial,sans-serif;margin:0;padding:20px;background:#f1f5f9;}}
-.toolbar{{margin-bottom:16px;}}
-.toolbar button{{padding:10px 18px;border-radius:8px;border:none;background:#2563eb;color:white;font-weight:700;cursor:pointer;}}
-.sheet{{display:grid;grid-template-columns:repeat(3, 1fr);gap:14px;}}
-.label{{border:1px dashed #94a3b8;border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;background:white;}}
-.label img{{flex-shrink:0;}}
-.label-text{{display:flex;flex-direction:column;font-size:11px;color:#111827;}}
-.label-text strong{{font-size:14px;}}
-.label-text .url{{color:#475569;}}
-@media print{{ .toolbar{{display:none;}} body{{background:white;padding:0;}} }}
-</style>
-</head>
-<body>
-<div class="toolbar"><button onclick="window.print()">🖨️ Print This Page</button></div>
-<div class="sheet">
-{labels_html}
-</div>
-</body>
-</html>
-"""
-
-
-@app.route("/admin/partners")
-def admin_partners():
-    if not session.get("logged_in"):
-        return redirect("/admin")
-
-    stats = bulk_db.partner_stats()
-    rows_html = "".join(
-        f"""<tr>
-            <td>{partner}</td>
-            <td>{s['total']}</td>
-            <td>{s['unassigned']}</td>
-            <td>{s['active']}</td>
-            <td>{s['lost'] + s['replaced']}</td>
-            <td>{s['activation_pct']}%</td>
-        </tr>"""
-        for partner, s in sorted(stats.items())
-    ) or '<tr><td colspan="6" style="color:#64748b;">No partner orders yet.</td></tr>'
-
-    body = f"""
-<a class="back" href="/dashboard">← Dashboard</a>
-<h1>Partner Dashboard</h1>
-<p class="subtitle">Supply and activation stats across all partner orders.</p>
-
-<div class="card">
-<table>
-<thead><tr><th>Partner</th><th>Total Supplied</th><th>Unassigned</th><th>Activated</th><th>Lost / Replaced</th><th>Activation %</th></tr></thead>
-<tbody>{rows_html}</tbody>
-</table>
-</div>
-
-<div class="btn-row">
-    <a class="btn btn-outline btn-sm" href="/admin/bulk-bands">➕ New Batch</a>
-    <a class="btn btn-outline btn-sm" href="/admin/inventory">🔎 Inventory Search</a>
-</div>
-"""
-    return _admin_page("Partner Dashboard", body)
-
-
-@app.route("/admin/inventory", methods=["GET"])
-def admin_inventory():
-    if not session.get("logged_in"):
-        return redirect("/admin")
-
-    band_id = request.args.get("band_id", "").strip()
-    batch_number = request.args.get("batch_number", "").strip()
-    partner_org = request.args.get("partner_org", "").strip()
-    status = request.args.get("status", "").strip()
-
-    searched = any([band_id, batch_number, partner_org, status])
-    results = bulk_db.list_bands(
-        band_id=band_id or None, batch_number=batch_number or None,
-        partner_org=partner_org or None, status=status or None, limit=300,
-    ) if searched else []
-
-    csrf_field = csrf_input_html()
-    rows_html = "".join(
-        f"""<tr>
-            <td>{b['band_id']}</td>
-            <td>{b['partner_org']}</td>
-            <td>{b['batch_number']}</td>
-            <td>{_status_pill(b['status'])}</td>
-            <td>{_status_pill(b['qc_status'])}</td>
-            <td>{(b['date_activated'] or '—')[:10] if b['date_activated'] else '—'}</td>
-            <td>
-                <form method="POST" action="/admin/bands/{b['band_id']}/qc" style="display:inline;">
-                    {csrf_field}
-                    <input type="hidden" name="qc_status" value="passed">
-                    <input type="hidden" name="tested_nfc" value="1">
-                    <input type="hidden" name="tested_qr" value="1">
-                    <button class="btn btn-sm btn-green" type="submit">✅ QC Passed</button>
-                </form>
-                <form method="POST" action="/admin/bands/{b['band_id']}/status" style="display:inline;">
-                    {csrf_field}
-                    <input type="hidden" name="new_status" value="lost">
-                    <button class="btn btn-sm btn-outline" type="submit">Mark Lost</button>
-                </form>
-            </td>
-        </tr>"""
-        for b in results
-    ) or ('<tr><td colspan="7" style="color:#64748b;">No matching bands.</td></tr>' if searched else '<tr><td colspan="7" style="color:#64748b;">Enter a search above.</td></tr>')
-
-    def _sel(v):
-        return "selected" if status == v else ""
-
-    body = f"""
-<a class="back" href="/dashboard">← Dashboard</a>
-<h1>Inventory Search</h1>
-<p class="subtitle">Search across all bulk-provisioned bands by Band ID, batch, partner, or status.</p>
-
-<div class="card">
-<form method="GET">
-    <label for="band_id">Band ID</label>
-    <input type="text" id="band_id" name="band_id" value="{band_id}" placeholder="e.g. EB051">
-
-    <label for="batch_number">Batch Number</label>
-    <input type="text" id="batch_number" name="batch_number" value="{batch_number}" placeholder="e.g. PYP-2026-001">
-
-    <label for="partner_org">Partner</label>
-    <input type="text" id="partner_org" name="partner_org" value="{partner_org}" placeholder="e.g. Payless Pharmacy">
-
-    <label for="status">Status</label>
-    <select id="status" name="status">
-        <option value="" {_sel('')}>Any</option>
-        <option value="unassigned" {_sel('unassigned')}>Unassigned</option>
-        <option value="active" {_sel('active')}>Active</option>
-        <option value="lost" {_sel('lost')}>Lost</option>
-        <option value="replaced" {_sel('replaced')}>Replaced</option>
-    </select>
-
-    <div class="btn-row">
-        <button class="btn" type="submit">Search</button>
-    </div>
-</form>
-</div>
-
-<div class="card">
-<table>
-<thead><tr><th>Band ID</th><th>Partner</th><th>Batch</th><th>Status</th><th>QC</th><th>Activated</th><th>Actions</th></tr></thead>
-<tbody>{rows_html}</tbody>
-</table>
-</div>
-"""
-    return _admin_page("Inventory Search", body)
-
-
-@app.route("/admin/bands/<band_id>/qc", methods=["POST"])
-def admin_band_qc_update(band_id):
-    if not session.get("logged_in"):
-        return redirect("/admin")
-    if not csrf_valid():
-        return redirect(request.referrer or "/admin/inventory")
-
-    try:
-        bulk_db.update_qc(
-            band_id,
-            request.form.get("qc_status", "pending"),
-            request.form.get("tested_nfc") == "1",
-            request.form.get("tested_qr") == "1",
-            actor=audit_actor(),
-            ip_address=request.remote_addr,
-        )
-    except bulk_db.BulkGenerationError:
-        pass
-    return redirect(request.referrer or "/admin/inventory")
-
-
-@app.route("/admin/bands/<band_id>/status", methods=["POST"])
-def admin_band_status_update(band_id):
-    if not session.get("logged_in"):
-        return redirect("/admin")
-    if not csrf_valid():
-        return redirect(request.referrer or "/admin/inventory")
-
-    try:
-        bulk_db.update_status(
-            band_id,
-            request.form.get("new_status", ""),
-            actor=audit_actor(),
-            ip_address=request.remote_addr,
-        )
-    except bulk_db.BulkGenerationError:
-        pass
-    return redirect(request.referrer or "/admin/inventory")
-
-
-# ===============================
-# CHECKOUT
-# No itemized payment processor (Stripe/Square/Shopify) is connected
-# yet, so this hands off to the same PayPal payment link already used
-# for /donate. Because that's a single fixed PayPal link rather than
-# a real per-item checkout, this page shows the buyer exactly what
-# they're paying for and asks them to note it in PayPal's payment
-# message, and to confirm the amount matches before paying.
-# ===============================
-@app.route("/checkout")
-def checkout():
-    from markupsafe import escape
-    item = escape(request.args.get("item", "").strip() or "EmpowerBands Purchase")
-    price = escape(request.args.get("price", "").strip())
-
-    price_html = f'<div class="checkout-price">{price}</div>' if price else ""
-
-    return f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkout — EmpowerBands Worldwide</title>
-<meta name="robots" content="noindex, nofollow">
-<style>
-*{{box-sizing:border-box;}}
-body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}}
-.card{{max-width:460px;width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:26px;padding:34px;text-align:center;}}
-h1{{font-size:22px;margin:0 0 4px;}}
-.item-name{{color:#67e8f9;font-weight:700;font-size:17px;margin:14px 0 4px;}}
-.checkout-price{{font-size:30px;font-weight:900;margin-bottom:18px;}}
-.note{{background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);color:#fde68a;border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.6;text-align:left;margin:18px 0;}}
-.btn-paypal{{display:block;width:100%;padding:16px;border-radius:16px;background:linear-gradient(135deg,#0070ba,#003087);color:white;text-decoration:none;font-weight:800;font-size:16px;margin-top:10px;}}
-.btn-back{{display:inline-block;margin-top:16px;color:#94a3b8;text-decoration:none;font-size:13.5px;}}
-</style>
-</head>
-<body>
-<div class="card">
-    <div style="font-size:36px;" aria-hidden="true">🛒</div>
-    <h1>Complete Your Purchase</h1>
-    <div class="item-name">{item}</div>
-    {price_html}
-    <div class="note">
-        ⚠️ EmpowerBands doesn't have itemized checkout connected yet, so this
-        continues to our secure PayPal payment page. Please add
-        "<strong>{item}</strong>" in the payment note, and confirm the amount
-        before paying — it may not be pre-filled to match the price shown here.
-    </div>
-    <a class="btn-paypal" href="{PAYPAL_URL}">Continue to PayPal →</a>
-    <br>
-    <a class="btn-back" href="/merch">← Back to Shop</a>
-</div>
-</body>
-</html>
-"""
-
-
-
-# ===============================
-# CUSTOMER ACTIVATION
-# ===============================
-@app.route("/activate", methods=["GET", "POST"])
-def activate():
-    prefill_token = request.args.get("token", "").strip()
-    error = ""
-
-    if request.method == "POST":
-        if is_rate_limited(f"activate:{request.remote_addr}", max_calls=15, period_seconds=600):
-            error = "Too many attempts. Please wait a few minutes and try again."
-        elif not csrf_valid():
-            error = "Your session expired — please refresh and try again."
-        else:
-            token = request.form.get("token", "").strip()
-            band = bulk_db.get_band_by_token(token) if token else None
-
-            if not band:
-                error = "That activation code wasn't recognized. Double-check it and try again."
-            elif band["status"] != "unassigned":
-                error = "This band has already been activated."
-            elif request.form.get("agree_privacy") != "on" or request.form.get("agree_sms") != "on":
-                error = "You must agree to the Privacy Policy and SMS Terms to activate your band."
-            else:
-                name = request.form.get("name", "").strip()
-                phone = request.form.get("phone", "").strip()
-                if not name or not phone:
-                    error = "Name and phone number are required."
-                else:
-                    photo = request.files.get("photo")
-                    photo_url = ""
-                    if photo and photo.filename:
-                        filename = f"{int(time.time())}_{secure_filename(photo.filename)}"
-                        filepath = os.path.join(UPLOAD_FOLDER, filename)
-                        photo.save(filepath)
-                        photo_url = f"/static/uploads/{filename}"
-
-                    row = [
-                        band["band_id"], name,
-                        request.form.get("email", "").strip(), phone,
-                        request.form.get("emergency_phones", "").strip(),
-                        request.form.get("emergency_emails", "").strip(),
-                        request.form.get("age_group", "").strip(),
-                        request.form.get("condition", "").strip(),
-                        request.form.get("instructions", "").strip(),
-                        request.form.get("medical_notes", "").strip(),
-                        request.form.get("pin", "").strip() or "1234",
-                        request.form.get("address", "").strip(),
-                        request.form.get("race", "").strip(),
-                        request.form.get("gender", "").strip(),
-                        photo_url,
-                    ]
-
-                    with open(file_name, "a", newline="", encoding="utf-8") as f:
-                        csv.writer(f).writerow(row)
-
-                    bulk_db.activate_band(band["band_id"], actor=f"customer:{name}", ip_address=request.remote_addr)
-
-                    return redirect("/" + band["band_id"])
-
-    error_html = f'<div class="activate-error">⚠️ {error}</div>' if error else ""
-
-    return f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Activate Your EmpowerBand</title>
-<meta name="description" content="Enter your activation code to set up your EmpowerBands emergency profile.">
-<style>
-*{{box-sizing:border-box;}}
-body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);min-height:100vh;color:white;}}
-.page{{min-height:100vh;display:flex;justify-content:center;padding:40px 20px;}}
-.card{{width:100%;max-width:560px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:32px;height:fit-content;}}
-h1{{margin:0 0 6px;font-size:26px;text-align:center;}}
-.subtitle{{text-align:center;color:#cbd5e1;margin:0 0 24px;font-size:14.5px;}}
-label{{display:block;font-size:13px;color:#cbd5e1;margin:14px 0 6px;font-weight:700;}}
-input, textarea, select{{width:100%;box-sizing:border-box;padding:14px;border:none;outline:none;border-radius:14px;background:rgba(255,255,255,.1);color:white;font-size:15px;}}
-textarea{{min-height:80px;resize:vertical;}}
-input::placeholder, textarea::placeholder{{color:#94a3b8;}}
-.consent{{display:flex;align-items:flex-start;gap:10px;margin-top:16px;font-size:13px;color:#cbd5e1;line-height:1.5;}}
-.consent input{{width:auto;margin-top:3px;}}
-.consent label{{margin:0;font-weight:400;display:inline;}}
-button{{width:100%;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,#22c55e,#06b6d4);color:white;font-weight:bold;font-size:17px;cursor:pointer;margin-top:22px;}}
-.activate-error{{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:14px 18px;border-radius:14px;margin-bottom:18px;font-size:14px;}}
-.section-label{{margin-top:24px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#67e8f9;font-weight:800;}}
-a{{color:#67e8f9;}}
-</style>
-</head>
-<body>
-<div class="page">
-<div class="card">
-<h1>Activate Your EmpowerBand</h1>
-<p class="subtitle">Enter your activation code and set up your emergency profile. Nothing except this band's public web address is ever stored on the band itself.</p>
-
-{error_html}
-
-<form method="POST" enctype="multipart/form-data">
-    {csrf_input_html()}
-    <label for="token">Activation Code</label>
-    <input type="text" id="token" name="token" value="{prefill_token}" placeholder="Enter the code included with your band" required>
-
-    <div class="section-label">Your Information</div>
-    <label for="name">Full Name</label>
-    <input type="text" id="name" name="name" required>
-
-    <label for="phone">Phone Number</label>
-    <input type="tel" id="phone" name="phone" required>
-
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email">
-
-    <div class="section-label">Emergency Contacts</div>
-    <label for="emergency_phones">Emergency Contact Phone(s)</label>
-    <input type="text" id="emergency_phones" name="emergency_phones" placeholder="Comma-separated for more than one">
-
-    <label for="emergency_emails">Emergency Contact Email(s)</label>
-    <input type="text" id="emergency_emails" name="emergency_emails" placeholder="Comma-separated for more than one">
-
-    <div class="section-label">Safety Details</div>
-    <label for="age_group">Age Group</label>
-    <input type="text" id="age_group" name="age_group" placeholder="e.g. Child, Adult, Senior">
-
-    <label for="condition">Condition (optional)</label>
-    <input type="text" id="condition" name="condition" placeholder="e.g. Autism, Dementia, Diabetes">
-
-    <label for="instructions">Instructions For A First Responder</label>
-    <textarea id="instructions" name="instructions" placeholder="What should someone do if they scan this band?"></textarea>
-
-    <label for="medical_notes">Medical Notes (optional)</label>
-    <textarea id="medical_notes" name="medical_notes"></textarea>
-
-    <label for="pin">4-Digit PIN (optional — protects full profile view)</label>
-    <input type="text" id="pin" name="pin" maxlength="4" placeholder="1234">
-
-    <label for="address">Address (optional)</label>
-    <input type="text" id="address" name="address">
-
-    <label for="gender">Gender (optional)</label>
-    <input type="text" id="gender" name="gender">
-
-    <label for="race">Physical Description (optional)</label>
-    <input type="text" id="race" name="race" placeholder="Optional — can help identify someone if they're ever reported missing">
-
-    <label for="photo">Photo (optional)</label>
-    <input type="file" id="photo" name="photo" accept="image/*">
-
-    <div class="consent">
-        <input type="checkbox" id="agree_privacy" name="agree_privacy">
-        <label for="agree_privacy">I agree to the <a href="/privacy" target="_blank">Privacy Policy</a>.</label>
-    </div>
-    <div class="consent">
-        <input type="checkbox" id="agree_sms" name="agree_sms">
-        <label for="agree_sms">I agree to receive SMS/text alerts per the <a href="/sms-opt-in" target="_blank">SMS Terms</a>. Message &amp; data rates may apply.</label>
-    </div>
-
-    <button type="submit">Activate My Band</button>
-</form>
-</div>
-</div>
-</body>
-</html>
-"""
 
 
 if __name__ == "__main__":
