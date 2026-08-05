@@ -218,7 +218,7 @@ def admin_preprogram_edit(band_id):
 
           <div style="display:flex;gap:8px;margin-top:12px;">
             <button class="btn" type="submit">Save profile</button>
-            <a class="back" href="/admin/preprogram">Cancel</a>
+            <a class="back" href="https://empowerbands.org/admin/preprogram">Cancel</a>
           </div>
         </form>
       </div>
