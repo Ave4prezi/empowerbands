@@ -593,7 +593,103 @@ body{{
     background:#020817;
     color:white;
 }}
+/* ===============================
+   EMPOWERBANDS SPLASH SCREEN
+================================ */
 
+#splash-screen {{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    background:
+        radial-gradient(circle at center,
+        rgba(37,99,235,0.22) 0%,
+        #07111f 45%,
+        #020817 100%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:999999;
+    opacity:1;
+    visibility:visible;
+    transition:opacity .65s ease, visibility .65s ease;
+}}
+
+#splash-screen.hide {{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}}
+
+.splash-logo {{
+    width:190px;
+    height:190px;
+    object-fit:contain;
+    filter:drop-shadow(0 0 35px rgba(14,165,233,.85));
+    animation:splashPulse 1.4s ease-in-out infinite;
+}}
+
+.splash-title {{
+    margin-top:22px;
+    font-size:22px;
+    font-weight:900;
+    letter-spacing:.04em;
+    color:white;
+    opacity:0;
+    animation:splashText .8s ease .25s forwards;
+}}
+
+.splash-subtitle {{
+    margin-top:7px;
+    font-size:13px;
+    color:#38bdf8;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    opacity:0;
+    animation:splashText .8s ease .45s forwards;
+}}
+
+@keyframes splashPulse {{
+    0% {{
+        transform:scale(.90);
+        opacity:.72;
+    }}
+
+    50% {{
+        transform:scale(1.06);
+        opacity:1;
+    }}
+
+    100% {{
+        transform:scale(.90);
+        opacity:.72;
+    }}
+}}
+
+@keyframes splashText {{
+    from {{
+        opacity:0;
+        transform:translateY(8px);
+    }}
+
+    to {{
+        opacity:1;
+        transform:translateY(0);
+    }}
+}}
+
+@media(max-width:600px) {{
+    .splash-logo {{
+        width:150px;
+        height:150px;
+    }}
+
+    .splash-title {{
+        font-size:19px;
+    }}
+}}
 .header{{
     display:flex;
     align-items:center;
@@ -867,6 +963,28 @@ body{{
 </head>
 
 <body>
+
+<body>
+
+<!-- ===============================
+     EMPOWERBANDS SPLASH SCREEN
+================================ -->
+<div id="splash-screen">
+    <img
+        src="{LOGO_URL}"
+        alt="EmpowerBands Worldwide"
+        class="splash-logo"
+    >
+
+    <div class="splash-title">
+        EmpowerBands Worldwide
+    </div>
+
+    <div class="splash-subtitle">
+        Protect What Matters Most
+    </div>
+</div>
+
 
 <div class="header">
     
@@ -1144,9 +1262,35 @@ body{{
     👁 <strong style="color:rgba(255,255,255,0.7);">{visit_count}</strong> visitors and counting
 </div>
 
+<!-- ===============================
+     SPLASH SCREEN SCRIPT
+================================ -->
+<script>
+window.addEventListener("load", function() {{
+    const splash = document.getElementById("splash-screen");
+
+    if (!splash) return;
+
+    setTimeout(function() {{
+        splash.classList.add("hide");
+
+        setTimeout(function() {{
+            splash.remove();
+        }}, 700);
+
+    }}, 1800);
+}});
+</script>
+
+
+<!-- TIDIO CHAT -->
+<script
+    src="//code.tidio.co/p4dgrg4dt5tkoaz3wfwi72xbttfvvkzr.js"
+    async>
+</script>
+
 </body>
 </html>
-    <script src="//code.tidio.co/p4dgrg4dt5tkoaz3wfwi72xbttfvvkzr.js" async></script>
 """
     
 
