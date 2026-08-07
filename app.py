@@ -3047,7 +3047,7 @@ Unlock Full Info
 
 @app.route("/donate")
 def donate():
-    return redirect("https://www.paypal.com/ncp/payment/6ZT5B9XMXD3K6")
+    return redirect("https://www.paypal.com/ncp/payment/HXFLDKQYU9A56")
 
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
