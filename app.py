@@ -3075,11 +3075,26 @@ def im_safe(band_id):
 def qr_code(band_id):
     band_id = band_id.strip().upper()
 
-    # Only allow normal EmpowerBands IDs
-    if not band_id.startswith("EB") or not band_id[2:].isdigit():
-        abort(400, description="Invalid band ID")
+    # Make sure this Band ID actually exists
+    band_exists = False
 
-    # Remove a trailing slash so the QR URL is formatted correctly
+    try:
+        with open(file_name, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                if row.get("band_id", "").strip().upper() == band_id:
+                    band_exists = True
+                    break
+
+    except Exception as e:
+        print("QR lookup error:", e)
+        abort(500, description="Could not verify band ID")
+
+    if not band_exists:
+        abort(404, description="Band not found")
+
+    # URL that scanning the QR code will open
     profile_url = f"{BASE_URL.rstrip('/')}/{band_id}"
 
     qr = qrcode.QRCode(
@@ -3092,7 +3107,10 @@ def qr_code(band_id):
     qr.add_data(profile_url)
     qr.make(fit=True)
 
-    image = qr.make_image(fill_color="black", back_color="white")
+    image = qr.make_image(
+        fill_color="black",
+        back_color="white"
+    )
 
     buffer = BytesIO()
     image.save(buffer, format="PNG")
