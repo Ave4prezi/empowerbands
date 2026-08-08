@@ -433,7 +433,7 @@ def admin_preprogram_activate():
 
     # Attempt to activate in the bulk DB
     try:
-        activated = activate_band(band_id, actor="admin", ip_address=request.remote_addr)
+        activated = bulk_db.activate_band(band_id, actor="admin", ip_address=request.remote_addr)
     except Exception as e:
         # activation failed silently — still redirect to the public profile so admin can inspect
         print("Activation error:", e)
