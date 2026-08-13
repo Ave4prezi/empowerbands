@@ -35,6 +35,16 @@ TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 
+# ===============================
+# IMPACT CLUB PAYMENT LINKS
+# ===============================
+
+IMPACT_SUPPORTER_URL = os.environ.get("IMPACT_SUPPORTER_URL", "#")
+IMPACT_EMPOWERER_URL = os.environ.get("IMPACT_EMPOWERER_URL", "#")
+IMPACT_CHAMPION_URL = os.environ.get("IMPACT_CHAMPION_URL", "#")
+IMPACT_PARTNER_URL = os.environ.get("IMPACT_PARTNER_URL", "#")
+IMPACT_LEGACY_URL = os.environ.get("IMPACT_LEGACY_URL", "#")
+
 ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
 ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
 
@@ -527,17 +537,19 @@ def site_nav_html(active=""):
         <span>EmpowerBands<em>Worldwide</em></span>
     </a>
     <nav class="site-nav" aria-label="Main navigation">
-        {link("/", "Home", "home")}
-        {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
-        {link("/merch", "Shop", "merch")}
-        {link("/board-members", "Board", "board")}
-        {link("/blessing-boxes", "Blessing Boxes", "blessing")}
-        {link("/#about", "About", "about")}
-        {link("mailto:support@empowerbands.org", "Contact", "contact")}
-    </nav>
+    {link("/", "Home", "home")}
+    {link("/impact-club", "💙 Impact Club", "impact")}
+    {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
+    {link("/merch", "Shop", "merch")}
+    {link("/board-members", "Board", "board")}
+    {link("/blessing-boxes", "Blessing Boxes", "blessing")}
+    {link("/#about", "About", "about")}
+    {link("mailto:support@empowerbands.org", "Contact", "contact")}
+</nav>
     <div class="site-header-buttons">
-        <a class="btn-outline-sm" href="/donate">❤️ Donate</a>
-    </div>
+    <a class="btn-outline-sm" href="/donate">❤️ Donate — One-Time</a>
+    <a class="btn-outline-sm" href="/impact-club">💙 Impact Club — Monthly</a>
+</div>
 </div>
 <style>
 .skip-link{{
@@ -604,6 +616,63 @@ def site_footer_html():
 .site-footer a:hover{color:#67e8f9;}
 </style>
 """
+
+# ===============================
+# MONTHLY IMPACT CLUB
+# ===============================
+
+@app.route("/impact-club")
+def impact_club():
+    return f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Monthly Impact Club — EmpowerBands Worldwide</title>
+    </head>
+
+    <body>
+
+        {site_nav_html("impact")}
+
+        <h1>EmpowerBands Monthly Impact Club</h1>
+
+        <p>Become one of our Founding 100 monthly supporters.</p>
+
+        <a href="{IMPACT_SUPPORTER_URL}">
+            🤝 Supporter — $5/month
+        </a>
+
+        <br><br>
+
+        <a href="{IMPACT_EMPOWERER_URL}">
+            💙 Empowerer — $10/month
+        </a>
+
+        <br><br>
+
+        <a href="{IMPACT_CHAMPION_URL}">
+            🏆 Champion — $25/month
+        </a>
+
+        <br><br>
+
+        <a href="{IMPACT_PARTNER_URL}">
+            ⭐ Impact Partner — $50/month
+        </a>
+
+        <br><br>
+
+        <a href="{IMPACT_LEGACY_URL}">
+            👑 Legacy Partner — $100/month
+        </a>
+
+        {site_footer_html()}
+
+    </body>
+    </html>
+    """
 
 
 # ===============================
@@ -1576,7 +1645,9 @@ def band_profile_shortcut(band_id):
     "im_safe",
     "traveling-band-movement",
     "merch",
-    "board-members"
+    "board-members",
+    "impact-club"
+    
 ]
 
     if band_id.lower() in blocked_routes:
