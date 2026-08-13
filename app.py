@@ -1647,7 +1647,7 @@ def band_profile_shortcut(band_id):
     "merch",
     "board-members",
     "impact-club"
-    
+   
 ]
 
     if band_id.lower() in blocked_routes:
