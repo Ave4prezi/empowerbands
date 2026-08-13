@@ -623,56 +623,902 @@ def site_footer_html():
 
 @app.route("/impact-club")
 def impact_club():
-    return f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Monthly Impact Club — EmpowerBands Worldwide</title>
-    </head>
+    return """
+<!DOCTYPE html>
+<html lang="en">
 
-    <body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        {site_nav_html("impact")}
+<title>Monthly Impact Club — EmpowerBands Worldwide</title>
 
-        <h1>EmpowerBands Monthly Impact Club</h1>
+<meta
+    name="description"
+    content="Join the EmpowerBands Monthly Impact Club and become one of our Founding 100 monthly supporters."
+>
 
-        <p>Become one of our Founding 100 monthly supporters.</p>
+<meta property="og:title" content="EmpowerBands Monthly Impact Club">
+<meta
+    property="og:description"
+    content="Small monthly contributions. Powerful community impact. Join the Founding 100."
+>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://empowerbands.org/impact-club">
+<meta property="og:image" content="__LOGO_URL__">
 
-        <a href="{IMPACT_SUPPORTER_URL}">
-            🤝 Supporter — $5/month
+<style>
+__MARKETING_CSS__
+
+
+/* ===============================
+   IMPACT CLUB PREMIUM UI
+================================ */
+
+.impact-hero {
+    position:relative;
+    text-align:center;
+    padding:75px 20px 55px;
+    overflow:hidden;
+}
+
+.impact-hero::before {
+    content:"";
+    position:absolute;
+    width:520px;
+    height:520px;
+    border-radius:50%;
+    background:rgba(37,99,235,.18);
+    filter:blur(90px);
+    top:-280px;
+    left:50%;
+    transform:translateX(-50%);
+    pointer-events:none;
+}
+
+.impact-logo {
+    position:relative;
+    width:115px;
+    height:115px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid rgba(103,232,249,.35);
+    box-shadow:
+        0 0 25px rgba(14,165,233,.55),
+        0 0 70px rgba(37,99,235,.30);
+    margin-bottom:25px;
+}
+
+.impact-badge {
+    position:relative;
+    display:inline-block;
+    padding:8px 15px;
+    margin-bottom:18px;
+    border-radius:999px;
+    border:1px solid rgba(103,232,249,.35);
+    background:rgba(14,165,233,.10);
+    color:#67e8f9;
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+
+.impact-hero h1 {
+    position:relative;
+    max-width:850px;
+    margin:0 auto 18px;
+    font-size:clamp(38px,7vw,68px);
+    line-height:1.03;
+    font-weight:900;
+}
+
+.impact-hero h1 span {
+    display:block;
+    background:linear-gradient(135deg,#67e8f9,#38bdf8,#6366f1);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+
+.impact-hero p {
+    position:relative;
+    max-width:720px;
+    margin:0 auto;
+    color:#cbd5e1;
+    font-size:18px;
+    line-height:1.75;
+}
+
+
+/* FOUNDING 100 */
+
+.founding-card {
+    position:relative;
+    max-width:850px;
+    margin:10px auto 55px;
+    padding:32px;
+    text-align:center;
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(14,165,233,.14),
+            rgba(37,99,235,.10)
+        );
+
+    border:1px solid rgba(103,232,249,.30);
+    border-radius:24px;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.20),
+        0 0 40px rgba(37,99,235,.12);
+}
+
+.founding-card h2 {
+    margin:0 0 10px;
+    font-size:29px;
+}
+
+.founding-card p {
+    color:#cbd5e1;
+    line-height:1.7;
+    max-width:650px;
+    margin:0 auto 24px;
+}
+
+.goal-row {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:9px;
+    color:#dbeafe;
+    font-size:13px;
+    font-weight:800;
+}
+
+.goal-track {
+    height:14px;
+    background:rgba(255,255,255,.08);
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.goal-fill {
+    width:4%;
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg,#06b6d4,#2563eb);
+    box-shadow:0 0 18px rgba(14,165,233,.65);
+}
+
+.goal-note {
+    margin-top:13px;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+
+/* MEMBERSHIP LEVELS */
+
+.impact-section-title {
+    text-align:center;
+    margin-bottom:8px;
+    font-size:34px;
+}
+
+.impact-section-subtitle {
+    text-align:center;
+    color:#94a3b8;
+    max-width:650px;
+    line-height:1.65;
+    margin:0 auto 34px;
+}
+
+.impact-tiers {
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:16px;
+    align-items:stretch;
+}
+
+.impact-tier {
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    padding:27px 20px 22px;
+    text-align:center;
+
+    background:
+        linear-gradient(
+            160deg,
+            rgba(255,255,255,.075),
+            rgba(255,255,255,.025)
+        );
+
+    border:1px solid rgba(56,189,248,.22);
+    border-radius:20px;
+
+    transition:
+        transform .22s ease,
+        border-color .22s ease,
+        box-shadow .22s ease;
+}
+
+.impact-tier:hover {
+    transform:translateY(-7px);
+    border-color:rgba(103,232,249,.55);
+    box-shadow:0 20px 45px rgba(0,0,0,.25);
+}
+
+.impact-tier.featured {
+    border:2px solid rgba(56,189,248,.75);
+    background:
+        linear-gradient(
+            160deg,
+            rgba(14,165,233,.20),
+            rgba(37,99,235,.09)
+        );
+
+    box-shadow:
+        0 0 38px rgba(14,165,233,.18),
+        0 18px 50px rgba(0,0,0,.25);
+
+    transform:scale(1.035);
+}
+
+.impact-tier.featured:hover {
+    transform:scale(1.035) translateY(-7px);
+}
+
+.popular-tag {
+    position:absolute;
+    top:-13px;
+    left:50%;
+    transform:translateX(-50%);
+    white-space:nowrap;
+
+    padding:6px 13px;
+    border-radius:999px;
+
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+
+    color:white;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.07em;
+
+    box-shadow:0 0 20px rgba(14,165,233,.45);
+}
+
+.tier-icon {
+    width:64px;
+    height:64px;
+    margin:3px auto 16px;
+
+    border-radius:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:29px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(14,165,233,.22),
+            rgba(37,99,235,.18)
+        );
+
+    border:1px solid rgba(103,232,249,.20);
+}
+
+.impact-tier h3 {
+    font-size:19px;
+    margin:0 0 7px;
+}
+
+.tier-price {
+    font-size:36px;
+    font-weight:900;
+    color:white;
+    margin:7px 0 15px;
+}
+
+.tier-price span {
+    display:block;
+    margin-top:3px;
+    font-size:12px;
+    font-weight:600;
+    color:#94a3b8;
+}
+
+.tier-description {
+    color:#cbd5e1;
+    font-size:13.5px;
+    line-height:1.6;
+    flex:1;
+    margin-bottom:20px;
+}
+
+.tier-button {
+    display:block;
+    text-decoration:none;
+    color:white;
+    font-weight:900;
+    font-size:13px;
+
+    padding:13px 12px;
+    border-radius:11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0891b2,
+            #2563eb
+        );
+
+    box-shadow:0 7px 20px rgba(37,99,235,.23);
+
+    transition:
+        transform .15s ease,
+        filter .15s ease;
+}
+
+.tier-button:hover {
+    transform:translateY(-2px);
+    filter:brightness(1.12);
+}
+
+
+/* MONTHLY MATH */
+
+.impact-math {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-top:26px;
+}
+
+.math-card {
+    text-align:center;
+    padding:23px 15px;
+
+    border-radius:17px;
+    border:1px solid rgba(255,255,255,.11);
+    background:rgba(255,255,255,.04);
+}
+
+.math-number {
+    font-size:27px;
+    font-weight:900;
+    color:#67e8f9;
+}
+
+.math-label {
+    color:#94a3b8;
+    font-size:12px;
+    margin-top:6px;
+}
+
+.math-result {
+    font-size:16px;
+    font-weight:800;
+    margin-top:8px;
+}
+
+
+/* WHY MONTHLY */
+
+.why-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.why-card {
+    padding:25px;
+    border-radius:18px;
+    border:1px solid rgba(56,189,248,.18);
+    background:rgba(255,255,255,.04);
+}
+
+.why-card span {
+    font-size:27px;
+}
+
+.why-card h3 {
+    margin:12px 0 8px;
+}
+
+.why-card p {
+    color:#cbd5e1;
+    line-height:1.6;
+    font-size:14px;
+    margin:0;
+}
+
+
+/* FINAL CTA */
+
+.impact-final {
+    margin:30px 0 55px;
+    padding:38px 25px;
+    text-align:center;
+
+    border-radius:24px;
+    border:1px solid rgba(56,189,248,.30);
+
+    background:
+        radial-gradient(
+            circle at top,
+            rgba(37,99,235,.24),
+            rgba(2,8,23,.40)
+        );
+
+    box-shadow:0 0 40px rgba(37,99,235,.14);
+}
+
+.impact-final h2 {
+    margin:0 0 10px;
+    font-size:30px;
+}
+
+.impact-final p {
+    max-width:620px;
+    margin:0 auto 22px;
+    color:#cbd5e1;
+    line-height:1.6;
+}
+
+.impact-final-buttons {
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+
+/* MOBILE */
+
+@media(max-width:1050px) {
+    .impact-tiers {
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:760px) {
+
+    .impact-hero {
+        padding:55px 15px 35px;
+    }
+
+    .impact-tiers {
+        grid-template-columns:1fr;
+    }
+
+    .impact-tier.featured {
+        transform:none;
+    }
+
+    .impact-tier.featured:hover {
+        transform:translateY(-7px);
+    }
+
+    .impact-math {
+        grid-template-columns:1fr 1fr;
+    }
+
+    .why-grid {
+        grid-template-columns:1fr;
+    }
+
+    .founding-card {
+        padding:25px 18px;
+    }
+}
+
+@media(max-width:450px) {
+    .impact-math {
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+__NAV__
+
+<main id="main-content">
+
+
+<!-- ===============================
+     HERO
+================================ -->
+
+<section class="impact-hero">
+
+    <img
+        src="__LOGO_URL__"
+        alt="EmpowerBands Worldwide"
+        class="impact-logo"
+    >
+
+    <div class="impact-badge">
+        ✨ FOUNDING 100
+    </div>
+
+    <h1>
+        EmpowerBands
+        <span>Monthly Impact Club</span>
+    </h1>
+
+    <p>
+        Small monthly contributions become powerful when
+        a community gives together. Join the people helping
+        EmpowerBands build safer, stronger, and more empowered
+        communities month after month.
+    </p>
+
+</section>
+
+
+<!-- ===============================
+     FOUNDING 100
+================================ -->
+
+<section class="founding-card">
+
+    <h2>🔥 Become One of Our Founding 100</h2>
+
+    <p>
+        Our first goal isn't one giant donation.
+        It's 100 people committed to moving the
+        EmpowerBands mission forward every month.
+    </p>
+
+    <div class="goal-row">
+        <span>Founding 100 Campaign</span>
+        <span>Goal: 100 Members</span>
+    </div>
+
+    <div class="goal-track">
+        <div class="goal-fill"></div>
+    </div>
+
+    <div class="goal-note">
+        The live member counter will be connected
+        when recurring checkout tracking is activated.
+    </div>
+
+</section>
+
+
+<!-- ===============================
+     LEVELS
+================================ -->
+
+<section class="mkt-section">
+
+    <h2 class="impact-section-title">
+        Choose Your Impact
+    </h2>
+
+    <p class="impact-section-subtitle">
+        Pick the monthly level that works for you.
+        Every member becomes part of the same movement.
+    </p>
+
+
+    <div class="impact-tiers">
+
+
+        <!-- $5 -->
+
+        <div class="impact-tier">
+
+            <div class="tier-icon">🤝</div>
+
+            <h3>Supporter</h3>
+
+            <div class="tier-price">
+                $5
+                <span>PER MONTH</span>
+            </div>
+
+            <p class="tier-description">
+                An easy way to stand with EmpowerBands
+                and help the mission move forward every month.
+            </p>
+
+            <a
+                class="tier-button"
+                href="__SUPPORTER_URL__"
+            >
+                Become a Supporter
+            </a>
+
+        </div>
+
+
+        <!-- $10 -->
+
+        <div class="impact-tier featured">
+
+            <div class="popular-tag">
+                MOST POPULAR
+            </div>
+
+            <div class="tier-icon">💙</div>
+
+            <h3>Empowerer</h3>
+
+            <div class="tier-price">
+                $10
+                <span>PER MONTH</span>
+            </div>
+
+            <p class="tier-description">
+                Join the core monthly community helping
+                EmpowerBands create consistent impact.
+            </p>
+
+            <a
+                class="tier-button"
+                href="__EMPOWERER_URL__"
+            >
+                Become an Empowerer
+            </a>
+
+        </div>
+
+
+        <!-- $25 -->
+
+        <div class="impact-tier">
+
+            <div class="tier-icon">🏆</div>
+
+            <h3>Champion</h3>
+
+            <div class="tier-price">
+                $25
+                <span>PER MONTH</span>
+            </div>
+
+            <p class="tier-description">
+                Help EmpowerBands reach more people,
+                families, schools, and communities.
+            </p>
+
+            <a
+                class="tier-button"
+                href="__CHAMPION_URL__"
+            >
+                Become a Champion
+            </a>
+
+        </div>
+
+
+        <!-- $50 -->
+
+        <div class="impact-tier">
+
+            <div class="tier-icon">⭐</div>
+
+            <h3>Impact Partner</h3>
+
+            <div class="tier-price">
+                $50
+                <span>PER MONTH</span>
+            </div>
+
+            <p class="tier-description">
+                Make a stronger monthly investment
+                in EmpowerBands programs and community impact.
+            </p>
+
+            <a
+                class="tier-button"
+                href="__PARTNER_URL__"
+            >
+                Become an Impact Partner
+            </a>
+
+        </div>
+
+
+        <!-- $100 -->
+
+        <div class="impact-tier">
+
+            <div class="tier-icon">👑</div>
+
+            <h3>Legacy Partner</h3>
+
+            <div class="tier-price">
+                $100
+                <span>PER MONTH</span>
+            </div>
+
+            <p class="tier-description">
+                Help build the long-term strength,
+                reach, and future of EmpowerBands Worldwide.
+            </p>
+
+            <a
+                class="tier-button"
+                href="__LEGACY_URL__"
+            >
+                Become a Legacy Partner
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===============================
+     RECURRING REVENUE VISION
+================================ -->
+
+<section class="mkt-section">
+
+    <h2 class="impact-section-title">
+        Small Giving. Big Possibilities.
+    </h2>
+
+    <p class="impact-section-subtitle">
+        Consistent monthly support gives EmpowerBands
+        the ability to plan ahead instead of starting
+        over every month.
+    </p>
+
+    <div class="impact-math">
+
+        <div class="math-card">
+            <div class="math-number">100</div>
+            <div class="math-label">MEMBERS × $10</div>
+            <div class="math-result">$1,000 / month</div>
+        </div>
+
+        <div class="math-card">
+            <div class="math-number">250</div>
+            <div class="math-label">MEMBERS × $10</div>
+            <div class="math-result">$2,500 / month</div>
+        </div>
+
+        <div class="math-card">
+            <div class="math-number">500</div>
+            <div class="math-label">MEMBERS × $10</div>
+            <div class="math-result">$5,000 / month</div>
+        </div>
+
+        <div class="math-card">
+            <div class="math-number">1,000</div>
+            <div class="math-label">MEMBERS × $10</div>
+            <div class="math-result">$10,000 / month</div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===============================
+     WHY MONTHLY
+================================ -->
+
+<section class="mkt-section">
+
+    <h2 class="impact-section-title">
+        Why Monthly Support Matters
+    </h2>
+
+    <div class="why-grid">
+
+        <div class="why-card">
+
+            <span>📅</span>
+
+            <h3>Consistency</h3>
+
+            <p>
+                Recurring support gives EmpowerBands
+                a dependable foundation for planning
+                programs and outreach.
+            </p>
+
+        </div>
+
+
+        <div class="why-card">
+
+            <span>🌍</span>
+
+            <h3>Growth</h3>
+
+            <p>
+                A strong monthly community helps the
+                mission reach beyond one event,
+                one neighborhood, or one city.
+            </p>
+
+        </div>
+
+
+        <div class="why-card">
+
+            <span>💙</span>
+
+            <h3>Community</h3>
+
+            <p>
+                Impact Club members aren't just donors.
+                They're people choosing to stand behind
+                the EmpowerBands mission month after month.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===============================
+     FINAL CTA
+================================ -->
+
+<section class="impact-final">
+
+    <h2>Ready to Become a Founding Member?</h2>
+
+    <p>
+        Choose your monthly level above and become
+        part of the first 100 people helping build
+        the future of EmpowerBands Worldwide.
+    </p>
+
+    <div class="impact-final-buttons">
+
+        <a class="btn" href="#main-content">
+            💙 View Membership Levels
         </a>
 
-        <br><br>
-
-        <a href="{IMPACT_EMPOWERER_URL}">
-            💙 Empowerer — $10/month
+        <a class="btn btn-outline" href="/donate">
+            ❤️ Make a One-Time Contribution
         </a>
 
-        <br><br>
+    </div>
 
-        <a href="{IMPACT_CHAMPION_URL}">
-            🏆 Champion — $25/month
-        </a>
+</section>
 
-        <br><br>
 
-        <a href="{IMPACT_PARTNER_URL}">
-            ⭐ Impact Partner — $50/month
-        </a>
+</main>
 
-        <br><br>
+__FOOTER__
 
-        <a href="{IMPACT_LEGACY_URL}">
-            👑 Legacy Partner — $100/month
-        </a>
-
-        {site_footer_html()}
-
-    </body>
-    </html>
-    """
+</body>
+</html>
+""" \
+    .replace("__NAV__", site_nav_html("impact")) \
+    .replace("__FOOTER__", site_footer_html()) \
+    .replace("__MARKETING_CSS__", MARKETING_PAGE_CSS) \
+    .replace("__LOGO_URL__", LOGO_URL) \
+    .replace("__SUPPORTER_URL__", IMPACT_SUPPORTER_URL) \
+    .replace("__EMPOWERER_URL__", IMPACT_EMPOWERER_URL) \
+    .replace("__CHAMPION_URL__", IMPACT_CHAMPION_URL) \
+    .replace("__PARTNER_URL__", IMPACT_PARTNER_URL) \
+    .replace("__LEGACY_URL__", IMPACT_LEGACY_URL)
 
 
 # ===============================
