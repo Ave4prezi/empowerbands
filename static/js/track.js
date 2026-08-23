@@ -1,4 +1,4 @@
-# Tracking page JS
+// Tracking page JS
 
 async function postLocation(bandId, lat, lon, name, contact) {
   try {
