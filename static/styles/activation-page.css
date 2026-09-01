@@ -1,0 +1,156 @@
+/* Mobile-first activation page styles
+   Add to project alongside existing activate.css.
+   Keeps visual alignment with current design system but scoped
+   to avoid interfering with other pages. */
+
+:root {
+  --ap-card-bg: #ffffff;
+  --ap-border: rgba(0,0,0,0.06);
+  --ap-accent: #0077cc;
+  --ap-radius: 16px;
+  --ap-gap: 14px;
+  --ap-text: #0b2536;
+}
+
+.activation-flow {
+  padding: 20px;
+  border-radius: var(--ap-radius);
+  background: var(--ap-card-bg);
+  border: 1px solid var(--ap-border);
+  box-shadow: 0 10px 30px rgba(6,18,28,0.06);
+}
+
+/* Progress steps */
+.activation-steps ol {
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 18px 0;
+  list-style: none;
+}
+.activation-steps li {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f1f6f9;
+  color: #0b2536;
+  min-width: 64px;
+  text-align: center;
+}
+.activation-steps li.is-current {
+  background: linear-gradient(90deg,#075a9a,#06a6d5);
+  color: white;
+  font-weight: 700;
+}
+
+/* Form layout */
+.form-section {
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(10,20,30,0.04);
+}
+.field {
+  margin-bottom: 12px;
+}
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--ap-text);
+}
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="tel"],
+.field select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(10,20,30,0.08);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.field .help {
+  display: block;
+  margin-top: 6px;
+  color: rgba(11,37,54,0.6);
+  font-size: 0.9rem;
+}
+.field-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+@media(min-width:900px){
+  .activation-layout { grid-template-columns: 0.9fr 1.1fr; }
+  .field-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+}
+.btn-primary { background: var(--ap-accent); color: white; }
+.btn-secondary { background: #eef6fb; color: var(--ap-text); }
+
+/* Errors & messages */
+.error {
+  color: #b00020;
+  margin-top: 6px;
+  font-size: 0.92rem;
+}
+.form-message {
+  margin: 8px 0 12px 0;
+  color: #0b2536;
+}
+
+/* Modal / review panel */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(6,18,28,0.45);
+  padding: 20px;
+  z-index: 1200;
+}
+.modal-content {
+  width: 100%;
+  max-width: 720px;
+  background: var(--ap-card-bg);
+  padding: 20px;
+  border-radius: 12px;
+}
+.review-summary {
+  margin: 12px 0;
+  background: #f8fbfd;
+  padding: 12px;
+  border-radius: 8px;
+}
+.modal-actions {
+  display:flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* Success panel */
+.success-panel {
+  padding: 18px;
+  border-radius: 12px;
+  background: linear-gradient(180deg,#f7fffb,#e9fff2);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* Make large touch targets on mobile */
+input, select, .btn { min-height: 44px; }
