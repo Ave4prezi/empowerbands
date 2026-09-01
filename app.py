@@ -114,28 +114,7 @@ if not os.path.exists(_spotlight_file):
     </div>
 
 
-    <!-- COMMUNITY PHOTOS -->
-    <div class="card">
-        <h2>📸 Community in Action</h2>
-        <p style="color:#cbd5e1;margin-bottom:18px;">See our volunteers and neighbors making a difference in Hartselle and the surrounding area.</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
-            <div style="border-radius:14px;overflow:hidden;line-height:0;">
-                <img src="/static/images/blessing-box.png"
-                     alt="EmpowerBands Blessing Box"
-                     style="width:100%;height:220px;object-fit:cover;border-radius:14px;display:block;">
-            </div>
-            <div style="border-radius:14px;overflow:hidden;line-height:0;">
-                <img src="/static/images/blessing-box-donation.png"
-                     alt="Community member donating to blessing box"
-                     style="width:100%;height:220px;object-fit:cover;border-radius:14px;display:block;">
-            </div>
-            <div style="border-radius:14px;overflow:hidden;line-height:0;">
-                <img src="/static/images/community-donations.png"
-                     alt="Volunteers stocking the blessing box"
-                     style="width:100%;height:220px;object-fit:cover;border-radius:14px;display:block;">
-            </div>
-        </div>
-    </div>
+    
 
 
 # Create volunteer sign-ups file if missing
