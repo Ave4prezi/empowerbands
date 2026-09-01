@@ -116,7 +116,6 @@ if not os.path.exists(_spotlight_file):
 
     
 
-
 # Create volunteer sign-ups file if missing
 _vol_file = "bb_volunteers.csv"
 if not os.path.exists(_vol_file):
