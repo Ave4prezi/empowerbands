@@ -21,7 +21,6 @@ import hmac
 from io import BytesIO
 from markupsafe import escape
 
-
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
