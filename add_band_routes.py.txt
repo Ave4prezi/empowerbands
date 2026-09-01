@@ -1,0 +1,41 @@
+# Add band routes for managing unassigned bands
+# This module handles the /add endpoint for adding bands to user profiles
+
+from flask import Blueprint, request, jsonify
+from datetime import datetime
+
+add_band_bp = Blueprint('add_band', __name__)
+
+@add_band_bp.route('/add', methods=['POST'])
+def add_unassigned_bands():
+    """
+    Add unassigned bands to user profile
+    Required JSON payload:
+    {
+        "user_id": "string",
+        "band_ids": ["band_id_1", "band_id_2", ...]
+    }
+    """
+    data = request.get_json()
+    
+    if not data or 'user_id' not in data:
+        return jsonify({'error': 'Missing user_id'}), 400
+    
+    user_id = data.get('user_id')
+    band_ids = data.get('band_ids', [])
+    
+    if not band_ids:
+        return jsonify({'error': 'No band_ids provided'}), 400
+    
+    # Add bands logic
+    added_bands = {
+        'user_id': user_id,
+        'bands_added': band_ids,
+        'added_at': datetime.now().isoformat(),
+        'status': 'success'
+    }
+    
+    return jsonify({
+        'message': 'Bands added successfully',
+        'result': added_bands
+    }), 200
