@@ -5752,6 +5752,7 @@ def sms_opt_in():
 <title>EmpowerBands SMS Opt-In</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+"""
 body{
     margin:0;
     font-family:Arial,sans-serif;
@@ -5768,6 +5769,7 @@ body{
     border:1px solid rgba(255,255,255,0.18);
     box-shadow:0 10px 30px rgba(0,0,0,0.35);
 }
+"""
 input{
     width:100%;
     padding:14px;
