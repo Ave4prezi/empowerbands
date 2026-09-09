@@ -5709,12 +5709,28 @@ def terms():
     """
 
 @app.route('/activate')
-def avtivate():
+def activate():
     # Option A: serv the static HTML file I gave you
-    return app. send_static-file('activate.html')
+    return app. send_static-file('activate.htkml')
     # or if yu put it in templates:
-    # return render_template('activate.html') 
+    # return render_template('activate.html')
 
+    
+@app.route('/api/activate', methods=['POST'])   # ← PUT THE API ROUTE HERE
+def api_activate():
+    data = request.get_json(force=True) or {}
+
+    band_id = (data.get('bandId') or '').strip().upper()
+    email   = (data.get('email') or '').strip().lower()
+
+    if not band_id or not email:
+        return jsonify({'error': 'Band ID and email are required'}), 400
+
+    # TODO: check that band_id exists / is available
+    # TODO: save the profile to your database
+    # TODO: optionally send confirmation email
+
+    return jsonify({'ok': True, 'bandId': band_id})
 
 
 @app.route("/delete-request")
