@@ -5830,7 +5830,7 @@ a{color:#93c5fd;}
     </p>
 
     <p>
-        <a href="/privacy">Privacy Policy</a> |
+        <a href="/privacy">Privacy Policy</a> 
         <a href="/terms">Terms of Service</a>
     </p>
 </div>
@@ -5838,6 +5838,7 @@ a{color:#93c5fd;}
 </body>
 </html>
 """
+return html
 
 # ===============================
 # CARD RENDER HELPERS
