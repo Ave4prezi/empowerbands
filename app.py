@@ -5654,7 +5654,7 @@ def admin_blessing_box_needs():
 
 @app.route("/privacy")
 def privacy():
-    return """
+    return render_template('privacy.html') 
     <html>
     <head>
         <title>EmpowerBands Privacy Policy</title>
@@ -5699,7 +5699,7 @@ def privacy():
 
 @app.route("/terms")
 def terms():
-    return """
+    return return render_template('terms.html')  """
     <h1>Terms of Service</h1>
     <p>EmpowerBands is a supplemental safety and communication tool.</p>
     <p>EmpowerBands is not a replacement for 911, emergency medical services, law enforcement, or professional healthcare monitoring.</p>
@@ -5707,6 +5707,15 @@ def terms():
     <p>By using EmpowerBands, users agree to receive emergency-related communication when their band or profile is activated.</p>
     <p><a href="/">Back Home</a></p>
     """
+
+@app.route('/activate')
+def avtivate():
+    # Option A: serv the static HTML file I gave you
+    return app. send_static-file('activate.html')
+    # or if yu put it in templates:
+    # return render_template('activate.html') 
+
+
 
 @app.route("/delete-request")
 def delete_request():
