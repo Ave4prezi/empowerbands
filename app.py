@@ -5795,14 +5795,125 @@ button {
 </head>
 <body>
 """
-a{color:#93c5fd;}
-.small{
-    font-size:14px;
-    color:#cbd5e1;
-    line-height:1.6;
-}
-</style>
+@app.route('/activate')
+def activate():
+    return app.send_static_file('activate.html')
+
+
+@app.route('/api/activate', methods=['POST'])
+def api_activate():
+    data = request.get_json(force=True) or {}
+
+    band_id = (data.get('bandId') or '').strip().upper()
+    email = (data.get('email') or '').strip().lower()
+
+    if not band_id or not email:
+        return jsonify({
+            'error': 'Band ID and email are required'
+        }), 400
+
+    # TODO: check that band_id exists / is available
+    # TODO: save the profile to your database
+    # TODO: optionally send confirmation email
+
+    return jsonify({
+        'ok': True,
+        'bandId': band_id
+    })
+
+
+@app.route("/delete-request")
+def delete_request():
+    return """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Deletion Request</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+<body>
+    <h1>Data Deletion Request</h1>
+
+    <p>
+        To request removal of your EmpowerBands profile,
+        emergency contact information, scan logs, or related data,
+        contact EmpowerBands support.
+    </p>
+
+    <p>Email: support@empowerbands.org</p>
+
+    <p>
+        Please include your Band ID so we can locate your profile.
+    </p>
+
+    <p><a href="/">Back Home</a></p>
+</body>
+</html>
+"""
+
+
+@app.route("/sms-opt-in")
+def sms_opt_in():
+    return """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EmpowerBands SMS Opt-In</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: white;
+            padding: 30px;
+        }
+
+        .card {
+            max-width: 650px;
+            margin: auto;
+            background: rgba(255,255,255,0.08);
+            padding: 28px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: #22c55e;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        a {
+            color: #93c5fd;
+        }
+
+        .small {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
 <body>
 
 <div class="card">
@@ -5814,18 +5925,34 @@ a{color:#93c5fd;}
     </p>
 
     <form>
-        <input type="text" placeholder="Full Name" required>
-        <input type="tel" placeholder="Phone Number" required>
+        <input
+            type="text"
+            placeholder="Full Name"
+            required
+        >
+
+        <input
+            type="tel"
+            placeholder="Phone Number"
+            required
+        >
 
         <label class="small">
-            <input type="checkbox" required style="width:auto;">
+            <input
+                type="checkbox"
+                required
+                style="width:auto;"
+            >
             I agree to receive SMS/text messages from EmpowerBands Worldwide.
-            Message frequency may vary. Message & data rates may apply.
+            Message frequency may vary. Message &amp; data rates may apply.
             Reply STOP to opt out. Reply HELP for help.
         </label>
 
         <br><br>
-        <button type="submit">Agree & Opt In</button>
+
+        <button type="submit">
+            Agree &amp; Opt In
+        </button>
     </form>
 
     <p class="small">
@@ -5839,7 +5966,8 @@ a{color:#93c5fd;}
     </p>
 
     <p>
-        <a href="/privacy">Privacy Policy</a> 
+        <a href="/privacy">Privacy Policy</a>
+        &nbsp;|&nbsp;
         <a href="/terms">Terms of Service</a>
     </p>
 </div>
@@ -5847,7 +5975,7 @@ a{color:#93c5fd;}
 </body>
 </html>
 """
-return html
+
 
 # ===============================
 # CARD RENDER HELPERS
