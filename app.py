@@ -5751,43 +5751,50 @@ def sms_opt_in():
 <head>
 <title>EmpowerBands SMS Opt-In</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    padding: 30px;
+}
+
+.card {
+    max-width: 650px;
+    margin: auto;
+    background: rgba(255,255,255,0.08);
+    padding: 28px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #22c55e;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+}
+</style>
+
+</head>
+<body>
 """
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#0f172a;
-    color:white;
-    padding:30px;
-}
-.card{
-    max-width:650px;
-    margin:auto;
-    background:rgba(255,255,255,0.08);
-    padding:28px;
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,0.18);
-    box-shadow:0 10px 30px rgba(0,0,0,0.35);
-}
-"""
-input{
-    width:100%;
-    padding:14px;
-    margin:10px 0;
-    border-radius:10px;
-    border:none;
-    font-size:16px;
-}
-button{
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:12px;
-    background:#22c55e;
-    color:white;
-    font-size:17px;
-    font-weight:bold;
-}
 a{color:#93c5fd;}
 .small{
     font-size:14px;
