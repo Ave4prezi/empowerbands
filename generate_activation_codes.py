@@ -4,6 +4,7 @@ import string
 import os
 
 
+
 CUSTOMERS_FILE = "customers.csv"
 ACTIVATION_FILE = "activation_codes.csv"
 
