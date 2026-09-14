@@ -78,6 +78,7 @@ Activate the full user profile.
 }
 ```
 
+
 ## Files Modified
 
 - `app.py` — Added blueprint registrations
