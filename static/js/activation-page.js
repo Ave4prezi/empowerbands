@@ -37,6 +37,18 @@
   const phoneEl = qs('#phone');
   const confirmOwnershipEl = qs('#confirm-ownership');
 
+  // Pre-fill Safety ID from URL like /activate/EB001
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+
+if (pathParts.length >= 2 && pathParts[0] === 'activate') {
+  const urlBandId = pathParts[1].trim().toUpperCase();
+
+  if (urlBandId && deviceIdEl) {
+    deviceIdEl.value = urlBandId;
+    deviceIdEl.readOnly = true;
+  }
+}
+
   // Error elements map
   const errors = {
     activationCode: qs('#error-activation-code'),
@@ -162,51 +174,42 @@
 
   // Next button handler: validate current step then advance
   nextBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (currentStepIndex === 0) {
-      // validate activation & device id
-      const codeResult = validateActivationCode(activationCodeEl.value);
-      const deviceResult = validateDeviceId(deviceIdEl.value);
-      let ok = true;
-      if (!codeResult.ok) {
-        setFieldError(errors.activationCode, codeResult.message);
-        ok = false;
-      } else setFieldError(errors.activationCode, '');
+  e.preventDefault();
 
-      if (!deviceResult.ok) {
-        setFieldError(errors.deviceId, deviceResult.message);
-        ok = false;
-      } else setFieldError(errors.deviceId, '');
+  if (currentStepIndex === 0) {
+    const codeResult = validateActivationCode(activationCodeEl.value);
+    const deviceResult = validateDeviceId(deviceIdEl.value);
 
-      if (!ok) return;
+    let ok = true;
 
-      // Activation code validated locally — Move to profile step
-      goToStep(1);
-      return;
+    if (!codeResult.ok) {
+      setFieldError(errors.activationCode, codeResult.message);
+      ok = false;
+    } else {
+      setFieldError(errors.activationCode, '');
     }
 
-    // If somehow on other steps, try to advance if valid
-    if (currentStepIndex < totalSteps - 1) {
-      goToStep(currentStepIndex + 1);
+    if (!deviceResult.ok) {
+      setFieldError(errors.deviceId, deviceResult.message);
+      ok = false;
+    } else {
+      setFieldError(errors.deviceId, '');
     }
-  });
 
-  prevBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    goToStep(currentStepIndex - 1);
-  });
+    if (!ok) return;
 
-  // When user clicks "Continue Activation" from Profile step or earlier, open review if profile validated
-  // We'll reuse nextBtn for both steps: if on Profile step, validate and show review
-  nextBtn.addEventListener('click', (e) => {
-    if (currentStepIndex === 1) {
-      // validate entire profile
-      const ok = validateProfileFields();
-      if (!ok) return;
-      // Prepare and show review
-      showReview();
-    }
-  });
+    goToStep(1);
+    return;
+  }
+
+  if (currentStepIndex === 1) {
+    const ok = validateProfileFields();
+
+    if (!ok) return;
+
+    showReview();
+  }
+});
 
   // Prepare review summary
   function showReview() {
@@ -237,7 +240,18 @@
   backToEditBtn.addEventListener('click', (ev) => {
     ev.preventDefault();
     reviewPanel.hidden = true;
+    go
+  // Close review and go back to edit
+  backToEditBtn.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    reviewPanel.hidden = true;
     goToStep(1);
+  });
+
+  // Confirm activation (demo only) — do not call any backend
+  confirmActivationBtn.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    reviewPanel.hidden = true;ToStep(1);
   });
 
   // Confirm activation (demo only) — do not call any backend
