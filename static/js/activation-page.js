@@ -237,57 +237,87 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
   }
 
   // Close review and go back to edit
-  backToEditBtn.addEventListener('click', (ev) => {
-    ev.preventDefault();
+backToEditBtn.addEventListener('click', (ev) => {
+  ev.preventDefault();
+  reviewPanel.hidden = true;
+  goToStep(1);
+});
+
+  // Confirm activation and send data to backend
+confirmActivationBtn.addEventListener('click', async (ev) => {
+  ev.preventDefault();
+
+  confirmActivationBtn.disabled = true;
+  confirmActivationBtn.textContent = 'Activating...';
+
+  const payload = {
+    bandId: deviceIdEl.value.trim(),
+    activationCode: activationCodeEl.value.trim(),
+    firstName: firstNameEl.value.trim(),
+    lastName: lastNameEl.value.trim(),
+    profileType: profileTypeEl.value,
+    email: emailEl.value.trim(),
+    phone: phoneEl.value.trim()
+  };
+
+  try {
+    const response = await fetch('/api/activate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Activation failed.');
+    }
+
     reviewPanel.hidden = true;
-    go
-  // Close review and go back to edit
-  backToEditBtn.addEventListener('click', (ev) => {
-    ev.preventDefault();
-    reviewPanel.hidden = true;
-    goToStep(1);
-  });
-
-  // Confirm activation (demo only) — do not call any backend
-  confirmActivationBtn.addEventListener('click', (ev) => {
-    ev.preventDefault();
-    reviewPanel.hidden = true;ToStep(1);
-  });
-
-  // Confirm activation (demo only) — do not call any backend
-  confirmActivationBtn.addEventListener('click', (ev) => {
-    ev.preventDefault();
-    reviewPanel.hidden = true;
-
-    // FUTURE BACKEND INTEGRATION:
-    // Build payload and send to server here via fetch/AJAX:
-    // const payload = { activationCode: activationCodeEl.value.trim(), deviceId: deviceIdEl.value.trim(), firstName: firstNameEl.value.trim(), ... };
-    // await activateDevice(payload) // implement server call later
-
-    // For now, show success/demo screen
+    form.hidden = true;
     successPanel.hidden = false;
-    // Update progress UI to 'Complete'
+
     const stepEls = qsa('.activation-steps li');
     stepEls.forEach((li, idx) => {
       li.classList.toggle('is-current', idx === 3);
     });
-    // Hide form to prevent repeated edits
-    form.hidden = true;
+
     formMessage.textContent = '';
-  });
 
-  // Prevent real form submission from trying to navigate
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-  });
+  } catch (error) {
+    reviewPanel.hidden = true;
+    formMessage.textContent =
+      error.message || 'Activation failed. Please try again.';
+    formMessage.className = 'form-message error';
 
-  // Utility: escape HTML for review
-  function escapeHtml(str) {
-    if (str == null) return '';
-    return String(str).replace(/[&<>"']/g, (s) => {
-      const m = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' };
-      return m[s];
-    });
+  } finally {
+    confirmActivationBtn.disabled = false;
+    confirmActivationBtn.textContent = 'Confirm Activation';
   }
+});
+
+// Prevent normal form submission
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+});
+
+// Utility: escape HTML for review
+function escapeHtml(str) {
+  if (str == null) return '';
+
+  return String(str).replace(/[&<>"']/g, (s) => {
+    const m = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+
+    return m[s];
+  });
+}
 
 })();
