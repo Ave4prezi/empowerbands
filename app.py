@@ -5799,6 +5799,11 @@ button {
 def activate():
     return app.send_static_file('activate.html')
 
+@app.route("/activate/<band_id>")
+def activate_band_page(band_id):
+    band_id = band_id.strip().upper()
+    return app.send_static_file("activate.html")
+
 
 @app.route('/api/activate', methods=['POST'])
 def api_activate():
