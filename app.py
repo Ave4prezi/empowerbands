@@ -5711,7 +5711,7 @@ def terms():
 @app.route('/activate')
 def activate():
     # Option A: serv the static HTML file I gave you
-    return app. send_static-file('activate.htkml')
+    return app. send_static-file('activate.html')
     # or if yu put it in templates:
     # return render_template('activate.html')
 
