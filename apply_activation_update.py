@@ -103,6 +103,7 @@ def update_register_html():
     });
     </script>
     '''
+
     
     # Insert before closing form tag or at end of body
     if '</form>' in content:
