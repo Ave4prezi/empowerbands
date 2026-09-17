@@ -6,6 +6,7 @@ from flask import (
     send_file,
     jsonify,
     abort,
+    render_template,
 )
 from twilio.rest import Client
 from werkzeug.utils import secure_filename
@@ -2488,7 +2489,7 @@ def band_profile_shortcut(band_id):
     blocked_routes = [
     "admin",
     "add",
-    "scans",   
+    "scans",
     "alert_with_location",
     "manifest.json",
     "pro",
@@ -2501,9 +2502,18 @@ def band_profile_shortcut(band_id):
     "traveling-band-movement",
     "merch",
     "board-members",
-    "impact-club"
-   
-]
+    "impact-club",
+    "activate",          # ← critical
+    "register",
+    "dashboard",
+    "login",
+    "board",
+    "profile",
+    "about",
+    "contact",
+    "giveaway",
+    "emergency",
+    ]
 
     if band_id.lower() in blocked_routes:
         return redirect("/")
@@ -5711,11 +5721,10 @@ def terms():
     """
 
 @app.route('/activate')
-def activate():
-    # Option A: serv the static HTML file I gave you
-    return app. send_static-file('activate.html')
-    # or if yu put it in templates:
-    # return render_template('activate.html')
+@app.route('/activate/<band_id>')
+def activate(band_id=None):
+    """Serve the Safety ID activation page."""
+    return render_template('activate.html')
 
     
 @app.route('/api/activate', methods=['POST'])
