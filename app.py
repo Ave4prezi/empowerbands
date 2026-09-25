@@ -5256,41 +5256,50 @@ def blessing_boxes():
     <a class="back" href="/">← Back to Home</a>
 
     <!-- WHERE ARE THE BOXES -->
-    <div class="card" style="margin-top:20px;">
-        <h2>📍 Where to Find a Box</h2>
-<p>We currently have Blessing Boxes set up at:</p>
+<div class="card" style="margin-top:20px;">
+    <h2>📍 Where to Find a Box</h2>
+    <p>We currently have Blessing Boxes set up at:</p>
 
-<br>
+    <br>
 
-<a href="https://www.google.com/maps/search/The+Spotted+Ladybug+Hartselle+AL"
-   target="_blank"
-   class="location-badge"
-   style="text-decoration:none;">
-    📦 The Spotted Ladybug — Downtown Hartselle, AL
-</a>
+    <a href="https://www.google.com/maps/search/The+Spotted+Ladybug+Hartselle+AL"
+       target="_blank"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 The Spotted Ladybug — Downtown Hartselle, AL
+    </a>
 
-<br><br>
+    <br><br>
 
-<a href="https://www.google.com/maps/search/Cowboys+1605+Main+St+E+Hartselle+AL+35640"
-   target="_blank"
-   class="location-badge"
-   style="text-decoration:none;">
-    📦 Cowboys — 1605 Main St E, Hartselle, AL
-</a>
+    <a href="https://www.google.com/maps/search/Cowboys+1605+Main+St+E+Hartselle+AL+35640"
+       target="_blank"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 Cowboys — 1605 Main St E, Hartselle, AL
+    </a>
 
-<br><br>
+    <br><br>
 
-<p style="font-size:14px;color:#94a3b8;">
-    📌 <em>Tap either badge above to get directions.</em>
-</p>
+    <a href="https://www.google.com/maps/search/Anna%27s+Thrift+Store+1806+11th+St+SE+Decatur+AL+35601"
+       target="_blank"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 Anna’s Thrift Store — 1806 11th St SE, Decatur, AL 35601
+    </a>
 
-<br>
+    <br><br>
 
-<p>
-    We are actively looking to partner with additional local businesses to host
-    Blessing Boxes throughout the community. If you own or manage a business and
-    would like to host a box, see the partnership section below.
-</p>
+    <p style="font-size:14px;color:#94a3b8;">
+        📌 <em>Tap any location above to get directions.</em>
+    </p>
+
+    <br>
+
+    <p>
+        We are actively looking to partner with additional local businesses to host
+        Blessing Boxes throughout the community. If you own or manage a business and
+        would like to host a box, see the partnership section below.
+    </p>
 </div>
 
     <!-- WHAT'S NEEDED -->
