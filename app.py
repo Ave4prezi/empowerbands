@@ -561,6 +561,278 @@ def site_nav_html(active=""):
 </nav>
     <div class="site-header-buttons">
     <a class="btn-outline-sm" href="/donate">❤️ Donate — One-Time</a>
+    <a class="btn-outline-sm" href="/impact-club">💙 I>
+    </body>
+    </html>
+    """
+
+@app.route("/admin/preprogram/edit/<band_id>", methods=["GET", "POST"])
+def admin_preprogram_edit(band_id):
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    band_id = band_id.strip().upper()
+
+    # Load existing CSV rows
+    rows = []
+    try:
+        with open(file_name, "r", newline="", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+    except FileNotFoundError:
+        # create header if missing
+        rows = [header]
+
+    header_row = rows[0] if rows else header
+    data_rows = rows[1:] if len(rows) > 1 else []
+
+    current = None
+    for r in data_rows:
+        if r and r[0].strip().upper() == band_id:
+            # ensure length
+            while len(r) < len(header_row):
+                r.append("")
+            current = r
+            break
+
+    if request.method == "POST":
+        # build row in same column order as header
+        new_row = [
+            request.form.get("band_id", band_id).strip().upper(),
+            (current[1] if current and len(current) > 1 else request.form.get("activation_code", "")).strip().upper(),
+            request.form.get("name", "").strip(),
+            request.form.get("email", "").strip(),
+            request.form.get("phone", "").strip(),
+            request.form.get("emergency_phones", "").strip(),
+            request.form.get("emergency_emails", "").strip(),
+            request.form.get("age_group", "").strip(),
+            request.form.get("condition", "").strip(),
+            request.form.get("instructions", "").strip(),
+            request.form.get("medical_notes", "").strip(),
+            request.form.get("pin", "").strip() or "1234",
+            request.form.get("address", "").strip(),
+            request.form.get("race", "").strip(),
+            request.form.get("gender", "").strip(),
+            request.form.get("photo_url", "").strip(),
+        ]
+
+        # replace or append
+        updated_rows = [header_row]
+        replaced = False
+        for r in data_rows:
+            if r and r[0].strip().upper() == band_id:
+                updated_rows.append(new_row)
+                replaced = True
+            else:
+                updated_rows.append(r)
+        if not replaced:
+            updated_rows.append(new_row)
+
+        with open(file_name, "w", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerows(updated_rows)
+
+        return redirect("/admin/preprogram")
+
+    # GET: render form with current values (or blanks)
+    values = current or [""] * len(header_row)
+    # ensure length
+    while len(values) < len(header_row):
+        values.append("")
+
+    return f"""
+    <!doctype html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Pre‑program {escape(band_id)}</title>
+      <style>
+        body{{font-family:Arial,Helvetica,sans-serif;background:#07111f;color:white;padding:20px}}
+        .card{{max-width:720px;margin:0 auto;background:rgba(255,255,255,0.03);padding:20px;border-radius:12px}}
+        input,textarea{{width:100%;padding:10px;border-radius:8px;border:none;margin-top:8px;margin-bottom:12px;background:rgba(255,255,255,0.04);color:white}}
+        label{{font-weight:700;color:#7dd3fc}}
+        .row{{display:flex;gap:12px}}
+        .row > div{{flex:1}}
+        .btn{{padding:10px 14px;border-radius:10px;border:none;background:#22c55e;color:white;font-weight:700;cursor:pointer}}
+        .back{{background:rgba(255,255,255,0.06);color:#94a3b8;text-decoration:none;padding:8px 12px;border-radius:8px}}
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <a class="back" href="/admin/preprogram">← Back</a>
+        <h2>Pre‑program Band {escape(band_id)}</h2>
+
+        <form method="POST">
+          <label>Band ID</label>
+          <input name="band_id" value="{escape(values[0] or band_id)}" required>
+
+          <label>Full name (public)</label>
+          <input name="name" value="{escape(values[2])}">
+
+          <label>Email (optional)</label>
+          <input name="email" value="{escape(values[3])}">
+
+          <label>Primary phone</label>
+          <input name="phone" value="{escape(values[4])}">
+
+          <label>Emergency phones (comma separated)</label>
+          <input name="emergency_phones" value="{escape(values[5])}">
+
+          <label>Emergency emails (comma separated)</label>
+          <input name="emergency_emails" value="{escape(values[6])}">
+
+          <label>Age group</label>
+          <input name="age_group" value="{escape(values[7])}">
+
+          <label>Condition</label>
+          <input name="condition" value="{escape(values[8])}">
+
+          <label>Public instructions</label>
+          <textarea name="instructions">{escape(values[9])}</textarea>
+
+          <label>Private medical notes</label>
+          <textarea name="medical_notes">{escape(values[10])}</textarea>
+
+          <label>PIN (required to unlock full info)</label>
+          <input name="pin" value="{escape(values[11] or '1234')}">
+
+          <label>Address</label>
+          <input name="address" value="{escape(values[12])}">
+
+          <label>Race</label>
+          <input name="race" value="{escape(values[13])}">
+
+          <label>Gender</label>
+          <input name="gender" value="{escape(values[14])}">
+
+          <label>Photo URL</label>
+          <input name="photo_url" value="{escape(values[15])}">
+
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn" type="submit">Save profile</button>
+            <a class="back" href="https://empowerbands.org/admin/preprogram">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </body>
+    </html>
+    """
+
+@app.route("/admin/preprogram/activate", methods=["POST"])
+def admin_preprogram_activate():
+    if not session.get("logged_in"):
+        return redirect("/admin")
+
+    band_id = (request.form.get("band_id") or "").strip().upper()
+    if not band_id:
+        return redirect("/admin/preprogram")
+
+    # Attempt to activate in the bulk DB
+    try:
+        activated = bulk_db.activate_band(band_id, actor="admin", ip_address=request.remote_addr)
+    except Exception as e:
+        # activation failed silently — still redirect to the public profile so admin can inspect
+        print("Activation error:", e)
+        activated = False
+
+    # Redirect straight to public profile (app's /<band_id> handler)
+    return redirect(f"/{band_id}")
+
+# --- END: Bulk pre-program admin pages ---
+
+
+def send_full_alert(name, phones, emails, band_id, maps_link=None):
+    profile_url = f"{BASE_URL}/{band_id}"
+    location_text = f"\nLocation:\n{maps_link}" if maps_link else ""
+    
+    message = (
+        f"🚨 EMPOWERBANDS EMERGENCY ALERT 🚨\n\n"
+        f"{name}'s emergency profile was triggered.\n\n"
+        f"Profile:\n{profile_url}"
+        f"{location_text}\n\n"
+        f"This person may need assistance"
+    )
+
+    success_sms = False
+    success_email = False
+
+    # =========================
+    # SMS (Twilio)
+    # =========================
+    phone_list = [p.strip() for p in str(phones).split(",") if p.strip()]
+
+    if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        for phone in phone_list:
+            try:
+                client.messages.create(
+                    body=message,
+                    from_=TWILIO_PHONE_NUMBER,
+                    to=phone
+                )
+                print("SMS sent:", phone)
+                success_sms = True
+            except Exception as e:
+                print("SMS failed:", e)
+
+    # =========================
+    # EMAIL (SMTP)
+    # =========================
+    email_list = [e.strip() for e in str(emails).split(",") if e.strip()]
+
+    if ALERT_EMAIL_PASSWORD and email_list:
+        try:
+            msg = MIMEText(message)
+            msg["Subject"] = f"Emergency Alert: {name}"
+            msg["From"] = ALERT_EMAILS
+            msg["To"] = ", ".join(email_list)
+
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            server.login(ALERT_EMAILS, ALERT_EMAIL_PASSWORD)
+            server.sendmail(ALERT_EMAILS, email_list, msg.as_string())
+            server.quit()
+
+            print("Emails sent")
+            success_email = True
+        except Exception as e:
+            print("Email failed:", e)
+
+    print("Alert result -> SMS:", success_sms, "EMAIL:", success_email)
+    return success_sms or success_email
+
+
+# ===============================
+# SHARED SITE NAVIGATION + FOOTER
+# Used on the Traveling Band Movement, Merch, and Board Members
+# pages (and referenced from the homepage nav) so the site shares
+# one consistent header/footer instead of each page rebuilding it.
+# ===============================
+
+def site_nav_html(active=""):
+    def link(href, label, key, extra_style=""):
+        cls = "active" if key == active else ""
+        style = f' style="{extra_style}"' if extra_style else ""
+        return f'<a class="{cls}" href="{href}"{style}>{label}</a>'
+
+    return f"""
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="site-header">
+    <a class="site-logo" href="/">
+        <img src="{LOGO_URL}" alt="EmpowerBands logo">
+        <span>EmpowerBands<em>Worldwide</em></span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+    {link("/", "Home", "home")}
+    {link("/impact-club", "💙 Impact Club", "impact")}
+    {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
+    {link("/merch", "Shop", "merch")}
+    {link("/board-members", "Board", "board")}
+    {link("/blessing-boxes", "Blessing Boxes", "blessing")}
+    {link("/#about", "About", "about")}
+    {link("mailto:support@empowerbands.org", "Contact", "contact")}
+</nav>
+    <div class="site-header-buttons">
+    <a class="btn-outline-sm" href="/donate">❤️ Donate — One-Time</a>
     <a class="btn-outline-sm" href="/impact-club">💙 Idirect("/admin")
 
     band_id = band_id.strip().upper()
