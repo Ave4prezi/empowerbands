@@ -92,6 +92,25 @@ def main():
             )
             updated += int(exists)
             inserted += int(not exists)
+                    for row in activation_rows:
+            band_id = (row.get("band_id") or "").strip().upper()
+            activation_code = (row.get("activation_code") or "").strip().upper()
+            claimed = (row.get("claimed") or "").strip().lower() == "yes"
+
+            if not band_id or not activation_code:
+                continue
+
+            cur.execute(
+                """
+                INSERT INTO activation_codes (
+                    band_id, activation_code, claimed
+                ) VALUES (%s, %s, %s)
+                ON CONFLICT (band_id) DO UPDATE SET
+                    activation_code = EXCLUDED.activation_code,
+                    claimed = EXCLUDED.claimed
+                """,
+                (band_id, activation_code, claimed),
+            )
 
     print(f"Migration complete: {inserted} inserted, {updated} updated.")
 
