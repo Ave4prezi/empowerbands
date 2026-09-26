@@ -14,6 +14,7 @@ from werkzeug.utils import secure_filename
 import csv
 import os
 import time
+import psycopg
 import smtplib
 from email.mime.text import MIMEText
 import qrcode
@@ -27,8 +28,9 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-file_name = "customers.csv"
+file_name = "customers.csv""
 scan_log_file = "scan_log.csv"
 
 BASE_URL = os.environ.get("BASE_URL", "https://empowerbands.org")
