@@ -3505,8 +3505,9 @@ def profile(band_id):
     confirm_alert = request.args.get("confirm_alert") == "yes"
     alert_mode = request.args.get("alert") == "yes"
 
-            if not DATABASE_URL:
+    if not DATABASE_URL:
         return "Database is not configured.", 500
+
     try:
         with psycopg.connect(DATABASE_URL) as conn:
             with conn.cursor() as cur:
