@@ -32,6 +32,13 @@ def main():
     with source.open(newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
 
+        activation_source = Path(__file__).with_name("activation_codes.csv")
+    activation_rows = []
+
+    if activation_source.exists():
+        with activation_source.open(newline="", encoding="utf-8") as f:
+            activation_rows = list(csv.DictReader(f))
+
     inserted = 0
     updated = 0
     with connect() as conn, conn.cursor() as cur:
