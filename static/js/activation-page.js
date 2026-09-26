@@ -147,7 +147,7 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
     });
     prevBtn.hidden = currentStepIndex === 0;
     // Next button shown on steps before final profile step, submit shown at last step (but we use review modal)
-    nextBtn.hidden = currentStepIndex >= (totalSteps - 1);
+    nextBtn.hidden = false;
     submitBtn.hidden = true;
     // Clear general messages
     formMessage.textContent = '';
