@@ -92,7 +92,8 @@ def main():
             )
             updated += int(exists)
             inserted += int(not exists)
-                    for row in activation_rows:
+
+        for row in activation_rows:
             band_id = (row.get("band_id") or "").strip().upper()
             activation_code = (row.get("activation_code") or "").strip().upper()
             claimed = (row.get("claimed") or "").strip().lower() == "yes"
@@ -113,7 +114,5 @@ def main():
             )
 
     print(f"Migration complete: {inserted} inserted, {updated} updated.")
-
-
 if __name__ == "__main__":
     main()
