@@ -5573,7 +5573,9 @@ VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
     phone,
     profile_type,
     generate_password_hash('1234'),
+  )
 ),
+
                 cur.execute(
                     """
                     UPDATE activation_codes
