@@ -3877,7 +3877,7 @@ PIN verified • EmpowerBands Emergency Response System
 </body>
 </html>
 """
-                return f"""
+            return f"""
 <!DOCTYPE html>
 <html>
 <head>
