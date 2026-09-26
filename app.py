@@ -60,7 +60,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 header = [
     "band_id",
-    "activation_code",
     "name",
     "email",
     "phone",
@@ -5426,13 +5425,14 @@ def terms():
 @app.route('/activate')
 @app.route('/activate/<band_id>')
 def activate(band_id=None):
-    """Serve the Safety ID activation page."""
-    return render_template('activate.html')
+    """Serve the CSV-backed Safety ID activation page."""
+    return render_template('activate.html', band_id=(band_id or '').strip().upper())
 
-    
+
 @app.route('/api/activate', methods=['POST'])
 def api_activate():
-    data = request.get_json(force=True) or {}
+    """Activate an unclaimed Safety ID using activation_codes.csv."""
+    data = request.get_json(silent=True) or {}
 
     band_id = (data.get('bandId') or '').strip().upper()
     activation_code = (data.get('activationCode') or '').strip().upper()
@@ -5444,81 +5444,78 @@ def api_activate():
 
     if not band_id:
         return jsonify({'error': 'Safety ID is required.'}), 400
-
     if not activation_code:
         return jsonify({'error': 'Activation code is required.'}), 400
-
     if not first_name or not last_name:
         return jsonify({'error': 'First and last name are required.'}), 400
-
     if not email:
         return jsonify({'error': 'Email is required.'}), 400
+    if not phone:
+        return jsonify({'error': 'Phone number is required.'}), 400
+
+    activation_file = 'activation_codes.csv'
+    try:
+        with open(activation_file, 'r', newline='', encoding='utf-8') as f:
+            code_rows = list(csv.DictReader(f))
+    except FileNotFoundError:
+        return jsonify({'error': 'Activation code database was not found.'}), 500
+
+    code_record = next(
+        (r for r in code_rows if (r.get('band_id') or '').strip().upper() == band_id),
+        None
+    )
+    if code_record is None:
+        return jsonify({'error': 'Safety ID not found.'}), 404
+    if (code_record.get('activation_code') or '').strip().upper() != activation_code:
+        return jsonify({'error': 'Activation code is incorrect.'}), 403
+    if (code_record.get('claimed') or '').strip().lower() == 'yes':
+        return jsonify({'error': 'This Safety ID has already been activated.'}), 409
 
     try:
         with open(file_name, 'r', newline='', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            rows = list(reader)
+            rows = list(csv.reader(f))
     except FileNotFoundError:
-        return jsonify({
-            'error': 'Safety ID database was not found.'
-        }), 500
+        return jsonify({'error': 'Customer database was not found.'}), 500
 
     if not rows:
-        return jsonify({
-            'error': 'Safety ID database is empty.'
-        }), 500
+        return jsonify({'error': 'Customer database is empty.'}), 500
 
-    header_row = rows[0]
-    data_rows = rows[1:]
+    customer_header = rows[0]
+    customer_rows = rows[1:]
+    profile_row = next(
+        (r for r in customer_rows if r and r[0].strip().upper() == band_id),
+        None
+    )
 
-    band_found = False
-    updated_rows = [header_row]
+    # A new/unclaimed ID may exist only in activation_codes.csv.  Create its
+    # 15-column profile row on first activation.
+    if profile_row is None:
+        profile_row = [''] * len(customer_header)
+        profile_row[0] = band_id
+        customer_rows.append(profile_row)
+    else:
+        while len(profile_row) < len(customer_header):
+            profile_row.append('')
+        if (len(profile_row) > 1 and profile_row[1].strip()) or (len(profile_row) > 2 and profile_row[2].strip()):
+            return jsonify({'error': 'This Safety ID already has a profile.'}), 409
 
-    for row in data_rows:
-        while len(row) < len(header_row):
-            row.append('')
-
-        current_band_id = row[0].strip().upper()
-
-        if current_band_id == band_id:
-            band_found = True
-
-            stored_activation_code = row[1].strip().upper()
-
-            if stored_activation_code != activation_code:
-                return jsonify({
-                    'error': 'Activation code is incorrect.'
-                }), 403
-
-            existing_name = row[2].strip()
-            existing_email = row[3].strip()
-
-            if existing_name or existing_email:
-                return jsonify({
-                    'error': 'This Safety ID has already been activated.'
-                }), 409
-
-            row[2] = f'{first_name} {last_name}'.strip()
-            row[3] = email
-            row[4] = phone
-            row[7] = profile_type
-
-        updated_rows.append(row)
-
-    if not band_found:
-        return jsonify({
-            'error': 'Safety ID not found.'
-        }), 404
+    profile_row[1] = f'{first_name} {last_name}'.strip()
+    profile_row[2] = email
+    profile_row[3] = phone
+    profile_row[6] = profile_type
 
     try:
         with open(file_name, 'w', newline='', encoding='utf-8') as f:
-            csv.writer(f).writerows(updated_rows)
+            csv.writer(f).writerows([customer_header] + customer_rows)
+
+        code_record['claimed'] = 'yes'
+        with open(activation_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=['band_id', 'activation_code', 'claimed'])
+            writer.writeheader()
+            writer.writerows(code_rows)
     except Exception as e:
         print('Activation save error:', e)
-
-        return jsonify({
-            'error': 'Could not save the activation. Please try again.'
-        }), 500
+        return jsonify({'error': 'Could not save the activation. Please try again.'}), 500
 
     return jsonify({
         'ok': True,
