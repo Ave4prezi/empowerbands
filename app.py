@@ -5541,25 +5541,127 @@ def api_activate():
         while len(profile_row) < len(customer_header):
             profile_row.append('')
         if (len(profile_row) > 1 and profile_row[1].strip()) or (len(profile_row) > 2 and profile_row[2].strip()):
-            return jsonify({'error': 'This Safety ID already has a profile.'}), 409
+@app.route('/api/activate', methods=['POST'])
+def api_activate():
+    """Activate an unclaimed Safety ID using PostgreSQL."""
+    data = request.get_json(silent=True) or {}
 
-    profile_row[1] = f'{first_name} {last_name}'.strip()
-    profile_row[2] = email
-    profile_row[3] = phone
-    profile_row[6] = profile_type
+    band_id = (data.get('bandId') or '').strip().upper()
+    activation_code = (data.get('activationCode') or '').strip().upper()
+    email = (data.get('email') or '').strip().lower()
+    first_name = (data.get('firstName') or '').strip()
+    last_name = (data.get('lastName') or '').strip()
+    phone = (data.get('phone') or '').strip()
+    profile_type = (data.get('profileType') or '').strip()
+
+    if not band_id:
+        return jsonify({'error': 'Safety ID is required.'}), 400
+    if not activation_code:
+        return jsonify({'error': 'Activation code is required.'}), 400
+    if not first_name or not last_name:
+        return jsonify({'error': 'First and last name are required.'}), 400
+    if not email:
+        return jsonify({'error': 'Email is required.'}), 400
+    if not phone:
+        return jsonify({'error': 'Phone number is required.'}), 400
+    if not DATABASE_URL:
+        return jsonify({'error': 'Database is not configured.'}), 500
 
     try:
-        with open(file_name, 'w', newline='', encoding='utf-8') as f:
-            csv.writer(f).writerows([customer_header] + customer_rows)
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
 
-        code_record['claimed'] = 'yes'
-        with open(activation_file, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=['band_id', 'activation_code', 'claimed'])
-            writer.writeheader()
-            writer.writerows(code_rows)
+                # Lock the activation record so two requests cannot
+                # claim the same Safety ID at the same time.
+                cur.execute(
+                    """
+                    SELECT activation_code, claimed
+                    FROM activation_codes
+                    WHERE UPPER(band_id) = UPPER(%s)
+                    FOR UPDATE
+                    """,
+                    (band_id,),
+                )
+
+                code_record = cur.fetchone()
+
+                if code_record is None:
+                    return jsonify({'error': 'Safety ID not found.'}), 404
+
+                stored_code, claimed = code_record
+
+                if (stored_code or '').strip().upper() != activation_code:
+                    return jsonify({'error': 'Activation code is incorrect.'}), 403
+
+                if claimed:
+                    return jsonify({
+                        'error': 'This Safety ID has already been activated.'
+                    }), 409
+
+                # Do not overwrite an existing populated profile.
+                cur.execute(
+                    """
+                    SELECT full_name, email
+                    FROM members
+                    WHERE UPPER(band_id) = UPPER(%s)
+                    """,
+                    (band_id,),
+                )
+
+                existing_profile = cur.fetchone()
+
+                if existing_profile and (
+                    (existing_profile[0] or '').strip()
+                    or (existing_profile[1] or '').strip()
+                ):
+                    return jsonify({
+                        'error': 'This Safety ID already has a profile.'
+                    }), 409
+
+                cur.execute(
+                    """
+                    INSERT INTO members (
+                        band_id,
+                        full_name,
+                        email,
+                        primary_phone,
+                        age_group,
+                        updated_at
+                    )
+                    VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    ON CONFLICT (band_id) DO UPDATE SET
+                        full_name = EXCLUDED.full_name,
+                        email = EXCLUDED.email,
+                        primary_phone = EXCLUDED.primary_phone,
+                        age_group = EXCLUDED.age_group,
+                        updated_at = CURRENT_TIMESTAMP
+                    """,
+                    (
+                        band_id,
+                        f'{first_name} {last_name}'.strip(),
+                        email,
+                        phone,
+                        profile_type,
+                    ),
+                )
+
+                cur.execute(
+                    """
+                    UPDATE activation_codes
+                    SET claimed = TRUE,
+                        claimed_at = CURRENT_TIMESTAMP
+                    WHERE UPPER(band_id) = UPPER(%s)
+                    """,
+                    (band_id,),
+                )
+
+            conn.commit()
+
     except Exception as e:
-        print('Activation save error:', e)
-        return jsonify({'error': 'Could not save the activation. Please try again.'}), 500
+        print('Activation database error:', e)
+        return jsonify({
+            'error': 'Could not save the activation. Please try again.'
+        }), 500
 
     return jsonify({
         'ok': True,
