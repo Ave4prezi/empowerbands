@@ -3505,11 +3505,44 @@ def profile(band_id):
     confirm_alert = request.args.get("confirm_alert") == "yes"
     alert_mode = request.args.get("alert") == "yes"
 
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
+        if not DATABASE_URL:
+        return "Database is not configured.", 500
 
-        for row in reader:
+    try:
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT
+                        band_id,
+                        full_name,
+                        email,
+                        primary_phone,
+                        emergency_contacts,
+                        emergency_emails,
+                        age_group,
+                        public_condition,
+                        public_instructions,
+                        private_medical_notes,
+                        pin_hash,
+                        address,
+                        race,
+                        gender,
+                        photo_url
+                    FROM members
+                    WHERE UPPER(band_id) = UPPER(%s)
+                    """,
+                    (band_id,),
+                )
+                db_row = cur.fetchone()
+    except Exception as e:
+        print("Profile database error:", e)
+        return "Could not load Safety ID profile.", 500
+
+    if db_row is None:
+        return "Safety ID not found.", 404
+
+    for row in [list(db_row)]:
             if len(row) >= 9 and row[0].strip().upper() == band_id:
                 name = row[1]
                 email = row[2]
@@ -3599,7 +3632,7 @@ def profile(band_id):
                     </html>
                     """
 
-                if entered_pin == pin:
+                if pin and entered_pin and check_password_hash(pin, entered_pin):
                     return f"""
 <!DOCTYPE html>
 <html>
