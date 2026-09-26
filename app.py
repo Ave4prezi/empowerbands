@@ -3630,8 +3630,8 @@ def profile(band_id):
                     </html>
                     """
 
-                if pin and entered_pin and check_password_hash(pin, entered_pin):
-                    return f"""
+            if pin and entered_pin and check_password_hash(pin, entered_pin):
+              return f"""
 <!DOCTYPE html>
 <html>
 <head>
