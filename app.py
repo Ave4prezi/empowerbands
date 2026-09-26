@@ -5556,30 +5556,24 @@ def api_activate():
                 cur.execute(
                     """
                     INSERT INTO members (
-                        band_id,
-                        full_name,
-                        email,
-                        primary_phone,
-                        age_group,
-                        updated_at
-                    )
-                    VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-                    ON CONFLICT (band_id) DO UPDATE SET
-                        full_name = EXCLUDED.full_name,
-                        email = EXCLUDED.email,
-                        primary_phone = EXCLUDED.primary_phone,
-                        age_group = EXCLUDED.age_group,
-                        updated_at = CURRENT_TIMESTAMP
+    band_id,
+    full_name,
+    email,
+    primary_phone,
+    age_group,
+    pin_hash,
+    updated_at
+)
+VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
                     """,
                     (
-                        band_id,
-                        f'{first_name} {last_name}'.strip(),
-                        email,
-                        phone,
-                        profile_type,
-                    ),
-                )
-
+    band_id,
+    f'{first_name} {last_name}'.strip(),
+    email,
+    phone,
+    profile_type,
+    generate_password_hash('1234'),
+),
                 cur.execute(
                     """
                     UPDATE activation_codes
