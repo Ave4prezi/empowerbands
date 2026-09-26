@@ -3539,38 +3539,36 @@ def profile(band_id):
         print("Profile database error:", e)
         return "Could not load Safety ID profile.", 500
 
-    if db_row is None:
+        if db_row is None:
         return "Safety ID not found.", 404
 
-        for row in [list(db_row)]:
+    for row in [list(db_row)]:
         if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                age_group = row[6] if len(row) > 6 else ""
-                condition = row[7] if len(row) > 7 else ""
-                instructions = row[8] if len(row) > 8 else ""
-                medical_notes = row[9] if len(row) > 9 else ""
-                pin = row[10] if (len(row) > 10 and row[10]) else "1234"
-                address = row[11] if len(row) > 11 else ""
-                race = row[12] if len(row) > 12 else ""
-                gender = row[13] if len(row) > 13 else ""
-                photo_url = row[14] if len(row) > 14 else ""
+            name = row[1]
+            email = row[2]
+            phone = row[3]
+            emergency_phones = row[4] if len(row) > 4 else ""
+            emergency_emails = row[5] if len(row) > 5 else ""
+            age_group = row[6] if len(row) > 6 else ""
+            condition = row[7] if len(row) > 7 else ""
+            instructions = row[8] if len(row) > 8 else ""
+            medical_notes = row[9] if len(row) > 9 else ""
+            pin = row[10] if (len(row) > 10 and row[10]) else ""
+            address = row[11] if len(row) > 11 else ""
+            race = row[12] if len(row) > 12 else ""
+            gender = row[13] if len(row) > 13 else ""
+            photo_url = row[14] if len(row) > 14 else ""
 
-                visitor_ip = request.remote_addr
-                log_scan(
-                    band_id,
-                    name,
-                    "PROFILE_VIEW",
-                    visitor_ip
-                )
+            visitor_ip = request.remote_addr
+            log_scan(
+                band_id,
+                name,
+                "PROFILE_VIEW",
+                visitor_ip
+            )
 
-    
-
-                entered_pin = request.args.get("pin")
-                if alert_mode:
+            entered_pin = request.args.get("pin")
+            if alert_mode:
                     success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
 
                     if success:
