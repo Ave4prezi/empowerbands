@@ -5584,28 +5584,50 @@ def api_activate():
                         'error': 'This Safety ID already has a profile.'
                     }), 409
 
-                cur.execute(
-                    """
-                    INSERT INTO members (
-    band_id,
-    full_name,
-    email,
-    primary_phone,
-    age_group,
-    pin_hash,
-    updated_at
-)
-VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
-                    """,
-                    (
-    band_id,
-    f'{first_name} {last_name}'.strip(),
-    email,
-    phone,
-    profile_type,
-    generate_password_hash('1234'),
-  )
-),
+                if existing_profile:
+                    cur.execute(
+                        """
+                        UPDATE members
+                        SET full_name = %s,
+                            email = %s,
+                            primary_phone = %s,
+                            age_group = %s,
+                            pin_hash = %s,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE UPPER(band_id) = UPPER(%s)
+                        """,
+                        (
+                            f'{first_name} {last_name}'.strip(),
+                            email,
+                            phone,
+                            profile_type,
+                            generate_password_hash('1234'),
+                            band_id,
+                        ),
+                    )
+                else:
+                    cur.execute(
+                        """
+                        INSERT INTO members (
+                            band_id,
+                            full_name,
+                            email,
+                            primary_phone,
+                            age_group,
+                            pin_hash,
+                            updated_at
+                        )
+        VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+        """,
+        (
+            band_id,
+            f'{first_name} {last_name}'.strip(),
+            email,
+            phone,
+            profile_type,
+            generate_password_hash('1234'),
+        ),
+    )
 
                 cur.execute(
                     """
