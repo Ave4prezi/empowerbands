@@ -29,10 +29,10 @@ def main():
     if not source.exists():
         raise SystemExit(f"Missing {source}")
 
-    with source.open(newline="", encoding="utf-8") as f:
+        with source.open(newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
 
-        activation_source = Path(__file__).with_name("activation_codes.csv")
+    activation_source = Path(__file__).with_name("activation_codes.csv")
     activation_rows = []
 
     if activation_source.exists():
