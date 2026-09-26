@@ -3585,7 +3585,7 @@ def profile(band_id):
                         <p><a href="/{band_id}">Go Back</a></p>
                         """
 
-                if confirm_alert:
+            if confirm_alert:
                     return f"""
                     <html>
                     <head>
