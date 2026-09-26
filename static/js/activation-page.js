@@ -162,6 +162,11 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
     if (firstInput) firstInput.focus();
   }
 
+  // Prefill the Safety ID when opened as /activate/<band_id>.
+  if (window.EMPOWERBANDS_PREFILL_ID && !deviceIdEl.value) {
+    deviceIdEl.value = window.EMPOWERBANDS_PREFILL_ID;
+  }
+
   // Initialize
   goToStep(0);
 
