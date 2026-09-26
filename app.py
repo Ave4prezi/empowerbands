@@ -29,6 +29,48 @@ app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 DATABASE_URL = os.environ.get("DATABASE_URL")
+def init_db():
+    if not DATABASE_URL:
+        return
+
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS members (
+                    band_id TEXT PRIMARY KEY,
+                    full_name TEXT,
+                    email TEXT,
+                    primary_phone TEXT,
+                    emergency_contacts TEXT,
+                    emergency_emails TEXT,
+                    age_group TEXT,
+                    public_condition TEXT,
+                    public_instructions TEXT,
+                    private_medical_notes TEXT,
+                    pin_hash TEXT,
+                    address TEXT,
+                    race TEXT,
+                    gender TEXT,
+                    photo_url TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS activation_codes (
+                    band_id TEXT PRIMARY KEY,
+                    activation_code TEXT NOT NULL UNIQUE,
+                    claimed BOOLEAN NOT NULL DEFAULT FALSE,
+                    claimed_at TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+        conn.commit()
+
+
+init_db()
 
 file_name = "customers.csv"
 scan_log_file = "scan_log.csv"
