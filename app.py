@@ -3539,7 +3539,7 @@ def profile(band_id):
         print("Profile database error:", e)
         return "Could not load Safety ID profile.", 500
 
-        if db_row is None:
+    if db_row is None:
         return "Safety ID not found.", 404
 
     for row in [list(db_row)]:
