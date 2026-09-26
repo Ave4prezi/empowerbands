@@ -10,8 +10,7 @@ from flask import (
 )
 from twilio.rest import Client
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash
-
+from werkzeug.security import generate_password_hash, check_password_hash
 import csv
 import os
 import time
