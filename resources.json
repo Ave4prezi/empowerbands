@@ -1,0 +1,41 @@
+[
+  {
+    "id": "crisis",
+    "title": "Talk with someone now",
+    "intro": "Free, confidential support from organizations outside EmpowerBands.",
+    "links": [
+      {
+        "title": "988 Suicide & Crisis Lifeline",
+        "description": "Call or text 988 in the U.S., or use online chat.",
+        "url": "https://988lifeline.org/get-help/",
+        "call": "988",
+        "text": "988"
+      },
+      {
+        "title": "National Domestic Violence Hotline",
+        "description": "Support and safety planning. Call 800-799-7233 or text START to 88788.",
+        "url": "https://www.thehotline.org/get-help/",
+        "call": "8007997233",
+        "text": "88788"
+      }
+    ]
+  },
+  {
+    "id": "music",
+    "title": "Music for a calmer moment",
+    "intro": "Choose music that feels comfortable for you. Playback happens on the artist's music page.",
+    "links": [
+      {
+        "title": "Weightless (Ambient Transmissions Vol. 2) — Marconi Union",
+        "description": "The artist's six-part Weightless album on Bandcamp.",
+        "url": "https://marconiunion.bandcamp.com/album/weightless-ambient-transmissions-vol-2"
+      }
+    ]
+  },
+  {
+    "id": "encouragement",
+    "title": "Words of encouragement",
+    "intro": "Short talks and messages chosen by EmpowerBands will appear here.",
+    "links": []
+  }
+]

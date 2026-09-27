@@ -327,8 +327,8 @@ def site_nav_html(active=""):
 <a href="#main-content" class="skip-link">Skip to main content</a>
 <div class="site-header">
     <a class="site-logo" href="/">
-        <img src="{LOGO_URL}" alt="EmpowerBands Worldwide logo">
-        <span>EmpowerBands<em>Worldwide</em></span>
+        <img src="{LOGO_URL}" alt="EmpowerBands logo">
+        <span>EmpowerBands</span>
     </a>
     <nav class="site-nav" aria-label="Main navigation">
     {link("/", "Home", "home")}
@@ -337,6 +337,8 @@ def site_nav_html(active=""):
     {link("/merch", "Shop", "merch")}
     {link("/board-members", "Board", "board")}
     {link("/blessing-boxes", "Blessing Boxes", "blessing")}
+    {link("/resources", "Support & Resources", "resources")}
+    {link("/support-hub", "Support Groups", "support")}
     {link("/#about", "About", "about")}
     {link("mailto:support@empowerbands.org", "Contact", "contact")}
 </nav>
@@ -378,7 +380,7 @@ def site_footer_html():
     return """
 <footer class="site-footer">
     <div>
-        <strong>EmpowerBands Worldwide</strong><br>
+        <strong>EmpowerBands</strong><br>
         Protect What Matters Most
     </div>
     <div>
@@ -390,6 +392,7 @@ def site_footer_html():
         <a href="/merch">Shop</a> |
         <a href="/board-members">Board Members</a> |
         <a href="/blessing-boxes">Blessing Boxes</a> |
+        <a href="/resources">Support & Resources</a> |
         <a href="/sms-opt-in">SMS Opt-In</a> |
         <a href="/privacy">Privacy Policy</a> |
         <a href="/terms">Terms of Service</a> |
@@ -1959,6 +1962,7 @@ body{{
         <a href="#how">How It Works</a>
         <a href="#about">About Us</a>
         <a href="/board-members">Board</a>
+        <a href="/resources">Support & Resources</a>
         <a href="mailto:support@empowerbands.org">Contact</a>
     </div>
 
@@ -2200,6 +2204,7 @@ body{{
 
     <div>
         <a href="/blessing-boxes">💛 Blessing Boxes</a> |
+        <a href="/resources">Support & Resources</a> |
         <a href="/sms-opt-in">SMS Opt-In</a> |
         <a href="/privacy">Privacy Policy</a> |
         <a href="/terms">Terms of Service</a> |
@@ -5491,6 +5496,26 @@ def admin_blessing_box_needs():
 @app.route("/privacy")
 def privacy():
     return render_template('privacy.html')
+
+
+@app.route("/resources")
+def resources():
+    import json
+    from pathlib import Path
+
+    resource_file = Path(app.root_path) / "resources.json"
+    try:
+        with resource_file.open(encoding="utf-8") as source:
+            groups = json.load(source)
+    except (OSError, ValueError):
+        app.logger.exception("Could not load resources.json")
+        groups = []
+    return render_template("resources.html", groups=groups)
+
+
+@app.route("/support-hub")
+def support_hub():
+    return render_template("support_hub.html")
 
 
 @app.route("/terms")
