@@ -3362,6 +3362,22 @@ def edit_profile(band_id):
             writer = csv.writer(f)
             writer.writerows(new_rows)
 
+        # Public Safety ID pages use PostgreSQL when it is configured, so keep
+        # the profile photo in sync with the CSV-backed admin editor.
+        if DATABASE_URL:
+            with psycopg.connect(DATABASE_URL) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        UPDATE members
+                        SET photo_url = %s,
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE UPPER(band_id) = UPPER(%s)
+                        """,
+                        (photo_url, band_id),
+                    )
+                conn.commit()
+
         return redirect("/dashboard")
 
     return f"""
