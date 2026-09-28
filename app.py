@@ -27,6 +27,10 @@ from markupsafe import escape
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
 
+# Profile photos may temporarily be stored as a large data URL.  Raising the
+# reader limit lets an administrator open and repair those records safely.
+csv.field_size_limit(10_000_000)
+
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 def init_db():
@@ -3320,6 +3324,14 @@ def edit_profile(band_id):
 
     if request.method == "POST":
 
+        photo_url = request.form.get("photo_url", "").strip()
+        photo = request.files.get("photo")
+        if photo and photo.filename != "":
+            filename = f"{band_id}_{int(time.time())}_{secure_filename(photo.filename)}"
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            photo.save(filepath)
+            photo_url = f"/static/uploads/{filename}"
+
         updated_row = [
             request.form["band_id"].strip().upper(),
             request.form["name"].strip(),
@@ -3335,7 +3347,7 @@ def edit_profile(band_id):
             request.form["address"].strip(),
             request.form["race"].strip(),
             request.form["gender"].strip(),
-            request.form.get("photo_url", "").strip()
+            photo_url
         ]
 
         new_rows = [header]
@@ -3434,7 +3446,7 @@ button{{
 
 <h1>Edit Profile</h1>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
 
 <input name="band_id" value="{found_row[0]}" required>
 <input name="name" value="{found_row[1]}" required>
@@ -3453,6 +3465,7 @@ button{{
 <input name="race" value="{found_row[12]}">
 <input name="gender" value="{found_row[13]}">
 <input name="photo_url" value="{found_row[14]}" placeholder="Photo URL">
+<input type="file" name="photo" accept="image/*">
 
 <button type="submit">Save Changes</button>
 
