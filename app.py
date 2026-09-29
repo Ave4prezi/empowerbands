@@ -3468,6 +3468,19 @@ textarea{{
     min-height:90px;
 }}
 
+label{{
+    display:block;
+    margin:4px 0 7px;
+    color:#dbeafe;
+    font-size:14px;
+    font-weight:700;
+}}
+
+input::placeholder, textarea::placeholder{{
+    color:#cbd5e1;
+    opacity:.9;
+}}
+
 button{{
     width:100%;
     padding:16px;
@@ -3496,22 +3509,37 @@ button{{
 
 <form method="POST" enctype="multipart/form-data">
 
-<input name="band_id" value="{found_row[0]}" required>
-<input name="name" value="{found_row[1]}" required>
-<input name="email" value="{found_row[2]}">
-<input name="phone" value="{found_row[3]}">
-<input name="emergency_phones" value="{found_row[4]}" required>
-<input name="emergency_emails" value="{found_row[5]}">
-<input name="age_group" value="{found_row[6]}">
-<input name="condition" value="{found_row[7]}">
+<label>Safety ID</label>
+<input name="band_id" value="{found_row[0]}" placeholder="Safety ID" required>
+<label>Name</label>
+<input name="name" value="{found_row[1]}" placeholder="Full name" required>
+<label>Email</label>
+<input name="email" value="{found_row[2]}" placeholder="Email address">
+<label>Phone</label>
+<input name="phone" value="{found_row[3]}" placeholder="Primary phone number">
+<label>Emergency phone(s)</label>
+<input name="emergency_phones" value="{found_row[4]}" placeholder="Emergency contact phone number(s)" required>
+<label>Emergency email(s)</label>
+<input name="emergency_emails" value="{found_row[5]}" placeholder="Emergency contact email(s)">
+<label>Profile type / age group</label>
+<input name="age_group" value="{found_row[6]}" placeholder="Adult, Child, Senior, etc.">
+<label>Condition / public alert</label>
+<input name="condition" value="{found_row[7]}" placeholder="Condition or public safety alert">
 
-<textarea name="instructions">{found_row[8]}</textarea>
-<textarea name="medical_notes">{found_row[9]}</textarea>
+<label>What to do / instructions</label>
+<textarea name="instructions" placeholder="Instructions for someone helping this person">{found_row[8]}</textarea>
+<label>Private medical notes</label>
+<textarea name="medical_notes" placeholder="Private medical notes">{found_row[9]}</textarea>
 
-<input name="pin" value="{found_row[10]}" required>
-<input name="address" value="{found_row[11]}">
-<input name="race" value="{found_row[12]}">
-<input name="gender" value="{found_row[13]}">
+<label>PIN</label>
+<input name="pin" value="{found_row[10]}" placeholder="PIN" required>
+<label>Address</label>
+<input name="address" value="{found_row[11]}" placeholder="Address">
+<label>Race</label>
+<input name="race" value="{found_row[12]}" placeholder="Race">
+<label>Gender</label>
+<input name="gender" value="{found_row[13]}" placeholder="Gender">
+<label>Photo URL</label>
 <input name="photo_url" value="{found_row[14]}" placeholder="Photo URL">
 <input type="file" name="photo" accept="image/*">
 
@@ -4290,24 +4318,30 @@ def im_safe(band_id):
 def qr_code(band_id):
     band_id = band_id.strip().upper()
 
-    # Make sure this Band ID actually exists
-    band_exists = False
+    # PostgreSQL is the source of truth for current Safety IDs. New IDs created
+    # by the Activation Code Manager may not exist in the legacy CSV file.
+    if not DATABASE_URL:
+        abort(500, description="Database is not configured")
 
     try:
-        with open(file_name, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-
-            for row in reader:
-                if row.get("band_id", "").strip().upper() == band_id:
-                    band_exists = True
-                    break
-
-    except Exception as e:
-        print("QR lookup error:", e)
-        abort(500, description="Could not verify band ID")
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT 1
+                    FROM members
+                    WHERE UPPER(band_id) = UPPER(%s)
+                    LIMIT 1
+                    """,
+                    (band_id,),
+                )
+                band_exists = cur.fetchone() is not None
+    except Exception:
+        app.logger.exception("QR lookup failed for Safety ID")
+        abort(500, description="Could not verify Safety ID")
 
     if not band_exists:
-        abort(404, description="Band not found")
+        abort(404, description="Safety ID not found")
 
     # URL that scanning the QR code will open
     profile_url = f"{BASE_URL.rstrip('/')}/{band_id}"
