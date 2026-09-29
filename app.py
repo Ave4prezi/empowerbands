@@ -2586,7 +2586,7 @@ def dashboard():
         return redirect("/admin")
 
     customers = []
-    total_bands = count_rows(file_name)
+    total_bands = 0
     total_scans = count_rows(scan_log_file)
 
     # Read visitor counter
@@ -2648,15 +2648,30 @@ def dashboard():
     except:
         pass
 
-    try:
-        with open(file_name, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-
-            for row in reader:
-                customers.append(row)
-
-    except:
-        customers = []
+    # PostgreSQL is the source of truth for activated Safety ID profiles.
+    if DATABASE_URL:
+        try:
+            with psycopg.connect(DATABASE_URL) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        SELECT band_id, full_name, email, primary_phone
+                        FROM members
+                        ORDER BY band_id
+                        """
+                    )
+                    for band_id, full_name, email, primary_phone in cur.fetchall():
+                        customers.append({
+                            "band_id": band_id or "",
+                            "name": full_name or "",
+                            "email": email or "",
+                            "phone": primary_phone or "",
+                        })
+            total_bands = len(customers)
+        except Exception:
+            app.logger.exception("Dashboard member lookup failed")
+            customers = []
+            total_bands = 0
 
     customer_cards = ""
     
@@ -2700,12 +2715,6 @@ def dashboard():
     <a class="btn edit"
        href="/edit/{band_id}">
        Edit Profile
-    </a>
-
-    <a class="btn delete"
-       href="/delete/{band_id}"
-       onclick="return confirm('Delete this band permanently?')">
-       Delete
     </a>
 
 </div>
@@ -2878,10 +2887,6 @@ body{{
         <div class="logo">
             Empower<span>Bands</span>
         </div>
-
-        <a class="add-btn" href="/add">
-            + Add Band
-        </a>
 
         <a class="add-btn" href="/scans">
             📡 View Scans
@@ -3336,26 +3341,10 @@ def edit_profile(band_id):
 
     band_id = band_id.strip().upper()
 
-    with open(file_name, "r", newline="", encoding="utf-8") as f:
-        rows = list(csv.reader(f))
-
-    header = rows[0]
-    data_rows = rows[1:]
-
-    found_row = None
-
-    for row in data_rows:
-        if row[0].strip().upper() == band_id:
-            while len(row) < 15:
-                row.append("")
-            found_row = row
-            break
-
-    if not found_row:
-        return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>"
+    if not DATABASE_URL:
+        return "Database is not configured.", 500
 
     if request.method == "POST":
-
         photo_url = request.form.get("photo_url", "").strip()
         photo = request.files.get("photo")
         if photo and photo.filename != "":
@@ -3364,53 +3353,95 @@ def edit_profile(band_id):
             photo.save(filepath)
             photo_url = f"/static/uploads/{filename}"
 
-        updated_row = [
-            request.form["band_id"].strip().upper(),
-            request.form["name"].strip(),
-            request.form["email"].strip(),
-            request.form["phone"].strip(),
-            request.form["emergency_phones"].strip(),
-            request.form.get("emergency_emails", "").strip(),
-            request.form["age_group"].strip(),
-            request.form["condition"].strip(),
-            request.form["instructions"].strip(),
-            request.form["medical_notes"].strip(),
-            request.form["pin"].strip(),
-            request.form["address"].strip(),
-            request.form["race"].strip(),
-            request.form["gender"].strip(),
-            photo_url
-        ]
+        new_band_id = request.form["band_id"].strip().upper()
+        new_pin = request.form.get("pin", "").strip()
 
-        new_rows = [header]
-
-        for row in data_rows:
-            if row[0].strip().upper() == band_id:
-                new_rows.append(updated_row)
-            else:
-                new_rows.append(row)
-
-        with open(file_name, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerows(new_rows)
-
-        # Public Safety ID pages use PostgreSQL when it is configured, so keep
-        # the profile photo in sync with the CSV-backed admin editor.
-        if DATABASE_URL:
+        try:
             with psycopg.connect(DATABASE_URL) as conn:
                 with conn.cursor() as cur:
-                    cur.execute(
-                        """
-                        UPDATE members
-                        SET photo_url = %s,
-                            updated_at = CURRENT_TIMESTAMP
-                        WHERE UPPER(band_id) = UPPER(%s)
-                        """,
-                        (photo_url, band_id),
-                    )
+                    if new_pin:
+                        cur.execute(
+                            """
+                            UPDATE members
+                            SET band_id=%s, full_name=%s, email=%s, primary_phone=%s,
+                                emergency_contacts=%s, emergency_emails=%s, age_group=%s,
+                                public_condition=%s, public_instructions=%s,
+                                private_medical_notes=%s, pin_hash=%s, address=%s,
+                                race=%s, gender=%s, photo_url=%s,
+                                updated_at=CURRENT_TIMESTAMP
+                            WHERE UPPER(band_id)=UPPER(%s)
+                            """,
+                            (
+                                new_band_id, request.form["name"].strip(),
+                                request.form["email"].strip(), request.form["phone"].strip(),
+                                request.form["emergency_phones"].strip(),
+                                request.form.get("emergency_emails", "").strip(),
+                                request.form["age_group"].strip(), request.form["condition"].strip(),
+                                request.form["instructions"].strip(), request.form["medical_notes"].strip(),
+                                generate_password_hash(new_pin), request.form["address"].strip(),
+                                request.form["race"].strip(), request.form["gender"].strip(),
+                                photo_url, band_id,
+                            ),
+                        )
+                    else:
+                        cur.execute(
+                            """
+                            UPDATE members
+                            SET band_id=%s, full_name=%s, email=%s, primary_phone=%s,
+                                emergency_contacts=%s, emergency_emails=%s, age_group=%s,
+                                public_condition=%s, public_instructions=%s,
+                                private_medical_notes=%s, address=%s, race=%s, gender=%s,
+                                photo_url=%s, updated_at=CURRENT_TIMESTAMP
+                            WHERE UPPER(band_id)=UPPER(%s)
+                            """,
+                            (
+                                new_band_id, request.form["name"].strip(),
+                                request.form["email"].strip(), request.form["phone"].strip(),
+                                request.form["emergency_phones"].strip(),
+                                request.form.get("emergency_emails", "").strip(),
+                                request.form["age_group"].strip(), request.form["condition"].strip(),
+                                request.form["instructions"].strip(), request.form["medical_notes"].strip(),
+                                request.form["address"].strip(), request.form["race"].strip(),
+                                request.form["gender"].strip(), photo_url, band_id,
+                            ),
+                        )
+                    if cur.rowcount == 0:
+                        return "Safety ID profile not found.", 404
                 conn.commit()
+        except Exception:
+            app.logger.exception("Profile update failed")
+            return "Could not update Safety ID profile.", 500
 
         return redirect("/dashboard")
+
+    try:
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT band_id, full_name, email, primary_phone, emergency_contacts,
+                           emergency_emails, age_group, public_condition, public_instructions,
+                           private_medical_notes, address, race, gender, photo_url
+                    FROM members
+                    WHERE UPPER(band_id)=UPPER(%s)
+                    """,
+                    (band_id,),
+                )
+                db_row = cur.fetchone()
+    except Exception:
+        app.logger.exception("Edit profile lookup failed")
+        return "Could not load Safety ID profile.", 500
+
+    if not db_row:
+        return "<h1>Profile not found</h1><p><a href='/dashboard'>Back to Dashboard</a></p>", 404
+
+    # Keep the existing template indexes stable. PIN hashes are never sent to the browser.
+    found_row = [
+        db_row[0] or "", db_row[1] or "", db_row[2] or "", db_row[3] or "",
+        db_row[4] or "", db_row[5] or "", db_row[6] or "", db_row[7] or "",
+        db_row[8] or "", db_row[9] or "", "", db_row[10] or "",
+        db_row[11] or "", db_row[12] or "", db_row[13] or "",
+    ]
 
     return f"""
 <!DOCTYPE html>
@@ -3532,7 +3563,7 @@ button{{
 <textarea name="medical_notes" placeholder="Private medical notes">{found_row[9]}</textarea>
 
 <label>PIN</label>
-<input name="pin" value="{found_row[10]}" placeholder="PIN" required>
+<input name="pin" value="" placeholder="Leave blank to keep current PIN">
 <label>Address</label>
 <input name="address" value="{found_row[11]}" placeholder="Address">
 <label>Race</label>
