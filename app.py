@@ -1994,6 +1994,7 @@ body{{
     </div>
 
     <div class="top-buttons">
+        <a class="btn" href="/manage-profile">Manage My Safety Profile</a>
         <a class="btn" href="/EB001">🚀 View Demo</a>
         <a class="btn dark" href="/admin">🔒 Admin Login</a>
     </div>
