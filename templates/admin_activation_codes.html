@@ -126,14 +126,18 @@
 
   <div class="inventory-head">
     <h2>Inventory ({{ records|length }})</h2>
-    <a class="button secondary" href="{{ url_for('activation_manager.activation_codes_export', q=query, status=status, store=store) }}">Download CSV</a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button id="print-selected" type="button" style="width:auto;min-height:40px">Print Selected Cards</button>
+      <a class="button secondary" href="{{ url_for('activation_manager.activation_codes_export', q=query, status=status, store=store) }}">Download CSV</a>
+    </div>
   </div>
   {% if records %}
   <div class="table-wrap"><table>
-    <thead><tr><th>Safety ID</th><th>Activation code</th><th>Status</th><th>Created</th><th>Claimed</th><th>Store / assigned</th><th>Notes</th><th>Actions</th></tr></thead>
+    <thead><tr><th class="select-col"><input id="select-all-cards" type="checkbox" title="Select all available cards"></th><th>Safety ID</th><th>Activation code</th><th>Status</th><th>Created</th><th>Claimed</th><th>Store / assigned</th><th>Notes</th><th>Actions</th></tr></thead>
     <tbody>
     {% for row in records %}
       <tr>
+        <td class="select-col" data-label="Print">{% if not row.claimed %}<input class="card-select" type="checkbox" value="{{ row.band_id }}" aria-label="Select {{ row.band_id }} for printing">{% endif %}</td>
         <td data-label="Safety ID"><code>{{ row.band_id }}</code></td>
         <td data-label="Activation code"><code>{{ row.activation_code }}</code></td>
         <td data-label="Status"><span class="pill {{ 'claimed' if row.claimed else 'available' }}">{{ 'Claimed' if row.claimed else 'Available' }}</span></td>
