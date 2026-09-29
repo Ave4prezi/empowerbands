@@ -416,6 +416,8 @@ def site_footer_html():
         <a href="/board-members">Board Members</a> |
         <a href="/blessing-boxes">Blessing Boxes</a> |
         <a href="/resources">Support & Resources</a> |
+        <a href="/board-members">Board</a> |
+        <a href="/admin">Admin</a> |
         <a href="/sms-opt-in">SMS Opt-In</a> |
         <a href="/privacy">Privacy Policy</a> |
         <a href="/terms">Terms of Service</a> |
@@ -1956,6 +1958,41 @@ body{{
         text-align:center;
     }}
 }}
+
+/* Clear first screen, with product and actions visible on small screens. */
+html,body{{max-width:100%;overflow-x:hidden;}}
+.header{{gap:18px;flex-wrap:wrap;padding:14px 6%;}}
+.nav{{gap:18px;flex-wrap:wrap;min-width:0;}}
+.nav a{{font-size:14px;white-space:nowrap;}}
+.top-buttons{{gap:10px;flex-wrap:wrap;}}
+.top-buttons .btn{{padding:11px 15px;font-size:13px;box-shadow:none;}}
+.hero{{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;padding:0 6% 110px;align-items:center;}}
+.hero-banner{{grid-column:1/-1;width:100%;margin:0;overflow:hidden;}}
+.hero-banner img{{display:block;width:100%;height:160px;object-fit:cover;object-position:center;}}
+.hero-copy,.hero-product{{min-width:0;}}
+.hero .eyebrow{{color:#67e8f9;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}}
+.hero h1{{font-size:clamp(38px,4.7vw,62px);}}
+.hero-description{{font-size:17px;}}
+.hero-product{{margin:0;background:#0b1b33;border:1px solid rgba(56,189,248,.3);border-radius:20px;overflow:hidden;box-shadow:0 20px 48px rgba(0,0,0,.25);}}
+.hero-product img{{display:block;width:100%;height:auto;}}
+.hero-product figcaption{{padding:12px 16px;color:#cbd5e1;font-size:13px;}}
+.hero-actions .btn{{font-size:14px;box-shadow:none;}}
+@media(max-width:850px){{
+    .header{{align-items:stretch;}}
+    .nav{{gap:14px;}}
+    .top-buttons{{flex-direction:row;}}
+    .hero{{grid-template-columns:1fr;padding-bottom:105px;text-align:left;}}
+    .hero-banner img{{height:115px;}}
+    .hero-product{{max-width:620px;}}
+    .hero-actions{{align-items:stretch;}}
+    .hero-actions .btn{{width:auto;}}
+}}
+@media(max-width:550px){{
+    .hero{{gap:18px;}}
+    .hero h1{{font-size:40px;}}
+    .hero-actions .btn{{width:100%;}}
+    .top-buttons .btn{{flex:1;text-align:center;}}
+}}
 </style>
 </head>
 
@@ -1984,79 +2021,37 @@ body{{
 
 
 <div class="header">
-    
-
-    <div class="nav">
+    <nav class="nav" aria-label="Main navigation">
         <a class="active" href="/">Home</a>
-        <a href="/sponsor">Sponsor a Safety ID</a>
-        <a href="/traveling-band-movement">Traveling Band Movement</a>
-        <a href="/merch">Shop</a>
         <a href="#how">How It Works</a>
-        <a href="#about">About Us</a>
-        <a href="/board-members">Board</a>
-        <a href="/resources">Support & Resources</a>
-        <a href="mailto:support@empowerbands.org">Contact</a>
-    </div>
-
+        <a href="/sponsor">Sponsor</a>
+        <a href="/merch">Shop</a>
+        <a href="/impact-club">Impact Club</a>
+        <a href="/resources">Resources</a>
+    </nav>
     <div class="top-buttons">
-        <a class="btn" href="/manage-profile">Manage My Safety Profile</a>
+        <a class="btn dark" href="/manage-profile">Manage My Profile</a>
         <a class="btn" href="https://pay.empowerbands.org">Buy a Safety ID</a>
-        <a class="btn" href="/EB001">🚀 View Demo</a>
-        <a class="btn dark" href="/admin">🔒 Admin Login</a>
     </div>
 </div>
 
 <section class="hero">
-
-
-
-<div class="hero-banner">
-    <img
-        src="https://i.imgur.com/bSUxUXa.jpeg"
-        alt="EmpowerBands Worldwide"
-    >
-</div>
-
-<style>
-.hero-banner {{
-    grid-column:1 / -1;
-    width:calc(100% + 12vw);
-    margin-left:-6vw;
-    overflow:hidden;
-    padding:0;
-}}
-
-.hero-banner img {{
-    display:block;
-    width:100%;
-    height:320px;
-    object-fit:cover;
-    object-position:center;
-}}
-
-@media(max-width:768px) {{
-    .hero-banner img {{
-        height:190px;
-    }}
-}}
-</style>
-
-    <h1>A Safety ID that <span>helps people reach you</span></h1>
-
-    <h3>Small wearable. Critical information within reach.</h3>
-
-    <p>
-        Tap the NFC Safety ID or scan its QR code to open a safety profile with
-        caregiver contacts and helpful instructions. No special app is needed.
-    </p>
-    <div class="hero-actions">
-        <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
-        <a class="btn dark" href="/EB001">See how it works</a>
+    <div class="hero-banner">
+        <img src="https://i.imgur.com/bSUxUXa.jpeg" alt="EmpowerBands Worldwide — Protect What Matters Most">
     </div>
-</div>
-
-</section>
-
+    <div class="hero-copy">
+        <p class="eyebrow">NFC + QR Safety ID</p>
+        <h1>A Safety ID that <span>helps people reach you</span></h1>
+        <p class="hero-description">Tap the wearable or scan its QR code to open a safety profile with caregiver contacts and helpful instructions. No special app is needed.</p>
+        <div class="hero-actions">
+            <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
+            <a class="btn dark" href="/EB001">View a sample profile</a>
+        </div>
+    </div>
+    <figure class="hero-product">
+        <img src="/static/images/safety-id-tap-demo.webp" alt="Illustration of an EmpowerBands NFC Safety ID worn on a cord beside a smartphone" width="900" height="600">
+        <figcaption>Tap a phone to the wearable to open its safety profile. Product illustration.</figcaption>
+    </figure>
 </section>
 
 <section id="about" class="section">
@@ -2079,22 +2074,12 @@ body{{
         that give people greater peace of mind at home, at school, while traveling,
         and throughout everyday life.
     </p>
-</section>
-
-        <div style="margin-top:25px;">
-            <a class="btn" href="/EB001">🚀 View Live Demo</a>
-            <a class="btn dark" href="/sponsor">Sponsor a Safety ID</a>
-            <a class="btn dark" href="/sponsor">Sponsor two — $50</a>
-        </div>
-
-        <div class="trust">
-            <div class="trust-card">📡 NFC + QR Technology</div>
-            <div class="trust-card">♿ Accessibility Focused</div>
-            <div class="trust-card">❤️ Nonprofit Organization</div>
-            <div class="trust-card">🏫 School & Caregiver Ready</div>
-        </div>
+    <div class="trust">
+        <div class="trust-card">📡 NFC + QR Technology</div>
+        <div class="trust-card">♿ Accessibility Focused</div>
+        <div class="trust-card">❤️ Nonprofit Organization</div>
+        <div class="trust-card">🏫 School & Caregiver Ready</div>
     </div>
-
 </section>
 
 <section class="section" id="how">
@@ -2243,6 +2228,8 @@ body{{
     <div>
         <a href="/blessing-boxes">💛 Blessing Boxes</a> |
         <a href="/resources">Support & Resources</a> |
+        <a href="/board-members">Board</a> |
+        <a href="/admin">Admin</a> |
         <a href="/sms-opt-in">SMS Opt-In</a> |
         <a href="/privacy">Privacy Policy</a> |
         <a href="/terms">Terms of Service</a> |
