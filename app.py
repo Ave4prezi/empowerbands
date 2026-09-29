@@ -2657,9 +2657,12 @@ def dashboard():
                 with conn.cursor() as cur:
                     cur.execute(
                         """
-                        SELECT band_id, full_name, email, primary_phone
-                        FROM members
-                        ORDER BY band_id
+                        SELECT m.band_id, m.full_name, m.email, m.primary_phone
+                        FROM members m
+                        INNER JOIN activation_codes a
+                            ON UPPER(a.band_id) = UPPER(m.band_id)
+                           AND a.claimed = TRUE
+                        ORDER BY m.band_id
                         """
                     )
                     for band_id, full_name, email, primary_phone in cur.fetchall():
