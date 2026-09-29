@@ -2659,9 +2659,14 @@ def dashboard():
                         """
                         SELECT m.band_id, m.full_name, m.email, m.primary_phone
                         FROM members m
-                        INNER JOIN activation_codes a
+                        LEFT JOIN activation_codes a
                             ON UPPER(a.band_id) = UPPER(m.band_id)
-                           AND a.claimed = TRUE
+                        WHERE a.claimed = TRUE
+                           OR (
+                               a.band_id IS NULL
+                               AND NULLIF(TRIM(m.full_name), '') IS NOT NULL
+                               AND UPPER(TRIM(m.full_name)) <> 'UNASSIGNED'
+                           )
                         ORDER BY m.band_id
                         """
                     )
