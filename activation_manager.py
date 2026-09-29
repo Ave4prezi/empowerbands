@@ -508,11 +508,20 @@ def register_activation_manager(
     def activation_codes_print():
         band_id = request.args.get("band_id", "").strip().upper()
         batch_id = request.args.get("batch", "").strip()
+        selected_ids = [value.strip().upper() for value in request.args.getlist("band_ids") if value.strip()]
         if band_id and not BAND_ID_RE.fullmatch(band_id):
             abort(400, description="Invalid Safety ID.")
-        if any(not BAND_ID_RE.fullmatch(value) for value in selected_ids):\n            abort(400, description="One or more Safety IDs are invalid.")\n        if len(selected_ids) > 200:\n            abort(400, description="Too many Safety IDs selected.")\n        if batch_id and not re.fullmatch(r"[a-f0-9]{32}", batch_id):
+        if any(not BAND_ID_RE.fullmatch(value) for value in selected_ids):
+            abort(400, description="One or more Safety IDs are invalid.")
+        if len(selected_ids) > 200:
+            abort(400, description="Too many Safety IDs selected.")
+        if batch_id and not re.fullmatch(r"[a-f0-9]{32}", batch_id):
             abort(400, description="Invalid batch reference.")
-        records = repository().records_for_print(band_id=band_id, batch_id=batch_id, band_ids=selected_ids)
+        records = repository().records_for_print(
+            band_id=band_id,
+            batch_id=batch_id,
+            band_ids=selected_ids,
+        )
         if not records:
             abort(404, description="No activation cards were found.")
         if any(record.get("claimed") for record in records):
