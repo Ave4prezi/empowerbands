@@ -20,18 +20,29 @@ from email.mime.text import MIMEText
 import qrcode
 import hashlib
 import hmac
+import re
+import secrets
 from io import BytesIO
 from markupsafe import escape
+from activation_manager import register_activation_manager
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "empowerbands-secret")
+configured_secret_key = os.environ.get("SECRET_KEY")
+if not configured_secret_key and os.environ.get("DATABASE_URL"):
+    raise RuntimeError("SECRET_KEY must be configured when DATABASE_URL is enabled.")
+app.secret_key = configured_secret_key or secrets.token_hex(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=bool(os.environ.get("RENDER")),
+)
 
 # Profile photos may temporarily be stored as a large data URL.  Raising the
 # reader limit lets an administrator open and repair those records safely.
 csv.field_size_limit(10_000_000)
 
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "empower123")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 def init_db():
     if not DATABASE_URL:
@@ -98,6 +109,13 @@ ALERT_EMAILS = os.environ.get("ALERT_EMAILS", "")
 ALERT_EMAIL_PASSWORD = os.environ.get("ALERT_EMAIL_PASSWORD")
 
 LOGO_URL = "https://i.imgur.com/bSUxUXa.jpeg"
+
+register_activation_manager(
+    app,
+    database_url_getter=lambda: DATABASE_URL,
+    logo_url="/static/images/empowerbands-logo-banner.jpeg",
+    base_url="https://www.empowerbands.org",
+)
 
 UPLOAD_FOLDER = "static/uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -1474,9 +1492,14 @@ def home():
     # Visitor counter
     _vc_file = "visit_count.txt"
     try:
-        _vc = int(open(_vc_file).read().strip()) if os.path.exists(_vc_file) else 0
+        if os.path.exists(_vc_file):
+            with open(_vc_file) as visit_count_file:
+                _vc = int(visit_count_file.read().strip())
+        else:
+            _vc = 0
         _vc += 1
-        open(_vc_file, "w").write(str(_vc))
+        with open(_vc_file, "w") as visit_count_file:
+            visit_count_file.write(str(_vc))
         visit_count = f"{_vc:,}"
     except:
         visit_count = "—"
@@ -2322,7 +2345,12 @@ def admin():
 
     if request.method == "POST":
 
-        if request.form.get("password") == ADMIN_PASSWORD:
+        submitted_password = request.form.get("password", "")
+        if not ADMIN_PASSWORD:
+            return "Administrator login is not configured.", 503
+
+        if hmac.compare_digest(submitted_password, ADMIN_PASSWORD):
+            session.clear()
             session["logged_in"] = True
             # Store latest commit SHA at login time so we can detect new changes
             try:
@@ -2877,6 +2905,10 @@ body{{
 
         <a class="add-btn" href="/admin/spotlight">
             💚 Family Spotlight
+</a>
+
+        <a class="add-btn" href="/admin/activation-codes">
+            🔐 Activation Codes
 </a>
 
 </div>
@@ -5564,7 +5596,11 @@ def activate(band_id=None):
 @app.route('/api/activate', methods=['POST'])
 def api_activate():
     """Activate an unclaimed Safety ID using PostgreSQL."""
-    data = request.get_json(silent=True) or {}
+    if not request.is_json:
+        return jsonify({'error': 'A JSON request is required.'}), 415
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Invalid activation request.'}), 400
 
     band_id = (data.get('bandId') or '').strip().upper()
     activation_code = (data.get('activationCode') or '').strip().upper()
@@ -5574,16 +5610,19 @@ def api_activate():
     phone = (data.get('phone') or '').strip()
     profile_type = (data.get('profileType') or '').strip()
 
-    if not band_id:
-        return jsonify({'error': 'Safety ID is required.'}), 400
-    if not activation_code:
-        return jsonify({'error': 'Activation code is required.'}), 400
-    if not first_name or not last_name:
+    if not re.fullmatch(r'[A-Z0-9-]{2,64}', band_id):
+        return jsonify({'error': 'Enter a valid Safety ID.'}), 400
+    if not re.fullmatch(r'[A-Z0-9]{4,64}', activation_code):
+        return jsonify({'error': 'Enter a valid activation code.'}), 400
+    if not first_name or not last_name or len(first_name) > 80 or len(last_name) > 80:
         return jsonify({'error': 'First and last name are required.'}), 400
-    if not email:
-        return jsonify({'error': 'Email is required.'}), 400
-    if not phone:
-        return jsonify({'error': 'Phone number is required.'}), 400
+    if len(email) > 254 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email):
+        return jsonify({'error': 'Enter a valid email address.'}), 400
+    phone_digits = re.sub(r'\D', '', phone)
+    if len(phone_digits) not in {10, 11} or (len(phone_digits) == 11 and not phone_digits.startswith('1')):
+        return jsonify({'error': 'Enter a valid phone number.'}), 400
+    if len(profile_type) > 80:
+        return jsonify({'error': 'Invalid profile type.'}), 400
     if not DATABASE_URL:
         return jsonify({'error': 'Database is not configured.'}), 500
 
@@ -5610,7 +5649,8 @@ def api_activate():
 
                 stored_code, claimed = code_record
 
-                if (stored_code or '').strip().upper() != activation_code:
+                normalized_stored_code = (stored_code or '').strip().upper()
+                if not hmac.compare_digest(normalized_stored_code, activation_code):
                     return jsonify({'error': 'Activation code is incorrect.'}), 403
 
                 if claimed:
@@ -5695,8 +5735,9 @@ def api_activate():
 
             conn.commit()
 
-    except Exception as e:
-        print('Activation database error:', e)
+    except Exception:
+        # Do not log activation codes or customer fields from a failed request.
+        app.logger.error('Activation database operation failed')
         return jsonify({
             'error': 'Could not save the activation. Please try again.'
         }), 500

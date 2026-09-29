@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Activation Code Manager | EmpowerBands</title>
+  <style>
+    :root { --navy:#071a2c; --blue:#087dcc; --cyan:#16b8e8; --ink:#14293a; --muted:#607286; --line:#dbe5ee; --paper:#fff; --bg:#f2f7fa; --danger:#a51d2d; --good:#08785b; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    header { background:linear-gradient(135deg,#020c1e,var(--navy)); color:#fff; padding:18px max(18px,calc((100vw - 1240px)/2)); display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    header h1 { font-size:clamp(1.35rem,4vw,2rem); margin:0; }
+    header p { margin:3px 0 0; color:#bfeeff; }
+    a { color:#066fae; }
+    .back { color:#fff; text-decoration:none; border:1px solid #476174; border-radius:10px; padding:9px 13px; }
+    main { max-width:1240px; margin:auto; padding:20px; }
+    .flash,.error { padding:13px 16px; border-radius:10px; margin-bottom:15px; font-weight:650; }
+    .flash.success { color:#075c45; background:#d9f6eb; }
+    .flash.error,.error { color:#80202a; background:#ffe4e8; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:0 0 18px; }
+    .stat,.panel { background:var(--paper); border:1px solid var(--line); border-radius:15px; box-shadow:0 5px 20px rgba(7,26,44,.05); }
+    .stat { padding:15px; }
+    .stat b { display:block; font-size:1.7rem; }
+    .stat span { color:var(--muted); font-size:.9rem; }
+    .actions { display:grid; grid-template-columns:1fr 2fr; gap:16px; margin-bottom:18px; }
+    .panel { padding:18px; }
+    h2 { margin:0 0 12px; font-size:1.2rem; }
+    label { display:block; font-size:.86rem; font-weight:750; margin:0 0 5px; }
+    input,select,textarea,button,.button { width:100%; min-height:45px; border:1px solid #b9c8d4; border-radius:9px; padding:10px 12px; font:inherit; }
+    textarea { min-height:75px; resize:vertical; }
+    button,.button { border:0; color:#fff; background:var(--blue); font-weight:800; cursor:pointer; text-decoration:none; text-align:center; display:inline-flex; align-items:center; justify-content:center; }
+    button:hover,.button:hover { filter:brightness(.92); }
+    .danger { background:var(--danger); }
+    .secondary { color:var(--ink); background:#e9f2f8; }
+    .filter-grid { display:grid; grid-template-columns:2fr 1fr 1.4fr auto auto; gap:10px; align-items:end; }
+    .filter-grid .button,.filter-grid button { width:auto; }
+    .inventory-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:25px 0 10px; }
+    .inventory-head h2 { margin:0; }
+    .inventory-head .button { width:auto; min-height:40px; }
+    .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:14px; background:#fff; }
+    table { width:100%; border-collapse:collapse; min-width:1100px; }
+    th,td { padding:12px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; }
+    th { position:sticky; top:0; background:#eaf4f9; font-size:.8rem; text-transform:uppercase; letter-spacing:.03em; }
+    code { font-size:1rem; font-weight:800; color:#042f4c; }
+    .pill { display:inline-block; padding:4px 8px; border-radius:999px; font-size:.78rem; font-weight:800; }
+    .available { background:#d9f6eb; color:var(--good); }
+    .claimed { background:#e4e8ed; color:#465461; }
+    .row-actions { display:grid; gap:8px; min-width:220px; }
+    .row-actions form { border-top:1px solid var(--line); padding-top:8px; }
+    .row-actions input,.row-actions textarea,.row-actions button { min-height:38px; padding:7px 9px; margin-top:5px; }
+    .print-link { display:block; text-align:center; padding:8px; border-radius:8px; background:#e8f5fc; text-decoration:none; font-weight:750; }
+    .hint { color:var(--muted); font-size:.86rem; margin:.4rem 0 0; }
+    .empty { text-align:center; color:var(--muted); padding:35px; }
+    @media (max-width:760px) {
+      main { padding:14px; }
+      .stats { grid-template-columns:1fr 1fr; }
+      .actions { grid-template-columns:1fr; }
+      .filter-grid { grid-template-columns:1fr 1fr; }
+      .filter-grid > :first-child,.filter-grid > :nth-child(3) { grid-column:1/-1; }
+      .filter-grid .button,.filter-grid button { width:100%; }
+      .table-wrap { overflow:visible; border:0; background:transparent; }
+      table,tbody,tr,td { display:block; min-width:0; width:100%; }
+      thead { display:none; }
+      tr { background:#fff; border:1px solid var(--line); border-radius:13px; padding:10px; margin-bottom:12px; box-shadow:0 4px 16px rgba(7,26,44,.05); }
+      td { border:0; padding:7px 9px; }
+      td::before { content:attr(data-label); display:block; color:var(--muted); font-size:.72rem; font-weight:800; text-transform:uppercase; }
+      .row-actions { min-width:0; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div><h1>Activation Code Manager</h1><p>EmpowerBands secure Safety ID inventory</p></div>
+  <a class="back" href="{{ url_for('dashboard') }}">← Admin dashboard</a>
+</header>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+  {% endwith %}
+  {% if database_error %}<div class="error">{{ database_error }}</div>{% endif %}
+
+  <section class="stats" aria-label="Inventory summary">
+    <div class="stat"><b>{{ counts.total }}</b><span>Total</span></div>
+    <div class="stat"><b>{{ counts.available }}</b><span>Available</span></div>
+    <div class="stat"><b>{{ counts.claimed }}</b><span>Claimed</span></div>
+    <div class="stat"><b>{{ counts.assigned }}</b><span>Assigned to stores</span></div>
+  </section>
+
+  <section class="actions">
+    <div class="panel">
+      <h2>Generate one Safety ID</h2>
+      <form method="post" action="{{ url_for('activation_manager.activation_codes_generate') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="count" value="1">
+        <button type="submit">Generate One Safety ID</button>
+      </form>
+      <p class="hint">The next sequential ID and a secure code are created directly in PostgreSQL.</p>
+    </div>
+    <div class="panel">
+      <h2>Generate a batch</h2>
+      <form method="post" action="{{ url_for('activation_manager.activation_codes_generate') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label for="count">Quantity</label>
+        <select id="count" name="count">
+          {% for size in batch_sizes if size != 1 %}<option value="{{ size }}">{{ size }} Safety IDs</option>{% endfor %}
+        </select>
+        <button type="submit" style="margin-top:10px">Generate Batch</button>
+      </form>
+      {% if request.args.get('batch') %}
+        <a class="button secondary" style="margin-top:10px" href="{{ url_for('activation_manager.activation_codes_print', batch=request.args.get('batch')) }}">Print newly generated batch</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Search inventory</h2>
+    <form class="filter-grid" method="get">
+      <div><label for="q">Safety ID</label><input id="q" name="q" value="{{ query }}" placeholder="EB019"></div>
+      <div><label for="status">Status</label><select id="status" name="status"><option value="all" {{ 'selected' if status == 'all' }}>All</option><option value="available" {{ 'selected' if status == 'available' }}>Available</option><option value="claimed" {{ 'selected' if status == 'claimed' }}>Claimed</option></select></div>
+      <div><label for="store">Store or organization</label><input id="store" name="store" value="{{ store }}" placeholder="Store name"></div>
+      <button type="submit">Filter</button>
+      <a class="button secondary" href="{{ url_for('activation_manager.activation_codes_index') }}">Clear</a>
+    </form>
+  </section>
+
+  <div class="inventory-head">
+    <h2>Inventory ({{ records|length }})</h2>
+    <a class="button secondary" href="{{ url_for('activation_manager.activation_codes_export', q=query, status=status, store=store) }}">Download CSV</a>
+  </div>
+  {% if records %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Safety ID</th><th>Activation code</th><th>Status</th><th>Created</th><th>Claimed</th><th>Store / assigned</th><th>Notes</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for row in records %}
+      <tr>
+        <td data-label="Safety ID"><code>{{ row.band_id }}</code></td>
+        <td data-label="Activation code"><code>{{ row.activation_code }}</code></td>
+        <td data-label="Status"><span class="pill {{ 'claimed' if row.claimed else 'available' }}">{{ 'Claimed' if row.claimed else 'Available' }}</span></td>
+        <td data-label="Created">{{ row.created_at.strftime('%Y-%m-%d %H:%M') if row.created_at else '—' }}</td>
+        <td data-label="Date claimed">{{ row.claimed_at.strftime('%Y-%m-%d %H:%M') if row.claimed_at else '—' }}</td>
+        <td data-label="Store / organization">{{ row.assigned_to or '—' }}{% if row.assigned_at %}<div class="hint">{{ row.assigned_at.strftime('%Y-%m-%d %H:%M') }}</div>{% endif %}</td>
+        <td data-label="Notes">{{ row.notes or '—' }}</td>
+        <td data-label="Actions">
+          {% if not row.claimed %}
+          <div class="row-actions">
+            <a class="print-link" href="{{ url_for('activation_manager.activation_codes_print', band_id=row.band_id) }}">Print card</a>
+            <form method="post" action="{{ url_for('activation_manager.activation_codes_assign') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="band_id" value="{{ row.band_id }}">
+              <label>Store assignment</label><input name="assigned_to" maxlength="160" value="{{ row.assigned_to or '' }}" placeholder="Store or organization">
+              <textarea name="notes" maxlength="1000" placeholder="Internal notes">{{ row.notes or '' }}</textarea>
+              <button type="submit">Save assignment</button>
+            </form>
+            <form method="post" action="{{ url_for('activation_manager.activation_codes_rotate') }}" onsubmit="return confirm('Revoke the current unused code and replace it? The old card will stop working.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="band_id" value="{{ row.band_id }}">
+              <label>Type {{ row.band_id }} to replace code</label><input name="confirmation" autocomplete="off" required>
+              <button class="danger" type="submit">Revoke &amp; replace</button>
+            </form>
+          </div>
+          {% else %}<span class="hint">Protected: claimed IDs cannot be reassigned or regenerated here.</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<div class="panel empty">No Safety IDs match these filters.</div>{% endif %}
+</main>
+</body>
+</html>
