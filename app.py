@@ -354,6 +354,7 @@ def site_nav_html(active=""):
     </a>
     <nav class="site-nav" aria-label="Main navigation">
     {link("/", "Home", "home")}
+    {link("/sponsor", "Sponsor a Safety ID", "sponsor")}
     {link("/impact-club", "💙 Impact Club", "impact")}
     {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
     {link("/merch", "Shop", "merch")}
@@ -365,7 +366,7 @@ def site_nav_html(active=""):
     {link("mailto:support@empowerbands.org", "Contact", "contact")}
 </nav>
     <div class="site-header-buttons">
-    <a class="btn-outline-sm" href="/donate">❤️ Donate — One-Time</a>
+    <a class="btn-outline-sm" href="/sponsor">Sponsor a Safety ID — One-Time</a>
     <a class="btn-outline-sm" href="/impact-club">💙 Impact Club — Monthly</a>
 </div>
 </div>
@@ -1780,6 +1781,9 @@ body{{
     color:transparent;
 }}
 
+.hero-actions{{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}}
+.hero-actions .btn{{font-size:15px;}}
+
 .hero h3{{
     color:#0ea5e9;
     font-size:24px;
@@ -1984,6 +1988,7 @@ body{{
 
     <div class="nav">
         <a class="active" href="/">Home</a>
+        <a href="/sponsor">Sponsor a Safety ID</a>
         <a href="/traveling-band-movement">Traveling Band Movement</a>
         <a href="/merch">Shop</a>
         <a href="#how">How It Works</a>
@@ -2036,14 +2041,18 @@ body{{
 }}
 </style>
 
-    <h1>EmpowerBands <span>Worldwide</span></h1>
+    <h1>A Safety ID that <span>helps people reach you</span></h1>
 
-    <h3>Smart Wearable Safety Technology</h3>
+    <h3>Small wearable. Critical information within reach.</h3>
 
     <p>
-        EmpowerBands Worldwide is committed to safety inclusion,
-        and rapid emergency response through smart wearable technology....
+        Tap the NFC Safety ID or scan its QR code to open a safety profile with
+        caregiver contacts and helpful instructions. No special app is needed.
     </p>
+    <div class="hero-actions">
+        <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
+        <a class="btn dark" href="/EB001">See how it works</a>
+    </div>
 </div>
 
 </section>
@@ -2074,8 +2083,8 @@ body{{
 
         <div style="margin-top:25px;">
             <a class="btn" href="/EB001">🚀 View Live Demo</a>
-            <a class="btn dark" href="mailto:support@empowerbands.org">❤️ Support Our Mission</a>
-            <a class="btn dark" href="mailto:support@empowerbands.org">🛡️ Partner With Us</a>
+            <a class="btn dark" href="/sponsor">Sponsor a Safety ID</a>
+            <a class="btn dark" href="/sponsor">Sponsor two — $50</a>
         </div>
 
         <div class="trust">
@@ -2173,10 +2182,10 @@ body{{
                 <strong>Join the Movement</strong>
                 <p>Start or receive a traveling band</p>
             </a>
-            <a class="quick-card" href="/donate">
+            <a class="quick-card" href="/sponsor">
                 <span>❤️</span>
-                <strong>Donate or Support</strong>
-                <p>Help empowerment reach further</p>
+                <strong>Sponsor a Safety ID</strong>
+                <p>One person for $25 or two for $50</p>
             </a>
         </div>
     </div>
@@ -2208,11 +2217,11 @@ body{{
 
     <div>
         <h2>Ready To Support The Mission?</h2>
-        <p>Partner with EmpowerBands Worldwide to help build safer, more accessible communities.</p>
+        <p>Sponsor a Safety ID for a child, senior, or person with a disability in our community.</p>
     </div>
 
     <div class="cta-buttons">
-        <a class="btn" href="mailto:support@empowerbands.org">❤️ Support The Mission</a>
+        <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
         <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
         <a class="btn dark" href="/EB001">🚀 View Demo</a>
     </div>
@@ -4332,6 +4341,12 @@ Unlock Full Info
 @app.route("/donate")
 def donate():
     return redirect("https://www.paypal.com/ncp/payment/HXFLDKQYU9A56")
+
+
+@app.route("/sponsor")
+def sponsor():
+    """One-time sponsored Safety ID information and checkout handoff."""
+    return render_template("sponsor.html")
 
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
