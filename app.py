@@ -5093,6 +5093,25 @@ def blessing_boxes():
             line-height:1.7;
         }}
         .page{{max-width:760px;margin:0 auto;padding:0 20px 60px;}}
+        .photo-grid{{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:14px;
+            margin:24px 0;
+        }}
+        .photo-grid figure{{
+            margin:0;
+            overflow:hidden;
+            background:rgba(255,255,255,0.07);
+            border:1px solid rgba(255,255,255,0.13);
+            border-radius:16px;
+        }}
+        .photo-grid img{{display:block;width:100%;height:290px;object-fit:cover;}}
+        .photo-grid figcaption{{padding:11px 14px;color:#cbd5e1;font-size:13px;line-height:1.4;}}
+        @media(max-width:560px){{
+            .photo-grid{{grid-template-columns:1fr;}}
+            .photo-grid img{{height:auto;max-height:440px;object-fit:contain;background:#07111f;}}
+        }}
         .card{{
             background:rgba(255,255,255,0.07);
             border:1px solid rgba(255,255,255,0.13);
@@ -5202,6 +5221,25 @@ def blessing_boxes():
 
 <div class="page">
     <a class="back" href="/">← Back to Home</a>
+
+    <section class="photo-grid" aria-label="Blessing Boxes in our community">
+        <figure>
+            <img src="/static/images/empowerbands-blessing-box.webp" alt="EmpowerBands Blessing Box outside a community location" width="1152" height="1536">
+            <figcaption>A Blessing Box in the community</figcaption>
+        </figure>
+        <figure>
+            <img src="/static/images/community-donation.webp" alt="A community member placing supplies in a Blessing Box" width="1152" height="1536" loading="lazy">
+            <figcaption>Neighbors adding supplies</figcaption>
+        </figure>
+        <figure>
+            <img src="/static/images/volunteers-stocking.webp" alt="Volunteers stocking a blue Blessing Box" width="1152" height="1536" loading="lazy">
+            <figcaption>Volunteers restocking a box</figcaption>
+        </figure>
+        <figure>
+            <img src="/static/images/food-and-water-donations.webp" alt="Food and bottled water placed inside a Blessing Box" width="864" height="1536" loading="lazy">
+            <figcaption>Food and water ready to share</figcaption>
+        </figure>
+    </section>
 
     <!-- WHERE ARE THE BOXES -->
 <div class="card" style="margin-top:20px;">
