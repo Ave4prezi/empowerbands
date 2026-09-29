@@ -35,6 +35,7 @@
   const profileTypeEl = qs('#profile-type');
   const emailEl = qs('#email');
   const phoneEl = qs('#phone');
+  const pinEl = qs('#pin');
   const confirmOwnershipEl = qs('#confirm-ownership');
 
   // Pre-fill Safety ID from URL like /activate/EB001
@@ -57,6 +58,7 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
     lastName: qs('#error-last-name'),
     email: qs('#error-email'),
     phone: qs('#error-phone'),
+    pin: qs('#error-pin'),
     confirm: qs('#error-confirm')
   };
 
@@ -107,12 +109,9 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
       ok = false;
     } else setFieldError(errors.lastName, '');
 
-    // Email
-    if (!emailEl.value.trim()) {
-      setFieldError(errors.email, 'Email address is required.');
-      ok = false;
-    } else if (!isValidEmail(emailEl.value.trim())) {
-      setFieldError(errors.email, 'Please enter a valid email address.');
+    // Email is optional.
+    if (emailEl.value.trim() && !isValidEmail(emailEl.value.trim())) {
+      setFieldError(errors.email, 'Please enter a valid email address or leave it blank.');
       ok = false;
     } else setFieldError(errors.email, '');
 
@@ -124,6 +123,12 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
       setFieldError(errors.phone, 'Please enter a valid U.S. phone number.');
       ok = false;
     } else setFieldError(errors.phone, '');
+
+    // Private PIN
+    if (!/^\d{4,8}$/.test(pinEl.value.trim())) {
+      setFieldError(errors.pin, 'Create a 4–8 digit PIN using numbers only.');
+      ok = false;
+    } else setFieldError(errors.pin, '');
 
     // Confirm ownership checkbox
     if (!confirmOwnershipEl.checked) {
@@ -225,7 +230,7 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
         <dt>First name</dt><dd>${escapeHtml(firstNameEl.value)}</dd>
         <dt>Last name</dt><dd>${escapeHtml(lastNameEl.value)}</dd>
         <dt>Profile type</dt><dd>${escapeHtml(profileTypeEl.value)}</dd>
-        <dt>Email</dt><dd>${escapeHtml(emailEl.value)}</dd>
+        <dt>Email</dt><dd>${escapeHtml(emailEl.value || 'Not provided')}</dd>
         <dt>Phone</dt><dd>${escapeHtml(phoneEl.value)}</dd>
       </dl>
     `;
@@ -262,7 +267,8 @@ confirmActivationBtn.addEventListener('click', async (ev) => {
     lastName: lastNameEl.value.trim(),
     profileType: profileTypeEl.value,
     email: emailEl.value.trim(),
-    phone: phoneEl.value.trim()
+    phone: phoneEl.value.trim(),
+    pin: pinEl.value.trim()
   };
 
   try {
