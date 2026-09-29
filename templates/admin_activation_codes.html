@@ -169,5 +169,25 @@
   </table></div>
   {% else %}<div class="panel empty">No Safety IDs match these filters.</div>{% endif %}
 </main>
+<script>
+(function () {
+  const boxes = Array.from(document.querySelectorAll('.card-select'));
+  const all = document.getElementById('select-all-cards');
+  const printButton = document.getElementById('print-selected');
+  if (all) all.addEventListener('change', function () {
+    boxes.forEach(function (box) { box.checked = all.checked; });
+  });
+  if (printButton) printButton.addEventListener('click', function () {
+    const selected = boxes.filter(function (box) { return box.checked; }).map(function (box) { return box.value; });
+    if (!selected.length) {
+      alert('Select at least one available Safety ID to print.');
+      return;
+    }
+    const params = new URLSearchParams();
+    selected.forEach(function (id) { params.append('band_ids', id); });
+    window.location.href = "{{ url_for('activation_manager.activation_codes_print') }}?" + params.toString();
+  });
+})();
+</script>
 </body>
 </html>
