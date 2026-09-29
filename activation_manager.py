@@ -530,10 +530,18 @@ def register_activation_manager(
         if any(record.get("claimed") for record in records):
             abort(409, description="Claimed Safety IDs cannot be printed as new activation cards.")
         base = base_url.rstrip("/")
+        manage_profile_url = f"{base}/manage-profile"
+        manage_profile_qr_data = _qr_data_uri(manage_profile_url)
         cards = []
         for record in records:
             activation_url = f"{base}/activate/{record['band_id']}"
-            cards.append({**record, "activation_url": activation_url, "qr_data": _qr_data_uri(activation_url)})
+            cards.append({
+                **record,
+                "activation_url": activation_url,
+                "qr_data": _qr_data_uri(activation_url),
+                "manage_profile_url": manage_profile_url,
+                "manage_profile_qr_data": manage_profile_qr_data,
+            })
         return render_template(
             "admin_activation_cards.html",
             cards=cards,
