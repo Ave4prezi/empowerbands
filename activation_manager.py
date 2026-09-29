@@ -305,7 +305,7 @@ class PostgresActivationRepository:
             conn.commit()
         return replacement
 
-    def records_for_print(self, band_id: str = "", batch_id: str = "") -> list[dict]:
+    def records_for_print(self, band_id: str = "", batch_id: str = "", band_ids: list[str] | None = None) -> list[dict]:
         if not band_id and not batch_id:
             return []
         if band_id:
@@ -510,9 +510,9 @@ def register_activation_manager(
         batch_id = request.args.get("batch", "").strip()
         if band_id and not BAND_ID_RE.fullmatch(band_id):
             abort(400, description="Invalid Safety ID.")
-        if batch_id and not re.fullmatch(r"[a-f0-9]{32}", batch_id):
+        if any(not BAND_ID_RE.fullmatch(value) for value in selected_ids):\n            abort(400, description="One or more Safety IDs are invalid.")\n        if len(selected_ids) > 200:\n            abort(400, description="Too many Safety IDs selected.")\n        if batch_id and not re.fullmatch(r"[a-f0-9]{32}", batch_id):
             abort(400, description="Invalid batch reference.")
-        records = repository().records_for_print(band_id=band_id, batch_id=batch_id)
+        records = repository().records_for_print(band_id=band_id, batch_id=batch_id, band_ids=selected_ids)
         if not records:
             abort(404, description="No activation cards were found.")
         if any(record.get("claimed") for record in records):
