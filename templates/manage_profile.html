@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manage My Safety Profile | EmpowerBands</title><link rel="stylesheet" href="/static/styles/activate.css">
+<style>
+.manage{min-height:100vh;padding:52px 16px;background:radial-gradient(circle at 85% 10%,rgba(14,165,233,.25),transparent 28rem),linear-gradient(135deg,#03101d,#082840 60%,#0a3854);color:#fff}
+.wrap{width:min(760px,100%);margin:auto}.brand{display:block;text-align:center;color:#fff;text-decoration:none;font-size:1.3rem;font-weight:900;margin-bottom:24px}.brand span{color:#67d8ff}
+.card{background:#fff;color:#162d3d;border-radius:28px;padding:clamp(22px,5vw,42px);box-shadow:0 30px 90px rgba(0,0,0,.32)}
+h1{margin:0;color:#04111f;font-size:clamp(2rem,7vw,3.2rem);letter-spacing:-.04em}p{line-height:1.6;color:#617787}
+.field{margin:15px 0}.field label{display:block;margin-bottom:7px;font-weight:800}.field input,.field textarea,.field select{width:100%;padding:13px 14px;border:1px solid #bdcdd6;border-radius:12px;font:inherit}.field textarea{min-height:100px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.btn{width:100%;min-height:52px;border:0;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#67d8ff,#0ea5e9);color:#04111f;font-weight:900;cursor:pointer}.secondary{background:#edf5f8}.msg{margin:14px 0;padding:12px;border-radius:12px;background:#edf5f8;color:#16384c}.msg:empty{display:none}.note{font-size:.88rem}.hide{display:none!important}.id{font-weight:900;color:#087fb7}
+@media(max-width:620px){.manage{padding:26px 12px}.card{border-radius:22px}.grid{grid-template-columns:1fr;gap:0}}
+</style></head><body><main class="manage"><div class="wrap"><a class="brand" href="/">Empower<span>Bands</span></a><section class="card">
+<div id="lookup"><h1>Manage My Safety Profile</h1><p>Verify the phone number connected to your Safety ID before making changes.</p><div id="lookup-msg" class="msg"></div><div class="field"><label>Safety ID</label><input id="band" autocomplete="off" placeholder="Example: EB019"></div><button class="btn" id="send">Text Me a Verification Code</button><p class="note">No access to this phone? Contact EmpowerBands support for assisted profile changes.</p></div>
+<div id="verify" class="hide"><h1>Check Your Phone</h1><p>Enter the 6-digit verification code we sent. It expires in 10 minutes.</p><div id="verify-msg" class="msg"></div><div class="field"><label>Verification code</label><input id="code" inputmode="numeric" maxlength="6" placeholder="000000"></div><button class="btn" id="verify-btn">Verify & Continue</button></div>
+<form id="editor" class="hide"><h1>Your Safety Profile</h1><p>Safety ID <span class="id" id="shown-id"></span> is locked and cannot be changed here.</p><div id="edit-msg" class="msg"></div>
+<div class="grid"><div class="field"><label>Full name *</label><input name="fullName" required></div><div class="field"><label>Phone *</label><input name="phone" type="tel" required></div></div>
+<div class="grid"><div class="field"><label>Email (optional)</label><input name="email" type="email"></div><div class="field"><label>Profile type</label><select name="ageGroup"><option>Child</option><option>Adult</option><option>Senior</option><option>Disability Support</option><option>Medical/Safety</option><option>Other</option></select></div></div>
+<div class="field"><label>Emergency phone(s)</label><input name="emergencyContacts" placeholder="Separate multiple numbers with commas"></div><div class="field"><label>Emergency email(s)</label><input name="emergencyEmails"></div>
+<div class="field"><label>Condition / public alert</label><input name="condition"></div><div class="field"><label>What to do / instructions</label><textarea name="instructions"></textarea></div>
+<div class="field"><label>Private medical notes</label><textarea name="medicalNotes"></textarea></div><div class="field"><label>Address</label><input name="address"></div>
+<div class="grid"><div class="field"><label>Race</label><input name="race"></div><div class="field"><label>Gender</label><input name="gender"></div></div>
+<div class="field"><label>Change private PIN (optional)</label><input name="pin" type="password" inputmode="numeric" maxlength="8" placeholder="Leave blank to keep current PIN"></div>
+<button class="btn" type="submit">Save Profile Changes</button></form>
+</section></div></main>
+<script>
+const $=s=>document.querySelector(s), band=$('#band'), lookup=$('#lookup'), verify=$('#verify'), editor=$('#editor');let id='';
+async function api(url,opts={}){const r=await fetch(url,{headers:{'Content-Type':'application/json'},...opts});const x=await r.json();if(!r.ok)throw new Error(x.error||'Something went wrong.');return x}
+$('#send').onclick=async()=>{id=band.value.trim().toUpperCase();$('#lookup-msg').textContent='Sending...';try{await api('/api/profile/request-code',{method:'POST',body:JSON.stringify({bandId:id})});lookup.classList.add('hide');verify.classList.remove('hide')}catch(e){$('#lookup-msg').textContent=e.message}};
+$('#verify-btn').onclick=async()=>{$('#verify-msg').textContent='Verifying...';try{await api('/api/profile/verify-code',{method:'POST',body:JSON.stringify({bandId:id,code:$('#code').value.trim()})});const d=await api('/api/profile/me');verify.classList.add('hide');editor.classList.remove('hide');$('#shown-id').textContent=d.bandId;for(const [k,v] of Object.entries(d)){if(editor.elements[k])editor.elements[k].value=v||''}}catch(e){$('#verify-msg').textContent=e.message}};
+editor.onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(editor));$('#edit-msg').textContent='Saving...';try{const x=await api('/api/profile/me',{method:'PUT',body:JSON.stringify(d)});$('#edit-msg').textContent=x.message}catch(err){$('#edit-msg').textContent=err.message}};
+</script></body></html>
