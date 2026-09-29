@@ -11,7 +11,7 @@
     .toolbar { position:sticky; top:0; z-index:2; display:flex; justify-content:center; gap:10px; padding:12px; background:#071a2c; }
     .toolbar button,.toolbar a { padding:10px 18px; border:0; border-radius:8px; background:#0785d1; color:#fff; text-decoration:none; font:700 15px system-ui; cursor:pointer; }
     .sheet { max-width:8.5in; margin:18px auto; display:grid; grid-template-columns:1fr 1fr; gap:.18in; padding:.25in; background:#fff; }
-    .card { height:3.45in; border:2px solid #0a82c7; border-radius:16px; padding:.24in; display:flex; flex-direction:column; page-break-inside:avoid; overflow:hidden; }
+    .card { height:3.15in; border:2px solid #0a82c7; border-radius:16px; padding:.24in; display:flex; flex-direction:column; page-break-inside:avoid; overflow:hidden; }
     .logo { width:100%; height:.68in; object-fit:contain; object-position:center; }
     h1 { margin:.08in 0 0; text-align:center; font-size:20px; }
     .tagline { color:#087fc1; text-align:center; font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:11px; }
@@ -29,21 +29,21 @@
       @page { size:letter portrait; margin:.25in; }
       body { background:#fff; }
       .toolbar { display:none; }
-      .sheet { width:7.18in; height:auto; margin:0 auto; padding:0; grid-template-columns:repeat(2, 3.75in); grid-auto-rows:3.45in; gap:.18in; align-content:start; }
-      .card { width:3.75in; height:3.45in; padding:.12in; border-radius:10px; break-inside:avoid; page-break-inside:avoid; }
-      .logo { height:.38in; }
-      h1 { margin:.03in 0 0; font-size:14px; }
-      .tagline { font-size:8px; }
-      .details { grid-template-columns:1fr 1.78in; gap:.05in; margin-top:.05in; }
-      .label { font-size:7px; }
-      .value { font-size:15px; margin-bottom:.04in; }
-      .qr { width:.82in; height:.82in; }\n      .qr-pair { gap:.05in; }\n      .qr-block { font-size:6px; }
-      .instructions { padding:.05in .07in; margin-top:.04in; font-size:7px; line-height:1.2; }
-      .instructions > strong { font-size:8px; margin-bottom:2px; }
-      .instructions li strong { font-size:7px; }
+      .sheet { width:7.18in; height:auto; margin:0 auto; padding:0; grid-template-columns:repeat(2, 3.75in); grid-auto-rows:3.15in; gap:.12in; align-content:start; }
+      .card { width:3.75in; height:3.15in; padding:.11in; border-radius:10px; break-inside:avoid; page-break-inside:avoid; }
+      .logo { height:.34in; }
+      h1 { margin:.02in 0 0; font-size:15px; }
+      .tagline { font-size:8.5px; }
+      .details { grid-template-columns:1fr 1.9in; gap:.04in; margin-top:.04in; }
+      .label { font-size:8px; }
+      .value { font-size:17px; margin-bottom:.03in; }
+      .qr { width:.88in; height:.88in; }\n      .qr-pair { gap:.05in; }\n      .qr-block { font-size:7px; }
+      .instructions { padding:.05in .07in; margin-top:.035in; font-size:8px; line-height:1.22; }
+      .instructions > strong { font-size:9px; margin-bottom:2px; }
+      .instructions li strong { font-size:8px; }
       .instructions ol { padding-left:12px; }
-      .url { font-size:7px; }
-      .card:nth-child(4n) { break-after:page; page-break-after:always; }
+      .url { font-size:7.5px; }
+      .card:nth-child(6n) { break-after:page; page-break-after:always; }
     }
   </style>
 </head>
