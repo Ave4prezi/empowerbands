@@ -11,7 +11,7 @@
     .toolbar { position:sticky; top:0; z-index:2; display:flex; justify-content:center; gap:10px; padding:12px; background:#071a2c; }
     .toolbar button,.toolbar a { padding:10px 18px; border:0; border-radius:8px; background:#0785d1; color:#fff; text-decoration:none; font:700 15px system-ui; cursor:pointer; }
     .sheet { max-width:8.5in; margin:18px auto; display:grid; grid-template-columns:1fr 1fr; gap:.18in; padding:.25in; background:#fff; }
-    .card { height:4.7in; border:2px solid #0a82c7; border-radius:16px; padding:.24in; display:flex; flex-direction:column; page-break-inside:avoid; overflow:hidden; }
+    .card { height:4.55in; border:2px solid #0a82c7; border-radius:16px; padding:.24in; display:flex; flex-direction:column; page-break-inside:avoid; overflow:hidden; }
     .logo { width:100%; height:.68in; object-fit:contain; object-position:center; }
     h1 { margin:.08in 0 0; text-align:center; font-size:20px; }
     .tagline { color:#087fc1; text-align:center; font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:11px; }
@@ -26,11 +26,11 @@
     .url { margin-top:auto; text-align:center; color:#40576a; font-size:10px; overflow-wrap:anywhere; }
     @media (max-width:700px) { .sheet { grid-template-columns:1fr; padding:12px; margin:0; } .card { height:auto; min-height:4.7in; } }
     @media print {
-      @page { size:letter; margin:.25in; }
+      @page { size:letter portrait; margin:.25in; }
       body { background:#fff; }
       .toolbar { display:none; }
-      .sheet { width:8in; margin:0; padding:0; gap:.18in; }
-      .card { break-inside:avoid; }
+      .sheet { width:8in; height:auto; margin:0; padding:0; grid-template-columns:repeat(2, 3.91in); grid-auto-rows:4.55in; gap:.18in; align-content:start; }
+      .card { width:3.91in; height:4.55in; break-inside:avoid; page-break-inside:avoid; }\n      .card:nth-child(4n) { break-after:page; page-break-after:always; }
     }
   </style>
 </head>
