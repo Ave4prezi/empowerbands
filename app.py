@@ -1977,6 +1977,15 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 .hero-product img{{display:block;width:100%;height:auto;}}
 .hero-product figcaption{{padding:12px 16px;color:#cbd5e1;font-size:13px;}}
 .hero-actions .btn{{font-size:14px;box-shadow:none;}}
+.pro-panel{{max-width:1120px;margin:0 auto;padding:36px;border-radius:24px;background:linear-gradient(135deg,#102b4c,#09182f);border:1px solid rgba(103,232,249,.35);}}
+.pro-panel h2{{text-align:left;margin:8px 0 12px;}}
+.pro-panel p{{color:#cbd5e1;line-height:1.65;}}
+.pro-features{{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:24px 0;}}
+.pro-features div{{padding:18px;border-radius:15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);}}
+.pro-features strong{{display:block;color:white;margin-bottom:6px;}}
+.pro-features span{{display:block;color:#cbd5e1;font-size:14px;line-height:1.5;}}
+@media(max-width:760px){{.pro-features{{grid-template-columns:1fr 1fr;}}}}
+@media(max-width:550px){{.pro-panel{{padding:24px;}}.pro-features{{grid-template-columns:1fr;}}}}
 @media(max-width:850px){{
     .header{{align-items:stretch;}}
     .nav{{gap:14px;}}
@@ -2052,6 +2061,23 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <img src="/static/images/safety-id-tap-demo.webp" alt="Illustration of an EmpowerBands NFC Safety ID worn on a cord beside a smartphone" width="900" height="600">
         <figcaption>Tap a phone to the wearable to open its safety profile. Product illustration.</figcaption>
     </figure>
+</section>
+
+<section class="section" id="pro-series">
+    <div class="pro-panel">
+        <p class="eyebrow">Make one tap do more</p>
+        <h2>Meet EmpowerBands Pro Series</h2>
+        <p>Take your band beyond your Safety ID. Give people one easy place to find the content, documents, and links you choose to share—right from a tap or QR scan.</p>
+        <div class="pro-features">
+            <div><strong>Videos &amp; video links</strong><span>Share an introduction, portfolio, tutorial, or your favorite video.</span></div>
+            <div><strong>Important documents</strong><span>Point people to selected documents, forms, an ebook, or your résumé.</span></div>
+            <div><strong>Social media &amp; websites</strong><span>Bring your profiles, business page, and online presence together.</span></div>
+            <div><strong>Payment links</strong><span>Share your Cash App, PayPal, or other payment link when appropriate.</span></div>
+            <div><strong>One simple connection</strong><span>Choose the links you want visitors to see from your Pro profile.</span></div>
+            <div><strong>Safety first</strong><span>Your Safety ID remains a separate profile for emergency information.</span></div>
+        </div>
+        <a class="btn" href="/pro">Explore Pro Series &amp; ask about upgrading</a>
+    </div>
 </section>
 
 <section id="about" class="section">
@@ -4566,44 +4592,34 @@ td{{
 @app.route("/pro")
 def pro():
     return """
-    <html>
-    <head>
-        <title>EmpowerBands Pro</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-
-    <body style="
-        background:#07111f;
-        color:white;
-        font-family:Arial;
-        text-align:center;
-        padding:60px;
-    ">
-
-        <h1>🔒 EmpowerBands Pro</h1>
-
-        <p>
-        Premium tools for advanced profiles,
-        business networking, analytics,
-        custom branding, and premium support.
-        </p>
-
-        <br>
-
-        <a href="/" style="
-            display:inline-block;
-            padding:14px 24px;
-            background:#0a58ca;
-            color:white;
-            text-decoration:none;
-            border-radius:14px;
-            font-weight:bold;
-        ">
-            ⬅ Go Back
-        </a>
-
-    </body>
-    </html>
+    <!doctype html><html lang="en"><head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pro Series | EmpowerBands</title>
+    <meta name="description" content="Explore EmpowerBands Pro Series and ask about upgrading your band.">
+    <style>
+    *{box-sizing:border-box}body{margin:0;background:#07111f;color:#fff;font:16px/1.6 Arial,sans-serif}
+    header,main,footer{max-width:1050px;margin:auto;padding:24px}header a,footer a{color:#7dd3fc}
+    main{padding-top:40px;padding-bottom:70px}h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1.1;margin:8px 0 18px}
+    h2{font-size:1.35rem;margin:0 0 8px}p{color:#cbd5e1}.eyebrow{color:#67e8f9;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:32px 0}
+    .card{padding:22px;background:#10243d;border:1px solid #31536e;border-radius:18px}
+    .button{display:inline-block;padding:14px 22px;border-radius:12px;background:#38bdf8;color:#061422;font-weight:800;text-decoration:none}
+    .note{padding:18px 22px;background:#0d2038;border-left:4px solid #38bdf8;border-radius:8px}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}}
+    </style></head><body>
+    <header><a href="/">← EmpowerBands home</a></header>
+    <main><p class="eyebrow">One band. More ways to connect.</p>
+    <h1>EmpowerBands Pro Series</h1>
+    <p>Use your band to share the links and resources that matter to you. A tap or QR scan can open a page with the content you choose, while your Safety ID stays focused on emergency information.</p>
+    <div class="grid">
+      <div class="card"><h2>Videos</h2><p>Link to an introduction, demonstration, tutorial, or video portfolio.</p></div>
+      <div class="card"><h2>Documents &amp; ebooks</h2><p>Share links to selected documents, digital books, forms, and your résumé.</p></div>
+      <div class="card"><h2>Social &amp; web links</h2><p>Connect visitors to your social media profiles, website, or business page.</p></div>
+      <div class="card"><h2>Payment links</h2><p>Include Cash App, PayPal, or another payment link for customers or supporters.</p></div>
+    </div>
+    <p class="note"><strong>How it connects:</strong> Your band contains a web link. A Pro setup would link that band to your chosen Pro page; visitors tap the NFC chip or scan the QR code to open it. Contact us to discuss setup and availability. Do not place private documents or sensitive account information on a public page.</p>
+    <a class="button" href="mailto:support@empowerbands.org?subject=EmpowerBands%20Pro%20Series%20upgrade%20request">Ask about upgrading to Pro</a>
+    </main><footer><a href="/">Back to home</a></footer></body></html>
     """
 
 # ===============================
