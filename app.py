@@ -5902,15 +5902,20 @@ def profile_self_service():
             with conn.cursor() as cur:
                 cur.execute("""SELECT band_id, full_name, email, primary_phone, emergency_contacts,
                     emergency_emails, age_group, public_condition, public_instructions,
-                    private_medical_notes, address, race, gender
+                    private_medical_notes, address, race, gender, photo_url
                     FROM members WHERE UPPER(band_id)=UPPER(%s)""", (band_id,))
                 row = cur.fetchone()
         if not row:
             return jsonify({'error': 'Profile not found.'}), 404
         keys = ['bandId','fullName','email','phone','emergencyContacts','emergencyEmails','ageGroup',
-                'condition','instructions','medicalNotes','address','race','gender']
+                'condition','instructions','medicalNotes','address','race','gender','photoUrl']
         return jsonify(dict(zip(keys, [v or '' for v in row])))
     data = request.get_json(silent=True) or {}
+    photo_url = (data.get('photoUrl') or '').strip()
+    if photo_url and not (photo_url.startswith('data:image/jpeg;base64,') or photo_url.startswith('data:image/png;base64,') or photo_url.startswith('data:image/webp;base64,') or re.fullmatch(r'https://[^\s]+', photo_url)):
+        return jsonify({'error': 'Profile photo must be a valid image.'}), 400
+    if len(photo_url) > 2_000_000:
+        return jsonify({'error': 'Profile photo is too large. Please choose a smaller image.'}), 400
     full_name = (data.get('fullName') or '').strip()
     phone = (data.get('phone') or '').strip()
     if not full_name or not _normalize_us_phone(phone):
@@ -5924,13 +5929,13 @@ def profile_self_service():
         (data.get('emergencyEmails') or '').strip(), (data.get('ageGroup') or '').strip(),
         (data.get('condition') or '').strip(), (data.get('instructions') or '').strip(),
         (data.get('medicalNotes') or '').strip(), (data.get('address') or '').strip(),
-        (data.get('race') or '').strip(), (data.get('gender') or '').strip(),
+        (data.get('race') or '').strip(), (data.get('gender') or '').strip(), photo_url,
     )
     with psycopg.connect(DATABASE_URL) as conn:
         with conn.cursor() as cur:
             cur.execute("""UPDATE members SET full_name=%s,email=%s,primary_phone=%s,emergency_contacts=%s,
                 emergency_emails=%s,age_group=%s,public_condition=%s,public_instructions=%s,
-                private_medical_notes=%s,address=%s,race=%s,gender=%s,updated_at=CURRENT_TIMESTAMP
+                private_medical_notes=%s,address=%s,race=%s,gender=%s,photo_url=%s,updated_at=CURRENT_TIMESTAMP
                 WHERE UPPER(band_id)=UPPER(%s)""", fields + (band_id,))
             if pin:
                 if not re.fullmatch(r'\d{4,8}', pin):
