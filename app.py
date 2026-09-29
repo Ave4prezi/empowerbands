@@ -1986,7 +1986,6 @@ body{{
         <a class="active" href="/">Home</a>
         <a href="/traveling-band-movement">Traveling Band Movement</a>
         <a href="/merch">Shop</a>
-        <a href="https://pay.empowerbands.org">Buy a Safety ID</a>
         <a href="#how">How It Works</a>
         <a href="#about">About Us</a>
         <a href="/board-members">Board</a>
