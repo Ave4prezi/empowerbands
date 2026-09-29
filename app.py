@@ -5670,6 +5670,7 @@ def api_activate():
     band_id = (data.get('bandId') or '').strip().upper()
     activation_code = (data.get('activationCode') or '').strip().upper()
     email = (data.get('email') or '').strip().lower()
+    pin = (data.get('pin') or '').strip()
     first_name = (data.get('firstName') or '').strip()
     last_name = (data.get('lastName') or '').strip()
     phone = (data.get('phone') or '').strip()
@@ -5681,13 +5682,15 @@ def api_activate():
         return jsonify({'error': 'Enter a valid activation code.'}), 400
     if not first_name or not last_name or len(first_name) > 80 or len(last_name) > 80:
         return jsonify({'error': 'First and last name are required.'}), 400
-    if len(email) > 254 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email):
-        return jsonify({'error': 'Enter a valid email address.'}), 400
+    if email and (len(email) > 254 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email)):
+        return jsonify({'error': 'Enter a valid email address or leave it blank.'}), 400
     phone_digits = re.sub(r'\D', '', phone)
     if len(phone_digits) not in {10, 11} or (len(phone_digits) == 11 and not phone_digits.startswith('1')):
         return jsonify({'error': 'Enter a valid phone number.'}), 400
     if len(profile_type) > 80:
         return jsonify({'error': 'Invalid profile type.'}), 400
+    if not re.fullmatch(r'\d{4,8}', pin):
+        return jsonify({'error': 'Create a 4–8 digit private PIN.'}), 400
     if not DATABASE_URL:
         return jsonify({'error': 'Database is not configured.'}), 500
 
@@ -5760,7 +5763,7 @@ def api_activate():
                             email,
                             phone,
                             profile_type,
-                            generate_password_hash('1234'),
+                            generate_password_hash(pin),
                             band_id,
                         ),
                     )
@@ -5784,7 +5787,7 @@ def api_activate():
             email,
             phone,
             profile_type,
-            generate_password_hash('1234'),
+            generate_password_hash(pin),
         ),
     )
 
@@ -5813,6 +5816,130 @@ def api_activate():
         'message': 'Safety ID activated successfully.'
     })
 
+
+
+@app.route('/manage-profile')
+def manage_profile():
+    return render_template('manage_profile.html')
+
+
+def _normalize_us_phone(phone):
+    digits = re.sub(r'\D', '', phone or '')
+    if len(digits) == 10:
+        return '+1' + digits
+    if len(digits) == 11 and digits.startswith('1'):
+        return '+' + digits
+    return None
+
+
+@app.route('/api/profile/request-code', methods=['POST'])
+def profile_request_code():
+    data = request.get_json(silent=True) or {}
+    band_id = (data.get('bandId') or '').strip().upper()
+    if not re.fullmatch(r'[A-Z0-9-]{2,64}', band_id) or not DATABASE_URL:
+        return jsonify({'error': 'Enter a valid Safety ID.'}), 400
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT primary_phone FROM members WHERE UPPER(band_id)=UPPER(%s)", (band_id,))
+            row = cur.fetchone()
+    if not row or not row[0]:
+        return jsonify({'error': 'We could not send a verification code for that Safety ID. Contact EmpowerBands support for help.'}), 400
+    phone = _normalize_us_phone(row[0])
+    if not phone or not (TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER):
+        return jsonify({'error': 'Text verification is temporarily unavailable. Contact EmpowerBands support for help.'}), 503
+    code = f"{secrets.randbelow(1000000):06d}"
+    session['profile_verify'] = {
+        'band_id': band_id,
+        'code_hash': generate_password_hash(code),
+        'expires': int(time.time()) + 600,
+        'attempts': 0,
+    }
+    try:
+        Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN).messages.create(
+            body=f"Your EmpowerBands verification code is {code}. It expires in 10 minutes.",
+            from_=TWILIO_PHONE_NUMBER,
+            to=phone,
+        )
+    except Exception:
+        app.logger.exception("Profile verification SMS failed")
+        session.pop('profile_verify', None)
+        return jsonify({'error': 'We could not send the verification text. Please try again.'}), 502
+    return jsonify({'ok': True, 'message': 'Verification code sent to the phone on this Safety ID.'})
+
+
+@app.route('/api/profile/verify-code', methods=['POST'])
+def profile_verify_code():
+    data = request.get_json(silent=True) or {}
+    band_id = (data.get('bandId') or '').strip().upper()
+    code = (data.get('code') or '').strip()
+    state = session.get('profile_verify') or {}
+    if state.get('band_id') != band_id or int(state.get('expires', 0)) < int(time.time()):
+        session.pop('profile_verify', None)
+        return jsonify({'error': 'That verification session expired. Request a new code.'}), 403
+    attempts = int(state.get('attempts', 0)) + 1
+    state['attempts'] = attempts
+    session['profile_verify'] = state
+    if attempts > 5:
+        session.pop('profile_verify', None)
+        return jsonify({'error': 'Too many attempts. Request a new code.'}), 429
+    if not check_password_hash(state.get('code_hash', ''), code):
+        return jsonify({'error': 'Verification code is incorrect.'}), 403
+    session['profile_edit_band_id'] = band_id
+    session['profile_edit_expires'] = int(time.time()) + 1800
+    session.pop('profile_verify', None)
+    return jsonify({'ok': True})
+
+
+@app.route('/api/profile/me', methods=['GET', 'PUT'])
+def profile_self_service():
+    band_id = session.get('profile_edit_band_id')
+    if not band_id or int(session.get('profile_edit_expires', 0)) < int(time.time()):
+        session.pop('profile_edit_band_id', None)
+        session.pop('profile_edit_expires', None)
+        return jsonify({'error': 'Please verify your phone number again.'}), 401
+    if request.method == 'GET':
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                cur.execute("""SELECT band_id, full_name, email, primary_phone, emergency_contacts,
+                    emergency_emails, age_group, public_condition, public_instructions,
+                    private_medical_notes, address, race, gender
+                    FROM members WHERE UPPER(band_id)=UPPER(%s)""", (band_id,))
+                row = cur.fetchone()
+        if not row:
+            return jsonify({'error': 'Profile not found.'}), 404
+        keys = ['bandId','fullName','email','phone','emergencyContacts','emergencyEmails','ageGroup',
+                'condition','instructions','medicalNotes','address','race','gender']
+        return jsonify(dict(zip(keys, [v or '' for v in row])))
+    data = request.get_json(silent=True) or {}
+    full_name = (data.get('fullName') or '').strip()
+    phone = (data.get('phone') or '').strip()
+    if not full_name or not _normalize_us_phone(phone):
+        return jsonify({'error': 'Name and a valid phone number are required.'}), 400
+    email = (data.get('email') or '').strip().lower()
+    if email and not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email):
+        return jsonify({'error': 'Enter a valid email address or leave it blank.'}), 400
+    pin = (data.get('pin') or '').strip()
+    fields = (
+        full_name, email, phone, (data.get('emergencyContacts') or '').strip(),
+        (data.get('emergencyEmails') or '').strip(), (data.get('ageGroup') or '').strip(),
+        (data.get('condition') or '').strip(), (data.get('instructions') or '').strip(),
+        (data.get('medicalNotes') or '').strip(), (data.get('address') or '').strip(),
+        (data.get('race') or '').strip(), (data.get('gender') or '').strip(),
+    )
+    with psycopg.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute("""UPDATE members SET full_name=%s,email=%s,primary_phone=%s,emergency_contacts=%s,
+                emergency_emails=%s,age_group=%s,public_condition=%s,public_instructions=%s,
+                private_medical_notes=%s,address=%s,race=%s,gender=%s,updated_at=CURRENT_TIMESTAMP
+                WHERE UPPER(band_id)=UPPER(%s)""", fields + (band_id,))
+            if pin:
+                if not re.fullmatch(r'\d{4,8}', pin):
+                    return jsonify({'error': 'PIN must be 4–8 digits.'}), 400
+                cur.execute("UPDATE members SET pin_hash=%s WHERE UPPER(band_id)=UPPER(%s)",
+                            (generate_password_hash(pin), band_id))
+        conn.commit()
+    session['profile_edit_expires'] = int(time.time()) + 1800
+    return jsonify({'ok': True, 'message': 'Safety Profile updated.'})
 
 
 @app.route("/delete-request")
