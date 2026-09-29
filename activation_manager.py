@@ -306,9 +306,12 @@ class PostgresActivationRepository:
         return replacement
 
     def records_for_print(self, band_id: str = "", batch_id: str = "", band_ids: list[str] | None = None) -> list[dict]:
-        if not band_id and not batch_id:
+        band_ids = band_ids or []
+        if not band_id and not batch_id and not band_ids:
             return []
-        if band_id:
+        if band_ids:
+            where_sql, params = "UPPER(band_id) = ANY(%s)", ([value.upper() for value in band_ids],)
+        elif band_id:
             where_sql, params = "UPPER(band_id) = UPPER(%s)", (band_id,)
         else:
             where_sql, params = "batch_id = %s", (batch_id,)
