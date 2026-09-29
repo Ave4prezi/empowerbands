@@ -1,3 +1,4 @@
+/* Premium activation experience */
 /* Mobile-first activation page styles
    Add to project alongside existing activate.css.
    Keeps visual alignment with current design system but scoped
@@ -165,3 +166,48 @@ button[hidden] {
 
 /* Make large touch targets on mobile */
 input, select, .btn { min-height: 44px; }
+
+.activation-page{overflow:hidden}
+.activation-layout{min-width:0}
+.activation-copy,.activation-card{min-width:0}
+.activation-copy h1{overflow-wrap:anywhere}
+.activation-explain{max-width:620px;color:rgba(255,255,255,.7);line-height:1.7}
+.activation-benefits div{align-items:flex-start;padding:14px 16px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.045);backdrop-filter:blur(8px)}
+.activation-benefits strong{width:auto;height:auto;min-width:88px;padding:7px 10px;border-radius:999px;line-height:1.15}
+.activation-benefits span{line-height:1.45}
+.activation-card{position:relative;overflow:hidden}
+.activation-card:before{content:"";position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,#67d8ff,#0ea5e9,#d8ad54)}
+.activation-steps{overflow-x:auto;padding-bottom:3px}
+.activation-steps ol{min-width:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.activation-steps li{min-width:0;padding:8px 5px;font-size:.78rem}
+.form-section legend{padding:0;margin-bottom:18px;color:#04111f;font-size:1.05rem;font-weight:900}
+.field input,.field select{transition:border-color .2s,box-shadow .2s,background .2s}
+.field input:focus,.field select:focus{outline:0;border-color:#0ea5e9;box-shadow:0 0 0 4px rgba(14,165,233,.12)}
+.optional{color:#718696;font-size:.82rem;font-weight:600}
+.checkbox-label{display:flex;gap:10px;align-items:flex-start;line-height:1.45}
+.checkbox-label input{flex:0 0 auto;width:19px;height:19px;margin-top:1px;accent-color:#0ea5e9}
+.form-actions .btn{min-height:50px;padding:12px 20px;border-radius:999px}
+.btn-primary{background:linear-gradient(135deg,#67d8ff,#0ea5e9);color:#04111f;box-shadow:0 10px 24px rgba(14,165,233,.2)}
+.success-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
+@media(max-width:700px){
+ .activation-shell{width:min(100% - 28px,1180px)}
+ .activation-hero{padding:38px 0 54px}
+ .activation-layout{gap:28px}
+ .activation-copy{padding:0}
+ .activation-eyebrow{font-size:.68rem;letter-spacing:.12em}
+ .activation-copy h1{font-size:clamp(2.25rem,12vw,3.7rem);line-height:1.02;letter-spacing:-.045em}
+ .activation-intro{margin-top:18px;font-size:1rem;line-height:1.55}
+ .activation-explain{font-size:.93rem;line-height:1.55}
+ .activation-benefits{margin-top:22px;gap:8px}
+ .activation-benefits div{padding:11px 12px;gap:10px}
+ .activation-benefits strong{min-width:76px;font-size:.7rem}
+ .activation-benefits span{font-size:.85rem}
+ .activation-card{width:100%;padding:24px 16px;border-radius:22px}
+ .activation-card h2{font-size:1.65rem}
+ .activation-card-intro{margin-bottom:18px}
+ .activation-steps li{font-size:.68rem;padding:7px 2px}
+ .form-actions{flex-direction:column-reverse}
+ .form-actions .btn{width:100%}
+ .modal{padding:12px}
+ .modal-content{max-height:90vh;overflow:auto;padding:18px;border-radius:18px}
+}
