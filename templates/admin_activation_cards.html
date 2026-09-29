@@ -18,7 +18,7 @@
     .details { display:grid; grid-template-columns:1fr 1.2in; gap:.12in; align-items:center; margin-top:.12in; }
     .label { color:#647789; font-size:10px; font-weight:800; text-transform:uppercase; }
     .value { font-size:22px; font-weight:900; letter-spacing:.05em; margin-bottom:.12in; }
-    .qr { width:1.2in; height:1.2in; }
+    .qr { width:1.05in; height:1.05in; }\n    .qr-pair { display:flex; gap:.08in; justify-content:flex-end; align-items:flex-start; }\n    .qr-block { text-align:center; font-size:8px; font-weight:800; color:#40576a; }\n    .qr-block span { display:block; margin-top:2px; }
     .instructions { background:#edf7fc; border-radius:10px; padding:.12in .15in; margin-top:.12in; font-size:11px; }
     .instructions > strong { display:block; font-size:12px; margin-bottom:4px; }
     .instructions li strong { display:inline; font-size:11px; margin:0; }
@@ -34,10 +34,10 @@
       .logo { height:.38in; }
       h1 { margin:.03in 0 0; font-size:14px; }
       .tagline { font-size:8px; }
-      .details { grid-template-columns:1fr .82in; gap:.07in; margin-top:.05in; }
+      .details { grid-template-columns:1fr 1.52in; gap:.05in; margin-top:.05in; }
       .label { font-size:7px; }
       .value { font-size:15px; margin-bottom:.04in; }
-      .qr { width:.82in; height:.82in; }
+      .qr { width:.68in; height:.68in; }\n      .qr-pair { gap:.05in; }\n      .qr-block { font-size:6px; }
       .instructions { padding:.05in .07in; margin-top:.04in; font-size:7px; line-height:1.2; }
       .instructions > strong { font-size:8px; margin-bottom:2px; }
       .instructions li strong { font-size:7px; }
@@ -60,7 +60,10 @@
           <div class="label">Safety ID</div><div class="value">{{ card.band_id }}</div>
           <div class="label">Activation code</div><div class="value">{{ card.activation_code }}</div>
         </div>
-        <img class="qr" src="{{ card.qr_data }}" alt="QR code for {{ card.band_id }}">
+        <div class="qr-pair">
+          <div class="qr-block"><img class="qr" src="{{ card.qr_data }}" alt="Activation QR code for {{ card.band_id }}"><span>ACTIVATE</span></div>
+          <div class="qr-block"><img class="qr" src="{{ card.manage_profile_qr_data }}" alt="Manage Safety Profile QR code"><span>MANAGE PROFILE</span></div>
+        </div>
       </div>
       <div class="instructions">
         <strong>GET STARTED</strong>
