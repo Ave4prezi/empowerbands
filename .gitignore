@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+activation_codes.csv
+empowerbands_activation_inventory*.csv
+bb_volunteers.csv
+blessing_box_needs.json
+family_spotlight.json
+scan_log.csv
+visit_count.txt

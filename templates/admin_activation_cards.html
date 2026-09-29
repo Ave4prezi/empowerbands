@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Print Activation Cards | EmpowerBands</title>
+  <style>
+    * { box-sizing:border-box; }
+    body { margin:0; color:#10283a; background:#eef3f6; font:15px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    .toolbar { position:sticky; top:0; z-index:2; display:flex; justify-content:center; gap:10px; padding:12px; background:#071a2c; }
+    .toolbar button,.toolbar a { padding:10px 18px; border:0; border-radius:8px; background:#0785d1; color:#fff; text-decoration:none; font:700 15px system-ui; cursor:pointer; }
+    .sheet { max-width:8.5in; margin:18px auto; display:grid; grid-template-columns:1fr 1fr; gap:.18in; padding:.25in; background:#fff; }
+    .card { height:4.7in; border:2px solid #0a82c7; border-radius:16px; padding:.24in; display:flex; flex-direction:column; page-break-inside:avoid; overflow:hidden; }
+    .logo { width:100%; height:.68in; object-fit:contain; object-position:center; }
+    h1 { margin:.08in 0 0; text-align:center; font-size:20px; }
+    .tagline { color:#087fc1; text-align:center; font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:11px; }
+    .details { display:grid; grid-template-columns:1fr 1.2in; gap:.12in; align-items:center; margin-top:.12in; }
+    .label { color:#647789; font-size:10px; font-weight:800; text-transform:uppercase; }
+    .value { font-size:22px; font-weight:900; letter-spacing:.05em; margin-bottom:.12in; }
+    .qr { width:1.2in; height:1.2in; }
+    .instructions { background:#edf7fc; border-radius:10px; padding:.12in .15in; margin-top:.12in; font-size:11px; }
+    .instructions strong { display:block; font-size:12px; margin-bottom:4px; }
+    .instructions ol { margin:0; padding-left:18px; }
+    .url { margin-top:auto; text-align:center; color:#40576a; font-size:10px; overflow-wrap:anywhere; }
+    @media (max-width:700px) { .sheet { grid-template-columns:1fr; padding:12px; margin:0; } .card { height:auto; min-height:4.7in; } }
+    @media print {
+      @page { size:letter; margin:.25in; }
+      body { background:#fff; }
+      .toolbar { display:none; }
+      .sheet { width:8in; margin:0; padding:0; gap:.18in; }
+      .card { break-inside:avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar"><a href="{{ url_for('activation_manager.activation_codes_index') }}">Back</a><button onclick="window.print()">Print {{ cards|length }} card{{ '' if cards|length == 1 else 's' }}</button></div>
+  <main class="sheet">
+  {% for card in cards %}
+    <article class="card">
+      <img class="logo" src="{{ logo_url }}" alt="EmpowerBands">
+      <h1>Activate Your Safety ID</h1>
+      <div class="tagline">Protect What Matters Most</div>
+      <div class="details">
+        <div>
+          <div class="label">Safety ID</div><div class="value">{{ card.band_id }}</div>
+          <div class="label">Activation code</div><div class="value">{{ card.activation_code }}</div>
+        </div>
+        <img class="qr" src="{{ card.qr_data }}" alt="QR code for {{ card.band_id }}">
+      </div>
+      <div class="instructions"><strong>How to activate</strong><ol><li>Scan the QR code or visit the web address below.</li><li>Enter the Safety ID and activation code.</li><li>Create and review your private safety profile.</li></ol></div>
+      <div class="url">{{ card.activation_url }}</div>
+    </article>
+  {% endfor %}
+  </main>
+</body>
+</html>

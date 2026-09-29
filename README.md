@@ -1,20 +1,21 @@
 # EmpowerBands
 
-Flask application using CSV files as its data store.
+Flask application using PostgreSQL for Safety ID activation and member profiles.
 
-## Core data files
+## Core data stores
 
-- `customers.csv` — Safety ID/customer profiles (15 columns, beginning with `band_id,name,email,...`).
-- `activation_codes.csv` — activation credentials and claimed status (`band_id,activation_code,claimed`).
+- PostgreSQL `members` — customer profile information.
+- PostgreSQL `activation_codes` — activation credentials, claim status, and inventory assignment.
+- `customers.csv` — legacy data used by remaining dashboard routes during the PostgreSQL migration.
 
 ## Activation flow
 
 1. Visit `/activate` or `/activate/<band_id>`.
 2. Enter the Safety ID and its activation code.
-3. `/api/activate` validates the code against `activation_codes.csv`.
-4. If the ID is unclaimed, the profile is created/updated in `customers.csv` and the code is marked `claimed=yes`.
+3. `/api/activate` validates and locks the matching PostgreSQL activation record.
+4. If the ID is unclaimed and no populated profile exists, the member profile is saved and the code is marked claimed in one transaction.
 
-Existing active customer rows remain in `customers.csv`. Activation codes are deliberately kept out of the customer profile columns so the rest of the legacy app retains its expected 15-column layout.
+Administrators generate and manage inventory at `/admin/activation-codes`. Activation codes remain separate from customer profile fields and must never be committed to the repository.
 
 ## Run
 
