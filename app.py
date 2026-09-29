@@ -2258,16 +2258,6 @@ body{{
 
 {whats_new_html}
 
-<div style="
-    text-align:center;
-    padding:18px 20px 10px;
-    font-family:Arial,sans-serif;
-    font-size:13px;
-    color:rgba(255,255,255,0.45);
-">
-    👁 <strong style="color:rgba(255,255,255,0.7);">{visit_count}</strong> visitors and counting
-</div>
-
 <!-- ===============================
      SPLASH SCREEN SCRIPT
 ================================ -->
