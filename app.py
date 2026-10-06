@@ -3520,6 +3520,8 @@ def profile(band_id):
             race = row[12] if len(row) > 12 else ""
             gender = row[13] if len(row) > 13 else ""
             photo_url = row[14] if len(row) > 14 else ""
+            if band_id == "EB001" and not photo_url:
+                photo_url = "/static/images/demo-profile-avatar.webp"
 
             visitor_ip = request.remote_addr
             log_scan(
