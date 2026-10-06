@@ -1,68 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sample Safety Profile | EmpowerBands</title>
-  <meta name="description" content="Explore a fictional EmpowerBands Safety ID profile. Demo buttons never send alerts or contact anyone.">
-  <link rel="stylesheet" href="/static/css/empowerbands-modern.css">
-  <style>
-    .demo-wrap{max-width:680px;margin:0 auto;padding:24px 20px 48px}
-    .demo-brand{display:block;margin-bottom:24px;color:#67e8f9;font-weight:800}
-    .demo-notice{padding:18px;border:1px solid #67e8f9;border-radius:16px;background:#102b4c}
-    .demo-card{margin-top:20px;padding:24px;border:1px solid #334155;border-radius:22px;background:#101d2e}
-    .demo-label{color:#67e8f9;font-size:13px;font-weight:bold;letter-spacing:.06em;text-transform:uppercase}
-    .demo-card h1{margin:8px 0;font-size:34px;line-height:1.2}
-    .demo-card h2{font-size:19px;margin:22px 0 8px}
-    .demo-card p{color:#cbd5e1}
-    .demo-actions{display:grid;gap:12px;margin-top:24px}
-    .demo-button{min-height:48px;padding:14px 18px;background:#2563eb;color:white;border:0;border-radius:12px;font-weight:bold;cursor:pointer}
-    .demo-button.secondary{background:#163b52;border:1px solid #38bdf8}
-    a:focus-visible,button:focus-visible{outline:3px solid #67e8f9;outline-offset:4px}
-    #demo-result{padding:14px;border:1px solid #67e8f9;border-radius:12px;margin-top:16px}
-    #demo-result:empty{display:none}
-    .demo-footer{font-size:14px;color:#cbd5e1;margin-top:24px}
-  </style>
-</head>
-<body>
-  <main class="demo-wrap">
-    <a class="demo-brand" href="/">← EmpowerBands home</a>
-    <div class="demo-notice"><strong>Sample profile — fictional information</strong><br>Explore how a Safety ID works. These demo buttons cannot send alerts, place calls, or share your location.</div>
-    <article class="demo-card" aria-labelledby="profile-name">
-      <span class="demo-label">EmpowerBands Safety Profile</span>
-      <h1 id="profile-name">Alex — Sample Profile</h1>
-      <p>Child · Demo Safety ID</p>
-      <h2>How to help</h2>
-      <p>I may need extra time to communicate. Please speak calmly, stay nearby, and help me connect with my caregiver.</p>
-      <h2>Caregiver contact</h2>
-      <p>Sample caregiver · Contact details are fictional and omitted from this demonstration.</p>
-      <h2>Private medical information</h2>
-      <p>A real profile can protect medical notes with a PIN. No private records are used here.</p>
-      <div class="demo-actions">
-        <button type="button" class="demo-button" data-demo="alert">Try a sample contact alert</button>
-        <button type="button" class="demo-button secondary" data-demo="contact">Preview caregiver contact</button>
-        <button type="button" class="demo-button secondary" data-demo="notes">Preview protected notes</button>
-      </div>
-      <div id="demo-result" role="status" aria-live="polite"></div>
-      <noscript><p>In a real profile, a helper can use the contact options or enter the PIN for protected information. Enable JavaScript to try the simulated buttons.</p></noscript>
-    </article>
-    <p class="demo-footer">A real Safety ID opens by NFC tap or QR scan. Location sharing uses the helper’s phone and requires permission. The wearable does not track location on its own. EmpowerBands is not a replacement for 911 or emergency services.</p>
-    <div class="demo-actions">
-      <a class="demo-button" href="https://pay.empowerbands.org">Buy a Safety ID</a>
-      <a class="demo-button secondary" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
-    </div>
-  </main>
-  <script>
-    const messages = {
-      alert: 'Demo complete: this is where a contact-alert confirmation would appear. No alert was sent and no location was requested.',
-      contact: 'A real profile offers its saved caregiver contact options. This sample cannot call or message anyone.',
-      notes: 'Sample medical notes: caregivers can add important instructions here. A real profile requires its PIN to reveal protected notes.'
-    };
-    document.querySelectorAll('[data-demo]').forEach(button => {
-      button.addEventListener('click', () => {
-        document.getElementById('demo-result').textContent = messages[button.dataset.demo];
-      });
-    });
-  </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><title>Sample Emergency Profile | EmpowerBands</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
+
+body {
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:
+    radial-gradient(circle at top,#0ea5e9 0%,#07111f 30%,#030712 100%);
+    min-height:100vh;
+    color:white;
+    padding-top:95px
+}
+
+.page {
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+}
+
+.card {
+    width:100%;
+    max-width:520px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:28px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
+
+.badge {
+    display:inline-block;
+    background:rgba(56,189,248,.12);
+    color:#7dd3fc;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:bold;
+    margin-bottom:18px;
+}
+
+h1 {
+    margin:0;
+    font-size:38px;
+    font-weight:800;
+}
+
+.info {
+    color:#cbd5e1;
+    margin-top:8px;
+    margin-bottom:25px;
+}
+
+.alert-box {
+    background:rgba(250,204,21,.12);
+    border:1px solid rgba(250,204,21,.35);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:20px;
+}
+
+.section {
+    margin-top:22px;
+}
+
+.section-title {
+    color:#67e8f9;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.section-text {
+    color:#e5e7eb;
+    line-height:1.6;
+}
+
+.btn {
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    text-align:center;
+    padding:16px;
+    border-radius:16px;
+    margin-top:16px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:16px;
+}
+
+.btn-red {
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;
+}
+
+.btn-blue {
+    background:linear-gradient(135deg,#06b6d4,#2563eb);
+    color:white;
+}
+
+.btn-dark {
+    background:rgba(255,255,255,.12);
+    color:white;
+    border:1px solid rgba(255,255,255,.15);
+}
+
+.pin-box {
+    margin-top:25px;
+}
+
+input {
+    width:100%;
+    box-sizing:border-box;
+    padding:15px;
+    border:none;
+    outline:none;
+    border-radius:16px;
+    background:rgba(255,255,255,.1);
+    color:white;
+    margin-bottom:14px;
+    font-size:16px;
+}
+
+
+input::placeholder {
+    color:#cbd5e1;
+}
+
+.unlock-btn {
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:16px;
+    background:linear-gradient(135deg,#22c55e,#06b6d4);
+    color:white;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+}
+
+a[href^="tel"] { 
+    color:white;
+    text-decoration:none;
+}
+
+
+.footer {
+    margin-top:25px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+}
+
+.sticky-alert{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:9999;
+    background:white;
+    padding:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+
+.sticky-alert button{
+    width:100%;
+    background:#dc2626;
+    color:white;
+    font-size:24px;
+    font-weight:bold;
+    padding:18px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+body{
+    padding-top:95px;
+}
+
+.sticky-alert{box-sizing:border-box}.demo-notice{background:rgba(14,165,233,.15);border:1px solid #38bdf8;border-radius:14px;padding:14px;margin-bottom:20px;line-height:1.5;font-size:14px}.btn{border:0;cursor:pointer;font-family:inherit}.pin-box label{display:block;margin-bottom:10px;color:#cbd5e1;font-size:14px}.demo-result:empty{display:none}.demo-result{margin-top:18px;padding:16px;border-radius:14px;background:rgba(56,189,248,.15);line-height:1.5}.page{box-sizing:border-box}.card{box-sizing:border-box}.footer a{color:#67e8f9}input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #67e8f9;outline-offset:3px}[hidden]{display:none!important}
+</style></head><body>
+<div class="sticky-alert"><button type="button" data-demo="alert">🚨 SEND EMERGENCY ALERT</button></div>
+<main class="page"><article class="card">
+<div class="demo-notice"><strong>Demo only — fictional profile</strong><br>This is how a real EmpowerBands profile looks. Buttons simulate actions; no calls, alerts, or location sharing occur.</div>
+<div class="demo-notice"><a href="/EB001" style="color:#67e8f9;font-weight:bold">View the original live profile (EB001) →</a><br>This is a real profile. Its call and emergency-alert buttons perform real actions. Please use the demo below for testing.</div>
+<div class="badge">EmpowerBands Emergency Profile</div>
+<div><img src="/static/images/empowerbands-logo-banner.jpeg" alt="EmpowerBands logo" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.15);margin-bottom:20px"></div>
+<h1>Alex — Sample Profile</h1>
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyAQAAAADAX2ykAAACkUlEQVR4nO2bTW7bMBCFv6kEeEkBOYCPIt8gZ+qRegPxKD1AAHFpgMLrgqRiJ0jSoI5qtTMLWT/f4gHEDDhvaBOfifjtUzg477zzzjvvvPNv8VajhziAnVIPJDNI7dtpQz3O34pHksQoSZq7ejcFSRMgzZ0ukOne9Dv/fvT1Nw0w/gBFA8Z56TXOQ/lm0OWN9Dj/5Xwn4tDJTnSvm6cd6Hf+Hd5OIaMJgHC2v67H+T/jW30OAhKIZDD+rCtr4w+4zOJ70+/8b/HRzMwGsFqVO0E6CFjK9nlbPc7fiC/5+5yhigMG4WyKA6br7L0//c5/ELX5mbtykZTrO6jtEmN75/3R3viXa6mJTppCpiwt5dH7353yLS/LQ1dylXEGCG19NYOv7y75tr7hsgxT9ldBq3Xl9XnXvJ2K13yom6lxXsqG2cx69H0AO22ox/lb8XX/HB+fesHZgC6rdMIlFhN0sm30OP81fDqozI9Gnc3sKBEHgJABFu9/98mX/DXCjGDp63xhAoM+i5bI2kaP81/Ba0o9RDuo+c+LldSNzbqy04Z6nL8Vv/rPM4wCkQ4ywiwj9dnG+SGX6r2NHudvy6/+VZ3lXzhZU2t9JWXvf/fJX/gbtdud16lvyJQmeAre/+6U59nBoPhXJX+h+VfU1PX13S9fa7Gee6GujAarCZ38fN1O+dYflWjWRjxmFB8B0kMmHnPbh92bfuc/iBfnJ1us5Vq6cKK9Pu+VbxX46hAHtf8dZ+9//xFeE4uVceGodQic/HzOTvn+xbNBGyLF4akHlp54FO5v7Jpf/7AwhUw9UJcO9ZDdOLecvlv9zr8RbaAP1Kl+vrpbL+5f7ZF/dX6Sy4GRuLpsoMd555133nnn/wf+F0/WygH5sIYUAAAAAElFTkSuQmCC" alt="QR code opens this fictional demo" style="width:180px;border-radius:14px;background:white;padding:10px;margin-top:20px">
+<br><br><a class="btn btn-blue" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyAQAAAADAX2ykAAACkUlEQVR4nO2bTW7bMBCFv6kEeEkBOYCPIt8gZ+qRegPxKD1AAHFpgMLrgqRiJ0jSoI5qtTMLWT/f4gHEDDhvaBOfifjtUzg477zzzjvvvPNv8VajhziAnVIPJDNI7dtpQz3O34pHksQoSZq7ejcFSRMgzZ0ukOne9Dv/fvT1Nw0w/gBFA8Z56TXOQ/lm0OWN9Dj/5Xwn4tDJTnSvm6cd6Hf+Hd5OIaMJgHC2v67H+T/jW30OAhKIZDD+rCtr4w+4zOJ70+/8b/HRzMwGsFqVO0E6CFjK9nlbPc7fiC/5+5yhigMG4WyKA6br7L0//c5/ELX5mbtykZTrO6jtEmN75/3R3viXa6mJTppCpiwt5dH7353yLS/LQ1dylXEGCG19NYOv7y75tr7hsgxT9ldBq3Xl9XnXvJ2K13yom6lxXsqG2cx69H0AO22ox/lb8XX/HB+fesHZgC6rdMIlFhN0sm30OP81fDqozI9Gnc3sKBEHgJABFu9/98mX/DXCjGDp63xhAoM+i5bI2kaP81/Ba0o9RDuo+c+LldSNzbqy04Z6nL8Vv/rPM4wCkQ4ywiwj9dnG+SGX6r2NHudvy6/+VZ3lXzhZU2t9JWXvf/fJX/gbtdud16lvyJQmeAre/+6U59nBoPhXJX+h+VfU1PX13S9fa7Gee6GujAarCZ38fN1O+dYflWjWRjxmFB8B0kMmHnPbh92bfuc/iBfnJ1us5Vq6cKK9Pu+VbxX46hAHtf8dZ+9//xFeE4uVceGodQic/HzOTvn+xbNBGyLF4akHlp54FO5v7Jpf/7AwhUw9UJcO9ZDdOLecvlv9zr8RbaAP1Kl+vrpbL+5f7ZF/dX6Sy4GRuLpsoMd555133nnn/wf+F0/WygH5sIYUAAAAAElFTkSuQmCC" download="EmpowerBands-demo-QR.png">⬇️ Download QR Code</a>
+<div class="info">Child • ID: DEMO</div>
+<div class="alert-box">⚠️ <strong>May need help communicating</strong></div>
+<div class="section"><div class="section-title">WHAT TO DO</div><div class="section-text">Please speak calmly, stay nearby, and help me connect with my caregiver. I may need extra time to respond.</div></div>
+<div class="section"><div class="section-title">MEDICAL NOTES</div><div class="section-text" id="medical-status">Protected — enter PIN to view</div></div>
+<button class="btn btn-red" type="button" data-demo="alert">🚨 Activate Emergency Alert</button>
+<button class="btn btn-blue" type="button" data-demo="contact">📞 Call Emergency Contact</button>
+<div class="pin-box"><form id="demo-pin-form"><label for="demo-pin">Try the sample PIN: <strong>1234</strong></label><input id="demo-pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter PIN to unlock full info" required><button class="unlock-btn" type="submit">Unlock Full Info</button></form></div>
+<div class="demo-result" id="demo-result" role="status" aria-live="polite"></div>
+<div class="section" id="private-demo" hidden><div class="badge">Unlocked Full Emergency Info — Demo</div><div class="section-title">PRIVATE MEDICAL NOTES</div><div class="section-text">Sample notes: Please explain each step clearly and give me time to respond. These instructions are fictional.</div><button class="btn btn-dark" type="button" id="lock-demo">Back to Public View</button></div>
+<div class="footer">EmpowerBands Emergency Response System<br><br><a href="/">← Back to EmpowerBands home</a></div>
+<footer style="text-align:center;padding:20px;font-size:13px;opacity:.8"><p><a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms of Service</a></p><p>EmpowerBands is not a replacement for 911, EMS, or professional medical monitoring.</p></footer>
+</article></main>
+<script>
+const result=document.getElementById('demo-result');
+document.querySelectorAll('[data-demo]').forEach(button=>button.addEventListener('click',()=>{result.textContent=button.dataset.demo==='alert'?'Demo: emergency contacts would receive an alert after confirmation. No alert was sent and no location was requested.':'Demo: this button would call the saved emergency contact. No call was placed.';}));
+document.getElementById('demo-pin-form').addEventListener('submit',event=>{event.preventDefault();if(document.getElementById('demo-pin').value==='1234'){document.getElementById('private-demo').hidden=false;document.getElementById('medical-status').textContent='Sample notes unlocked — see below';result.textContent='Demo PIN verified. Only fictional information is shown.';}else{result.textContent='For this demonstration, use sample PIN 1234.';}});
+document.getElementById('lock-demo').addEventListener('click',()=>{document.getElementById('private-demo').hidden=true;document.getElementById('medical-status').textContent='Protected — enter PIN to view';document.getElementById('demo-pin').value='';result.textContent='Returned to the public sample profile.';});
+</script></body></html>
