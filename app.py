@@ -1488,25 +1488,14 @@ BOARD_MEMBERS = [
 # HOME PAGE
 # ===============================
 
+@app.route("/demo")
+def safety_profile_demo():
+    # Deliberately independent of member data and emergency-alert endpoints.
+    return render_template("demo.html")
+
+
 @app.route("/")
 def home():
-    import urllib.request as _hw_ur, json as _hw_json
-
-    # Visitor counter
-    _vc_file = "visit_count.txt"
-    try:
-        if os.path.exists(_vc_file):
-            with open(_vc_file) as visit_count_file:
-                _vc = int(visit_count_file.read().strip())
-        else:
-            _vc = 0
-        _vc += 1
-        with open(_vc_file, "w") as visit_count_file:
-            visit_count_file.write(str(_vc))
-        visit_count = f"{_vc:,}"
-    except:
-        visit_count = "—"
-
     spotlight_html = ""
     try:
         import json as _sp_json
@@ -1540,45 +1529,12 @@ def home():
     except:
         spotlight_html = ""
 
-    whats_new_html = ""
-    try:
-        _hw_req = _hw_ur.Request(
-            "https://api.github.com/repos/Ave4prezi/Empowerbands/commits?per_page=1",
-            headers={"Authorization": f"token {os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN','')}",
-                     "Accept": "application/vnd.github.v3+json", "User-Agent": "EmpowerBands-App"}
-        )
-        with _hw_ur.urlopen(_hw_req, timeout=5) as _hw_r:
-            _hw_commits = _hw_json.loads(_hw_r.read().decode())
-        if _hw_commits:
-            _hw_c = _hw_commits[0]
-            _hw_msg = _hw_c.get("commit",{}).get("message","").split("\n")[0]
-            _hw_date = _hw_c.get("commit",{}).get("author",{}).get("date","")[:10]
-            _hw_url = _hw_c.get("html_url","#")
-            whats_new_html = f"""<div style="
-                background:linear-gradient(135deg,rgba(14,165,233,0.18),rgba(37,99,235,0.14));
-                border:1px solid rgba(103,232,249,0.25);
-                border-radius:14px;
-                padding:14px 20px;
-                margin:20px auto;
-                max-width:680px;
-                display:flex;
-                align-items:center;
-                gap:12px;
-                font-family:Arial,sans-serif;
-                font-size:13px;
-                color:#e5e7eb;
-                flex-wrap:wrap;
-            ">
-                <span style="font-size:18px;">✨</span>
-                <span><strong style="color:#67e8f9;">What\'s new</strong> &nbsp;{_hw_date} — {_hw_msg}</span>
-                <a href="/history" style="margin-left:auto;color:#67e8f9;text-decoration:none;font-size:12px;white-space:nowrap;">See all changes →</a>
-            </div>"""
-    except:
-        pass
     return f"""
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="utf-8">
+<meta name="description" content="EmpowerBands NFC and QR Safety IDs keep important information and caregiver contacts one tap away. Buy a Safety ID or sponsor someone in your community.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EmpowerBands Worldwide</title>
 
@@ -1589,103 +1545,6 @@ body{{
     font-family:Arial,sans-serif;
     background:#020817;
     color:white;
-}}
-/* ===============================
-   EMPOWERBANDS SPLASH SCREEN
-================================ */
-
-#splash-screen {{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    background:
-        radial-gradient(circle at center,
-        rgba(37,99,235,0.22) 0%,
-        #07111f 45%,
-        #020817 100%);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    z-index:999999;
-    opacity:1;
-    visibility:visible;
-    transition:opacity .65s ease, visibility .65s ease;
-}}
-
-#splash-screen.hide {{
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-}}
-
-.splash-logo {{
-    width:190px;
-    height:190px;
-    object-fit:contain;
-    filter:drop-shadow(0 0 35px rgba(14,165,233,.85));
-    animation:splashPulse 1.4s ease-in-out infinite;
-}}
-
-.splash-title {{
-    margin-top:22px;
-    font-size:22px;
-    font-weight:900;
-    letter-spacing:.04em;
-    color:white;
-    opacity:0;
-    animation:splashText .8s ease .25s forwards;
-}}
-
-.splash-subtitle {{
-    margin-top:7px;
-    font-size:13px;
-    color:#38bdf8;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    opacity:0;
-    animation:splashText .8s ease .45s forwards;
-}}
-
-@keyframes splashPulse {{
-    0% {{
-        transform:scale(.90);
-        opacity:.72;
-    }}
-
-    50% {{
-        transform:scale(1.06);
-        opacity:1;
-    }}
-
-    100% {{
-        transform:scale(.90);
-        opacity:.72;
-    }}
-}}
-
-@keyframes splashText {{
-    from {{
-        opacity:0;
-        transform:translateY(8px);
-    }}
-
-    to {{
-        opacity:1;
-        transform:translateY(0);
-    }}
-}}
-
-@media(max-width:600px) {{
-    .splash-logo {{
-        width:150px;
-        height:150px;
-    }}
-
-    .splash-title {{
-        font-size:19px;
-    }}
 }}
 .header{{
     display:flex;
@@ -1969,7 +1828,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 .top-buttons .btn{{padding:11px 15px;font-size:13px;box-shadow:none;}}
 .hero{{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;padding:0 6% 110px;align-items:center;}}
 .hero-banner{{grid-column:1/-1;width:100%;margin:0;overflow:hidden;}}
-.hero-banner img{{display:block;width:100%;height:160px;object-fit:cover;object-position:center;}}
+.hero-banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain;object-position:center;}}
 .hero-copy,.hero-product{{min-width:0;}}
 .hero .eyebrow{{color:#67e8f9;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}}
 .hero h1{{font-size:clamp(38px,4.7vw,62px);}}
@@ -1992,7 +1851,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     .nav{{gap:14px;}}
     .top-buttons{{flex-direction:row;}}
     .hero{{grid-template-columns:1fr;padding-bottom:105px;text-align:left;}}
-    .hero-banner img{{height:115px;}}
+    .hero-banner img{{height:auto;max-height:115px;}}
     .hero-product{{max-width:620px;}}
     .hero-actions{{align-items:stretch;}}
     .hero-actions .btn{{width:auto;}}
@@ -2007,28 +1866,6 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 </head>
 
 <body>
-
-<body>
-
-<!-- ===============================
-     EMPOWERBANDS SPLASH SCREEN
-================================ -->
-<div id="splash-screen">
-    <img
-        src="{LOGO_URL}"
-        alt="EmpowerBands Worldwide"
-        class="splash-logo"
-    >
-
-    <div class="splash-title">
-        EmpowerBands Worldwide
-    </div>
-
-    <div class="splash-subtitle">
-        Protect What Matters Most
-    </div>
-</div>
-
 
 <div class="header">
     <nav class="nav" aria-label="Main navigation">
@@ -2047,7 +1884,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 
 <section class="hero">
     <div class="hero-banner">
-        <img src="https://i.imgur.com/bSUxUXa.jpeg" alt="EmpowerBands Worldwide — Protect What Matters Most">
+        <img src="/static/images/empowerbands-logo-banner.jpeg" alt="EmpowerBands Worldwide — Protect What Matters Most">
     </div>
     <div class="hero-copy">
         <p class="eyebrow">NFC + QR Safety ID</p>
@@ -2055,7 +1892,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <p class="hero-description">Keep vital information and caregiver contacts one tap away. Tap the EmpowerBands Safety ID or scan its QR code to open a safety profile and help someone connect with their loved ones. No special app needed.</p>
         <div class="hero-actions">
             <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
-            <a class="btn dark" href="/EB001">View a sample profile</a>
+            <a class="btn dark" href="/demo">View a sample profile</a>
         </div>
     </div>
     <figure class="hero-product">
@@ -2085,9 +1922,9 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     <h2>About Us</h2>
 
     <p>
-        EmpowerBands Worldwide is a safety technology company focused on helping
-        individuals, families, caregivers, and communities access critical
-        emergency information when it matters most.
+        EmpowerBands is an Alabama nonprofit organization doing business as
+        EmpowerBands Worldwide. We help individuals, families, caregivers,
+        and communities keep important safety information and trusted contacts within reach.
     </p>
 
     <p>
@@ -2128,7 +1965,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <div class="card">
             <div class="num">3</div>
             <h3>Send Alerts Fast</h3>
-            <p>Emergency contacts can receive alerts and GPS location sharing within seconds.</p>
+            <p>A helper can send a contact alert and choose to share their phone’s location when permission is granted. The Safety ID does not track location on its own.</p>
         </div>
 
         <div class="card">
@@ -2225,7 +2062,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 </style>
 
 <section class="cta">
-    <img src="https://i.imgur.com/RpBUbHd.png">
+    <img src="/static/images/empowerbands-logo-banner.jpeg" alt="EmpowerBands logo">
 
     <div>
         <h2>Ready To Support The Mission?</h2>
@@ -2235,7 +2072,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     <div class="cta-buttons">
         <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
         <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
-        <a class="btn dark" href="/EB001">🚀 View Demo</a>
+        <a class="btn dark" href="/demo">🚀 View Demo</a>
     </div>
 </section>
 
@@ -2269,29 +2106,6 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <a href="https://linktr.ee/EmpowerBandsWorldwide">Linktree</a>
     </div>
 </div>
-
-{whats_new_html}
-
-<!-- ===============================
-     SPLASH SCREEN SCRIPT
-================================ -->
-<script>
-window.addEventListener("load", function() {{
-    const splash = document.getElementById("splash-screen");
-
-    if (!splash) return;
-
-    setTimeout(function() {{
-        splash.classList.add("hide");
-
-        setTimeout(function() {{
-            splash.remove();
-        }}, 700);
-
-    }}, 1800);
-}});
-</script>
-
 
 <!-- TIDIO CHAT -->
 <script

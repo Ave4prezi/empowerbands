@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sample Safety Profile | EmpowerBands</title>
+  <meta name="description" content="Explore a fictional EmpowerBands Safety ID profile. Demo buttons never send alerts or contact anyone.">
+  <link rel="stylesheet" href="/static/css/empowerbands-modern.css">
+  <style>
+    .demo-wrap{max-width:680px;margin:0 auto;padding:24px 20px 48px}
+    .demo-brand{display:block;margin-bottom:24px;color:#67e8f9;font-weight:800}
+    .demo-notice{padding:18px;border:1px solid #67e8f9;border-radius:16px;background:#102b4c}
+    .demo-card{margin-top:20px;padding:24px;border:1px solid #334155;border-radius:22px;background:#101d2e}
+    .demo-label{color:#67e8f9;font-size:13px;font-weight:bold;letter-spacing:.06em;text-transform:uppercase}
+    .demo-card h1{margin:8px 0;font-size:34px;line-height:1.2}
+    .demo-card h2{font-size:19px;margin:22px 0 8px}
+    .demo-card p{color:#cbd5e1}
+    .demo-actions{display:grid;gap:12px;margin-top:24px}
+    .demo-button{min-height:48px;padding:14px 18px;background:#2563eb;color:white;border:0;border-radius:12px;font-weight:bold;cursor:pointer}
+    .demo-button.secondary{background:#163b52;border:1px solid #38bdf8}
+    a:focus-visible,button:focus-visible{outline:3px solid #67e8f9;outline-offset:4px}
+    #demo-result{padding:14px;border:1px solid #67e8f9;border-radius:12px;margin-top:16px}
+    #demo-result:empty{display:none}
+    .demo-footer{font-size:14px;color:#cbd5e1;margin-top:24px}
+  </style>
+</head>
+<body>
+  <main class="demo-wrap">
+    <a class="demo-brand" href="/">← EmpowerBands home</a>
+    <div class="demo-notice"><strong>Sample profile — fictional information</strong><br>Explore how a Safety ID works. These demo buttons cannot send alerts, place calls, or share your location.</div>
+    <article class="demo-card" aria-labelledby="profile-name">
+      <span class="demo-label">EmpowerBands Safety Profile</span>
+      <h1 id="profile-name">Alex — Sample Profile</h1>
+      <p>Child · Demo Safety ID</p>
+      <h2>How to help</h2>
+      <p>I may need extra time to communicate. Please speak calmly, stay nearby, and help me connect with my caregiver.</p>
+      <h2>Caregiver contact</h2>
+      <p>Sample caregiver · Contact details are fictional and omitted from this demonstration.</p>
+      <h2>Private medical information</h2>
+      <p>A real profile can protect medical notes with a PIN. No private records are used here.</p>
+      <div class="demo-actions">
+        <button type="button" class="demo-button" data-demo="alert">Try a sample contact alert</button>
+        <button type="button" class="demo-button secondary" data-demo="contact">Preview caregiver contact</button>
+        <button type="button" class="demo-button secondary" data-demo="notes">Preview protected notes</button>
+      </div>
+      <div id="demo-result" role="status" aria-live="polite"></div>
+      <noscript><p>In a real profile, a helper can use the contact options or enter the PIN for protected information. Enable JavaScript to try the simulated buttons.</p></noscript>
+    </article>
+    <p class="demo-footer">A real Safety ID opens by NFC tap or QR scan. Location sharing uses the helper’s phone and requires permission. The wearable does not track location on its own. EmpowerBands is not a replacement for 911 or emergency services.</p>
+    <div class="demo-actions">
+      <a class="demo-button" href="https://pay.empowerbands.org">Buy a Safety ID</a>
+      <a class="demo-button secondary" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
+    </div>
+  </main>
+  <script>
+    const messages = {
+      alert: 'Demo complete: this is where a contact-alert confirmation would appear. No alert was sent and no location was requested.',
+      contact: 'A real profile offers its saved caregiver contact options. This sample cannot call or message anyone.',
+      notes: 'Sample medical notes: caregivers can add important instructions here. A real profile requires its PIN to reveal protected notes.'
+    };
+    document.querySelectorAll('[data-demo]').forEach(button => {
+      button.addEventListener('click', () => {
+        document.getElementById('demo-result').textContent = messages[button.dataset.demo];
+      });
+    });
+  </script>
+</body>
+</html>
