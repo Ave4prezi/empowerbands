@@ -150,25 +150,6 @@ if not os.path.exists(file_name):
 
         writer.writerow(header)
 
-        # Optional demo profile
-        writer.writerow([
-    "EB001",
-    "K7P4X9",
-    "Jaden",
-    "email@test.com",
-    "+12565551234",
-    "+12565551123",
-    "mom@test.com,dad@test.com",
-    "Child",
-    "Autism – Nonverbal",
-    "Please stay calm. I may not respond verbally. Call emergency contacts immediately.",
-    "No allergies",
-    "1234",
-    "123 Hope Street, Decatur AL 35601",
-    "Black / African American",
-    "Male",
-    "https://i.imgur.com/7A4KvOJ.jpeg"
-])
 
 # Create family spotlight file if missing
 _spotlight_file = "family_spotlight.json"
@@ -1488,6 +1469,11 @@ BOARD_MEMBERS = [
 # HOME PAGE
 # ===============================
 
+@app.route("/order")
+def order_safety_id():
+    return render_template("order.html")
+
+
 @app.route("/demo")
 def safety_profile_demo():
     # Deliberately independent of member data and emergency-alert endpoints.
@@ -1883,7 +1869,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     </nav>
     <div class="top-buttons">
         <a class="btn dark" href="/manage-profile">Manage My Profile</a>
-        <a class="btn" href="https://pay.empowerbands.org">Buy a Safety ID</a>
+        <a class="btn" href="/order">Order a Safety ID</a>
     </div>
 </div>
 
@@ -1893,9 +1879,11 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <h1>Protect <span>what matters most.</span></h1>
         <p class="hero-description">Keep vital information and caregiver contacts one tap away. Tap the EmpowerBands Safety ID or scan its QR code to open a safety profile and help someone connect with their loved ones. No special app needed.</p>
         <div class="hero-actions">
-            <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
-            <a class="btn dark" href="/demo">View a sample profile</a>
+            <a class="btn" href="/order">Order a Safety ID — $24.99</a>
+            <a class="btn dark" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
+            <a class="btn dark" href="/demo">Try the sample profile</a>
         </div>
+        <p class="owner-links">Already have a Safety ID? <a href="/activate">Activate it</a> · <a href="/manage-profile">Update your profile</a></p>
     </div>
     <figure class="hero-product">
         <img src="/static/images/packaged-safety-id-enhanced.webp" alt="AI-enhanced studio view of the EmpowerBands Safety ID package" width="1200" height="900">
@@ -1918,6 +1906,22 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         </div>
         <a class="btn" href="/pro">Explore Pro Series &amp; ask about upgrading</a>
     </div>
+</section>
+
+<section class="section purchase-paths" aria-labelledby="choose-path">
+<div class="section-intro"><p class="eyebrow">Choose your next step</p><h2 id="choose-path">For your family. For your community.</h2></div>
+<div class="path-grid">
+<article class="path-card"><span class="path-label">Personal purchase</span><h3>A Safety ID for someone you love</h3><p class="path-price">$24.99</p><p>A small NFC key fob opens a safety profile by tap or QR scan. Keep caregiver contacts and helpful instructions within reach.</p><a class="btn" href="/order">Request your Safety ID</a><p class="path-note">Order requests go directly to our team while online checkout is being restored.</p></article>
+<article class="path-card"><span class="path-label">One-time sponsorship</span><h3>Help another person have access</h3><p class="path-price">$25 <span>for one person</span></p><p>Sponsor a child, senior, or person with a disability. Sponsor two people for $50.</p><a class="btn dark" href="/sponsor">Sponsor a Safety ID</a><p class="path-note">A sponsorship supports access for someone else.</p></article>
+</div><p class="team-link">Built by people who care about their community. <a href="/board-members">Meet the EmpowerBands team →</a></p>
+</section>
+<section class="section setup-guide" aria-labelledby="setup-title">
+<div class="section-intro"><p class="eyebrow">Already received your Safety ID?</p><h2 id="setup-title">Make it yours in three steps.</h2></div>
+<ol class="setup-grid">
+<li><span class="step-number">1</span><h3>Activate</h3><p>Enter the Safety ID and activation code included with your package.</p></li>
+<li><span class="step-number">2</span><h3>Create your profile</h3><p>Add caregiver contacts, public instructions, and a PIN for protected medical notes.</p></li>
+<li><span class="step-number">3</span><h3>Tap or scan</h3><p>Use a compatible NFC phone or the QR code to open the profile. Keep contact details current.</p></li>
+</ol><div class="setup-actions"><a class="btn" href="/activate">Activate my Safety ID</a><a class="btn dark" href="/manage-profile">Manage my profile</a></div>
 </section>
 
 <section id="about" class="section">
@@ -2062,6 +2066,20 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     .tbm-highlight-text p{{margin:0 auto;}}
 }}
 </style>
+
+<section class="section faq-section" aria-labelledby="faq-title">
+    <div class="section-intro"><p class="eyebrow">Know before you choose</p><h2 id="faq-title">Your questions, answered.</h2></div>
+    <div class="faq-list">
+        <details><summary>Do I need a special app?</summary><p>No special EmpowerBands app is needed. Tap with a compatible NFC smartphone or scan the QR code. The phone needs internet access to load the safety profile.</p></details>
+        <details><summary>Does the Safety ID track someone by GPS?</summary><p>No. The Safety ID does not track location on its own. A helper may choose to share their phone’s location when sending a contact alert, with permission.</p></details>
+        <details><summary>What can someone see when they scan it?</summary><p>The public profile shows the information you provide for helping someone, including public instructions and a caregiver contact option. Private medical notes are protected by your PIN. Choose public details carefully.</p></details>
+        <details><summary>How do I update my profile?</summary><p>Open <a href="/manage-profile">Manage My Profile</a> and verify access with a text code sent to the phone connected to your Safety ID. Contact <a href="mailto:support@empowerbands.org">support@empowerbands.org</a> if you no longer have access to that phone.</p></details>
+        <details><summary>What if my phone cannot read NFC?</summary><p>Use the QR code to open the profile in your phone’s browser. NFC support varies by phone, case, settings, and where you hold the Safety ID.</p></details>
+        <details><summary>Does an alert contact 911?</summary><p>No. An EmpowerBands alert notifies the saved contacts; it does not contact 911 or emergency services. Call 911 directly in a life-threatening emergency.</p></details>
+        <details><summary>What is the difference between buying and sponsoring?</summary><p>A personal purchase is a Safety ID for you or someone you choose. A sponsorship helps EmpowerBands provide access to another person. The Monthly Impact Club is a separate recurring support program.</p></details>
+    </div>
+    <p class="faq-support">Still need help? <a href="mailto:support@empowerbands.org">Contact our team</a> · <a href="/resources">Browse support resources</a></p>
+</section>
 
 <section class="cta">
     <img src="/static/images/empowerbands-logo-banner.jpeg" alt="EmpowerBands logo">
@@ -6524,3 +6542,4 @@ __FOOTER__
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
