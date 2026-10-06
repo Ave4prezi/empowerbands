@@ -6,15 +6,16 @@
   <title>Activate Your EmpowerBands Safety ID</title>
   <link rel="stylesheet" href="/static/styles/activate.css" />
   <link rel="stylesheet" href="/static/styles/activation-page.css" />
+<style>.board-brand::before{display:none!important}.board-brand{padding-left:0!important}@media(max-width:600px){.board-inner{gap:12px!important}.board-brand img{width:210px;height:70px}}</style>
 </head>
 <body>
   <header class="board-header">
     <div class="board-inner">
-      <a class="board-brand" href="/">Empower<span>Bands</span></a>
+      <a class="board-brand" href="/" aria-label="EmpowerBands home"><img src="/static/images/empowerbands-logo-banner.jpeg" alt="EmpowerBands" width="210" height="70" style="display:block;width:210px;height:70px;object-fit:contain;"></a>
       <nav class="board-navigation" aria-label="Main navigation">
         <a href="/">Home</a>
         <a href="/register">Register</a>
-        <a href="/board">Board</a>
+        <a href="/board-members">Board</a>
         <a class="activate-nav-button board-active" href="/activate" aria-current="page">Activate</a>
       </nav>
     </div>
@@ -31,7 +32,7 @@
 
           <div class="activation-benefits trust-list" aria-label="Trust and safety">
             <div><strong>Secure</strong><span>Your safety information is controlled by you.</span></div>
-            <div><strong>Private</strong><span>Only accessible when you choose to share it.</span></div>
+            <div><strong>PIN-protected notes</strong><span>Public instructions help a finder. Private medical notes require your PIN.</span></div>
             <div><strong>Easy to Update</strong><span>Edit profile information anytime.</span></div>
           </div>
         </div>
