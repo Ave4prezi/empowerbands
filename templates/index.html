@@ -1,95 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>EmpowerBands Worldwide</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/RpBUbHd.png">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#07111f">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="EmpowerBands Worldwide helps families and caregivers protect loved ones with smart safety access and emergency-ready information." />
+  <title>EmpowerBands Worldwide</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/empowerbands-modern.css') }}" />
+  <link rel="apple-touch-icon" href="https://i.imgur.com/RpBUbHd.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#07111f" />
 </head>
-
 <body>
+  <header class="site-header">
+    <div class="site-topbar">
+      <a href="/" class="brand" aria-label="EmpowerBands home">
+        <span class="brand-mark">⚡</span>
+        <span>Empower<span>Bands</span></span>
+      </a>
 
-<!-- HERO SECTION -->
-<section class="hero">
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="active" href="/">Home</a>
+        <a href="/activate">Activate</a>
+        <a href="/resources">Resources</a>
+        <a href="/support-hub">Support Hub</a>
+        <a href="/manage-profile">Manage Profile</a>
+      </nav>
 
-    <div class="hero-content">
-
-        <img
-  src="{{ url_for('static', filename='images/community-donation.webp') }}"
-  alt="A community member placing donated supplies into a Blessing Box"
->
-
-        <img
-  src="{{ url_for('static', filename='images/food-and-water-donation.webp') }}"
-  alt="Food, household essentials, and bottled water donated for a Blessing Box"
->
-
-        <img
-  src="{{ url_for('static', filename='images/blessing-box.webp') }}"
-  alt="EmpowerBands Worldwide Blessing Box at a community location"
->
-            Protect What Matters Most</h1>
-
-        <p class="mission">
-            EmpowerBands Worldwide is committed to safety, inclusion, and rapid emergency response through smart wearable technology.
-        </p>
-
-        <div class="hero-buttons">
-    <a href="/learn-more" class="btn">Learn More</a>
-    <a href="/register" class="activate-nav-button">Activate Your Band</a>
-    <a href="/donate" class="btn btn-primary">Donate</a>
-    <a href="/board">Board of Directors</a>
-    <a href="giveaway.html">Enter the Shirt Giveaway</a>
-</div>
-
+      <div class="header-actions">
+        <a class="btn btn-secondary" href="/manage-profile">Manage My Profile</a>
+        <a class="btn btn-primary" href="/activate">Activate My ID</a>
+      </div>
     </div>
-</section>
+  </header>
 
-<!-- SAFETY MODULES -->
-<section class="modules">
+  <main>
+    <section class="hero">
+      <div class="container hero-shell">
+        <div class="hero-copy">
+          <span class="eyebrow">NFC + QR Safety ID</span>
+          <h1>Protect <span class="gradient">what matters most.</span></h1>
+          <p>
+            EmpowerBands helps families, schools, and caregivers share critical safety information in seconds.
+            A quick tap or scan can reveal emergency contacts, essential notes, and care instructions without friction.
+          </p>
 
-    <h2>Safety Modules</h2>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/activate">Activate Your Safety ID</a>
+            <a class="btn btn-secondary" href="/resources">Explore Resources</a>
+          </div>
 
-
-    <div class="module-grid">
-
-        <div class="module">
-            <h3>SOS Emergency Alert</h3>
-            <p>Instant alerts sent to caregivers and emergency contacts with GPS location.</p>
+          <div class="hero-stats" aria-label="Key statistics">
+            <div class="stat">
+              <strong>24/7</strong>
+              <span>Accessibility</span>
+            </div>
+            <div class="stat">
+              <strong>1 Tap</strong>
+              <span>Emergency access</span>
+            </div>
+            <div class="stat">
+              <strong>100%</strong>
+              <span>Care-first design</span>
+            </div>
+          </div>
         </div>
 
-        <div class="module">
-            <h3>Location Tracking</h3>
-            <p>Real-time location sharing for safety monitoring and rapid response.</p>
+        <div class="hero-visual" aria-label="Safety ID preview panel">
+          <div class="card-glow">
+            <div class="preview-card">
+              <div class="preview-image" role="img" aria-label="EmpowerBands profile preview"></div>
+              <div class="preview-info">
+                <div>
+                  <strong>Safety ID: EB001</strong>
+                  <div class="preview-meta">Caregiver-ready profile</div>
+                </div>
+                <span class="preview-badge">Live Ready</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2>Built for calm, clarity, and confidence.</h2>
+          <p>EmpowerBands is designed for people who need fast access to critical information in real-world moments.</p>
         </div>
 
-        <div class="module">
-            <h3>Community Support Network</h3>
-            <p>Connects users with volunteers, guardians, and support systems.</p>
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>Emergency-ready</h3>
+            <p>Share critical contact and medical information quickly when it matters most.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📡</div>
+            <h3>NFC + QR access</h3>
+            <p>One tap or scan connects someone to the right safety profile without app friction.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">👨‍👩‍👧‍👦</div>
+            <h3>Caregiver focused</h3>
+            <p>Purpose-built for parents, schools, communities, and caregivers supporting vulnerable individuals.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">💙</div>
+            <h3>Accessible design</h3>
+            <p>Clear, readable, low-stress interface that supports calm decision-making in emergencies.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container showcase">
+        <div class="panel">
+          <h3>How EmpowerBands works</h3>
+          <ul class="check-list">
+            <li>Tap an NFC-enabled band or scan the QR code to view a relevant safety profile.</li>
+            <li>Access emergency contacts, medical notes, and essential instructions in seconds.</li>
+            <li>Activate with a secure PIN and maintain control over sensitive information.</li>
+            <li>Update details anytime to reflect changing health, emergency, or care needs.</li>
+          </ul>
         </div>
 
+        <div class="panel metric-panel">
+          <div class="metric-box">
+            <strong>1 tap</strong>
+            <span>Fast profile access</span>
+          </div>
+          <div class="metric-box">
+            <strong>4-step</strong>
+            <span>Activation flow</span>
+          </div>
+          <div class="metric-box">
+            <strong>24/7</strong>
+            <span>Support-minded design</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container split-cta">
+        <h3>Ready to create a safer, more connected experience?</h3>
+        <p>Designed to make accessibility feel simple, reassuring, and trustworthy for the people EmpowerBands serves.</p>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="/activate">Get Started</a>
+          <a class="btn btn-secondary" href="/manage-profile">Manage Profile</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-shell">
+      <div>© 2026 EmpowerBands Worldwide</div>
+      <div>Decatur, Alabama • <a href="mailto:support@empowerbands.org">support@empowerbands.org</a></div>
+      <div><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/delete-request">Delete Request</a></div>
     </div>
-</section>
+  </footer>
 
-<!-- TESTIMONIALS / PARTNERS (OPTIONAL) -->
-<section class="testimonials">
-
-    <h2>Community Impact</h2>
-
-    <div class="testimonial">
-        <p>"EmpowerBands gave our family peace of mind knowing help is always one button away."</p>
-        <span>- Community Member</span>
-    </div>
-
-</section>
-
-<!-- FOOTER -->
-<footer>
-    <p>&copy; 2026 EmpowerBands Worldwide</p>
-    <p><a href="/history" style="color:#7dd3fc; text-decoration:none;">📋 Edit History</a></p>
-</footer>
-
+  <script src="{{ url_for('static', filename='js/empowerbands-modern.js') }}"></script>
 </body>
 </html>
