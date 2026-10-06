@@ -2050,8 +2050,8 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     </div>
     <div class="hero-copy">
         <p class="eyebrow">NFC + QR Safety ID</p>
-        <h1>A Safety ID that <span>helps people reach you</span></h1>
-        <p class="hero-description">Tap the wearable or scan its QR code to open a safety profile with caregiver contacts and helpful instructions. No special app is needed.</p>
+        <h1>Protect <span>what matters most.</span></h1>
+        <p class="hero-description">Keep vital information and caregiver contacts one tap away. Tap the EmpowerBands Safety ID or scan its QR code to open a safety profile and help someone connect with their loved ones. No special app needed.</p>
         <div class="hero-actions">
             <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
             <a class="btn dark" href="/EB001">View a sample profile</a>
