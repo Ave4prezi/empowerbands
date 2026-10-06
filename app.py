@@ -1826,7 +1826,9 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 .nav a{{font-size:14px;white-space:nowrap;}}
 .top-buttons{{gap:10px;flex-wrap:wrap;}}
 .top-buttons .btn{{padding:11px 15px;font-size:13px;box-shadow:none;}}
-.hero{{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;padding:0 6% 110px;align-items:center;}}
+.header-brand{{display:block;flex:0 0 210px;}}
+.header-brand img{{display:block;width:210px;height:70px;object-fit:contain;}}
+.hero{{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;padding:36px 6% 44px;align-items:center;}}
 .hero-banner{{grid-column:1/-1;width:100%;margin:0;overflow:hidden;}}
 .hero-banner img{{display:block;width:100%;height:auto;max-height:160px;object-fit:contain;object-position:center;}}
 .hero-copy,.hero-product{{min-width:0;}}
@@ -1850,7 +1852,9 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     .header{{align-items:stretch;}}
     .nav{{gap:14px;}}
     .top-buttons{{flex-direction:row;}}
-    .hero{{grid-template-columns:1fr;padding-bottom:105px;text-align:left;}}
+    .header-brand{{margin:0 auto;}}
+    .nav{{justify-content:center;}}
+    .hero{{grid-template-columns:1fr;padding-top:24px;padding-bottom:36px;text-align:left;}}
     .hero-banner img{{height:auto;max-height:115px;}}
     .hero-product{{max-width:620px;}}
     .hero-actions{{align-items:stretch;}}
@@ -1868,6 +1872,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 <body>
 
 <div class="header">
+    <a class="header-brand" href="/" aria-label="EmpowerBands home"><img src="/static/images/empowerbands-logo-banner.jpeg" width="2172" height="724" alt="EmpowerBands — Protect What Matters Most"></a>
     <nav class="nav" aria-label="Main navigation">
         <a class="active" href="/">Home</a>
         <a href="#how">How It Works</a>
@@ -1883,9 +1888,6 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 </div>
 
 <section class="hero">
-    <div class="hero-banner">
-        <img src="/static/images/empowerbands-logo-banner.jpeg" alt="EmpowerBands Worldwide — Protect What Matters Most">
-    </div>
     <div class="hero-copy">
         <p class="eyebrow">NFC + QR Safety ID</p>
         <h1>Protect <span>what matters most.</span></h1>
