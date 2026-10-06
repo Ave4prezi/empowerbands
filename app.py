@@ -1898,8 +1898,8 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         </div>
     </div>
     <figure class="hero-product">
-        <img src="/static/images/safety-id-tap-demo.webp" alt="Illustration of an EmpowerBands NFC Safety ID worn on a cord beside a smartphone" width="900" height="600">
-        <figcaption>Tap a phone to the wearable to open its safety profile. Product illustration.</figcaption>
+        <img src="/static/images/packaged-safety-id.webp" alt="Actual packaged EmpowerBands Safety ID with the branded NFC key fob" width="1152" height="1536" style="aspect-ratio:4/3;object-fit:cover;object-position:50% 35%;">
+        <figcaption>Your EmpowerBands Safety ID, packaged and ready to activate.</figcaption>
     </figure>
 </section>
 
