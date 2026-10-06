@@ -1898,8 +1898,8 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         </div>
     </div>
     <figure class="hero-product">
-        <img src="/static/images/packaged-safety-id.webp" alt="Actual packaged EmpowerBands Safety ID with the branded NFC key fob" width="1152" height="1536" style="aspect-ratio:4/3;object-fit:cover;object-position:50% 35%;">
-        <figcaption>Your EmpowerBands Safety ID, packaged and ready to activate.</figcaption>
+        <img src="/static/images/packaged-safety-id-enhanced.webp" alt="AI-enhanced studio view of the EmpowerBands Safety ID package" width="1200" height="900">
+        <figcaption>Your EmpowerBands Safety ID, packaged and ready to activate.<br><span style="font-size:12px;">AI-enhanced product image · <a href="/static/images/packaged-safety-id.webp" style="color:#67e8f9;">View original package photo</a></span></figcaption>
     </figure>
 </section>
 
