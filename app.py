@@ -1881,8 +1881,9 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <div class="hero-actions">
             <a class="btn" href="/order">Order a Safety ID — $24.99</a>
             <a class="btn dark" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
-            <a class="btn dark" href="/demo">Try the sample profile</a>
+            
         </div>
+        <p class="owner-links"><a href="/demo">Try the sample profile →</a></p>
         <p class="owner-links">Already have a Safety ID? <a href="/activate">Activate it</a> · <a href="/manage-profile">Update your profile</a></p>
     </div>
     <figure class="hero-product">
@@ -1891,27 +1892,42 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     </figure>
 </section>
 
-<section class="section" id="pro-series">
-    <div class="pro-panel">
-        <p class="eyebrow">Make one tap do more</p>
-        <h2>Meet EmpowerBands Pro Series</h2>
-        <p>Take your band beyond your Safety ID. Give people one easy place to find the content, documents, and links you choose to share—right from a tap or QR scan.</p>
-        <div class="pro-features">
-            <div><strong>Videos &amp; video links</strong><span>Share an introduction, portfolio, tutorial, or your favorite video.</span></div>
-            <div><strong>Important documents</strong><span>Point people to selected documents, forms, an ebook, or your résumé.</span></div>
-            <div><strong>Social media &amp; websites</strong><span>Bring your profiles, business page, and online presence together.</span></div>
-            <div><strong>Payment links</strong><span>Share your Cash App, PayPal, or other payment link when appropriate.</span></div>
-            <div><strong>One simple connection</strong><span>Choose the links you want visitors to see from your Pro profile.</span></div>
-            <div><strong>Safety first</strong><span>Your Safety ID remains a separate profile for emergency information.</span></div>
+<section class="section" id="how">
+    <h2>How EmpowerBands Works</h2>
+
+    <div class="grid">
+        <div class="card">
+            <div class="num">1</div>
+            <h3>Tap The Band</h3>
+            <p>A smartphone taps the NFC wearable or scans the QR code.</p>
         </div>
-        <a class="btn" href="/pro">Explore Pro Series &amp; ask about upgrading</a>
+
+        <div class="card">
+            <div class="num">2</div>
+            <h3>View Emergency Profile</h3>
+            <p>Important instructions, caregiver contacts, and support details appear instantly.</p>
+        </div>
+
+        <div class="card">
+            <div class="num">3</div>
+            <h3>Send Alerts Fast</h3>
+            <p>A helper can send a contact alert and choose to share their phone’s location when permission is granted. The Safety ID does not track location on its own.</p>
+        </div>
+
+        <div class="card">
+            <div class="num">4</div>
+            <h3>Improve Safety</h3>
+            <p>Supports schools, caregivers, seniors, disabilities, and emergency response situations.</p>
+        </div>
     </div>
 </section>
+
+
 
 <section class="section purchase-paths" aria-labelledby="choose-path">
 <div class="section-intro"><p class="eyebrow">Choose your next step</p><h2 id="choose-path">For your family. For your community.</h2></div>
 <div class="path-grid">
-<article class="path-card"><span class="path-label">Personal purchase</span><h3>A Safety ID for someone you love</h3><p class="path-price">$24.99</p><p>A small NFC key fob opens a safety profile by tap or QR scan. Keep caregiver contacts and helpful instructions within reach.</p><a class="btn" href="/order">Request your Safety ID</a><p class="path-note">Order requests go directly to our team while online checkout is being restored.</p></article>
+<article class="path-card"><span class="path-label">Personal purchase</span><h3>A Safety ID for someone you love</h3><p class="path-price">$24.99</p><p>A small NFC key fob opens a safety profile by tap or QR scan. Keep caregiver contacts and helpful instructions within reach.</p><a class="btn" href="/order">Request your Safety ID</a><p class="path-note">Request your quantity and pickup or delivery preference. Our team confirms your total and payment instructions.</p></article>
 <article class="path-card"><span class="path-label">One-time sponsorship</span><h3>Help another person have access</h3><p class="path-price">$25 <span>for one person</span></p><p>Sponsor a child, senior, or person with a disability. Sponsor two people for $50.</p><a class="btn dark" href="/sponsor">Sponsor a Safety ID</a><p class="path-note">A sponsorship supports access for someone else.</p></article>
 </div><p class="team-link">Built by people who care about their community. <a href="/board-members">Meet the EmpowerBands team →</a></p>
 </section>
@@ -1952,35 +1968,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     </div>
 </section>
 
-<section class="section" id="how">
-    <h2>How EmpowerBands Works</h2>
 
-    <div class="grid">
-        <div class="card">
-            <div class="num">1</div>
-            <h3>Tap The Band</h3>
-            <p>A smartphone taps the NFC wearable or scans the QR code.</p>
-        </div>
-
-        <div class="card">
-            <div class="num">2</div>
-            <h3>View Emergency Profile</h3>
-            <p>Important instructions, caregiver contacts, and support details appear instantly.</p>
-        </div>
-
-        <div class="card">
-            <div class="num">3</div>
-            <h3>Send Alerts Fast</h3>
-            <p>A helper can send a contact alert and choose to share their phone’s location when permission is granted. The Safety ID does not track location on its own.</p>
-        </div>
-
-        <div class="card">
-            <div class="num">4</div>
-            <h3>Improve Safety</h3>
-            <p>Supports schools, caregivers, seniors, disabilities, and emergency response situations.</p>
-        </div>
-    </div>
-</section>
 
 <section class="section" id="mission">
     <h2>Real-World Scenarios</h2>
@@ -2008,6 +1996,23 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     </div>
 </section>
 
+<section class="section" id="pro-series">
+    <div class="pro-panel">
+        <p class="eyebrow">Make one tap do more</p>
+        <h2>Meet EmpowerBands Pro Series</h2>
+        <p>Take your band beyond your Safety ID. Give people one easy place to find the content, documents, and links you choose to share—right from a tap or QR scan.</p>
+        <div class="pro-features">
+            <div><strong>Videos &amp; video links</strong><span>Share an introduction, portfolio, tutorial, or your favorite video.</span></div>
+            <div><strong>Important documents</strong><span>Point people to selected documents, forms, an ebook, or your résumé.</span></div>
+            <div><strong>Social media &amp; websites</strong><span>Bring your profiles, business page, and online presence together.</span></div>
+            <div><strong>Payment links</strong><span>Share your Cash App, PayPal, or other payment link when appropriate.</span></div>
+            <div><strong>One simple connection</strong><span>Choose the links you want visitors to see from your Pro profile.</span></div>
+            <div><strong>Safety first</strong><span>Your Safety ID remains a separate profile for emergency information.</span></div>
+        </div>
+        <a class="btn" href="/pro">Explore Pro Series &amp; ask about upgrading</a>
+    </div>
+</section>
+
 <section class="section" id="traveling-band-highlight">
     <div class="tbm-highlight">
         <div class="tbm-highlight-text">
@@ -2031,16 +2036,6 @@ html,body{{max-width:100%;overflow-x:hidden;}}
                 <span>🤝</span>
                 <strong>Meet Our Board</strong>
                 <p>The leaders behind the mission</p>
-            </a>
-            <a class="quick-card" href="/traveling-band-movement">
-                <span>🌍</span>
-                <strong>Join the Movement</strong>
-                <p>Start or receive a traveling band</p>
-            </a>
-            <a class="quick-card" href="/sponsor">
-                <span>❤️</span>
-                <strong>Sponsor a Safety ID</strong>
-                <p>One person for $25 or two for $50</p>
             </a>
         </div>
     </div>
@@ -2092,7 +2087,6 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     <div class="cta-buttons">
         <a class="btn" href="/sponsor">Sponsor a Safety ID — $25 for one person</a>
         <a class="btn dark" href="mailto:support@empowerbands.org">🤝 Partner With Us</a>
-        <a class="btn dark" href="/demo">🚀 View Demo</a>
     </div>
 </section>
 
@@ -2127,11 +2121,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
     </div>
 </div>
 
-<!-- TIDIO CHAT -->
-<script
-    src="//code.tidio.co/p4dgrg4dt5tkoaz3wfwi72xbttfvvkzr.js"
-    async>
-</script>
+<!-- Homepage support is available through the contact and FAQ links. -->
 
 </body>
 </html>
