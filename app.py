@@ -3512,7 +3512,7 @@ def profile(band_id):
         return "Could not load Safety ID profile.", 500
 
     if db_row is None:
-        return "Safety ID not found.", 404
+        return render_template("safety_id_ready.html"), 404
 
     for row in [list(db_row)]:
         if len(row) >= 9 and row[0].strip().upper() == band_id:
