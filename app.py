@@ -3507,9 +3507,48 @@ def profile(band_id):
                     (band_id,),
                 )
                 db_row = cur.fetchone()
+                needs_activation = False
+                if db_row is None or (db_row[1] or "").strip().upper() in ("", "UNASSIGNED"):
+                    cur.execute(
+                        "SELECT claimed FROM activation_codes WHERE UPPER(band_id) = UPPER(%s)",
+                        (band_id,),
+                    )
+                    activation_row = cur.fetchone()
+                    needs_activation = (
+                        activation_row is not None and not activation_row[0]
+                    ) or (db_row is not None and activation_row is None)
     except Exception as e:
         print("Profile database error:", e)
         return "Could not load Safety ID profile.", 500
+
+    if needs_activation:
+        return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activate Your Safety ID — EmpowerBands</title>
+<style>
+body{margin:0;background:#07111f;color:#f1f5f9;font-family:Arial,sans-serif;line-height:1.6;}
+main{max-width:520px;margin:60px auto;padding:28px;}
+h1{font-size:30px;line-height:1.2;}
+p{color:#cbd5e1;}
+.activate{display:inline-block;margin:12px 0;padding:14px 22px;border-radius:10px;background:#38bdf8;color:#07111f;font-weight:bold;text-decoration:none;}
+.support{color:#67e8f9;overflow-wrap:anywhere;}
+</style>
+</head>
+<body>
+<main>
+<h1>Your Safety ID is ready to activate</h1>
+<p>This EmpowerBands Safety ID hasn’t been connected to a safety profile yet.</p>
+<p>If you own this tag, use the Safety ID and activation code included with your package to get started.</p>
+<a class="activate" href="/activate">Activate My Safety ID</a>
+<p>Need help? <a class="support" href="mailto:support@empowerbands.org">support@empowerbands.org</a></p>
+</main>
+</body>
+</html>
+"""
 
     if db_row is None:
         return "Safety ID not found.", 404
