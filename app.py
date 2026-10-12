@@ -1502,14 +1502,14 @@ def home():
                 color:white;
             ">
                 <div style="font-size:13px;font-weight:700;letter-spacing:.05em;color:#86efac;text-transform:uppercase;margin-bottom:10px;">
-                    💚 {_sp_month} Family We're Blessing
+                    💚 {_sp_month} Community Impact Spotlight
                 </div>
                 <img src="{_sp_photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.2);margin-bottom:14px;">
                 <p style="font-size:15px;line-height:1.7;color:#e5e7eb;max-width:560px;margin:0 auto;">
                     {_sp.get("story","")}
                 </p>
                 <a href="/donate" style="display:inline-block;margin-top:16px;padding:12px 24px;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;text-decoration:none;font-weight:700;font-size:14px;">
-                    ❤️ Help Bless Next Month's Family
+                    💚 Support Our Community
                 </a>
             </div>"""
     except:
@@ -2756,7 +2756,7 @@ body{{
 </a>
 
         <a class="add-btn" href="/admin/spotlight">
-            💚 Family Spotlight
+            💚 Community Impact Spotlight
 </a>
 
         <a class="add-btn" href="/admin/activation-codes">
@@ -5378,7 +5378,7 @@ def admin_spotlight():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Spotlight — EmpowerBands</title>
+    <title>Community Impact Spotlight — EmpowerBands</title>
     <style>
         body{{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0ea5e9 0%,#07111f 35%,#030712 100%);color:white;min-height:100vh;padding:30px 20px;}}
         .page{{max-width:640px;margin:auto;}}
@@ -5398,8 +5398,8 @@ def admin_spotlight():
 <div class="page">
     <a class="back" href="/dashboard">⬅ Dashboard</a>
     <a class="back" href="/" target="_blank">👁 View Page</a>
-    <h1>💚 Family Spotlight</h1>
-    <p class="sub">Feature the family your donations are blessing this month on the homepage.</p>
+    <h1>💚 Community Impact Spotlight</h1>
+    <p class="sub">Recognize the people, partners, and families making a difference in our community.</p>
     {'<div class="msg">' + message + '</div>' if message else ''}
     <div class="card">
         <form method="POST">
@@ -5409,8 +5409,8 @@ def admin_spotlight():
             </div>
             <label>Month (e.g. "July 2026")</label>
             <input type="text" name="month" value="{current.get('month','')}" placeholder="July 2026">
-            <label>Family's Story</label>
-            <textarea name="story" rows="5" placeholder="This month, we're blessing the Johnson family...">{current.get('story','')}</textarea>
+            <label>Spotlight Story</label>
+            <textarea name="story" rows="5" placeholder="This month, we recognize a Community Impact Partner...">{current.get('story','')}</textarea>
             <label>Photo URL (optional — defaults to logo)</label>
             <input type="text" name="photo_url" value="{current.get('photo_url','')}" placeholder="https://...">
             <button type="submit">💾 Save & Publish</button>
