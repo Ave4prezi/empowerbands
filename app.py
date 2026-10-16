@@ -6598,5 +6598,11 @@ __FOOTER__
 """.replace("__NAV__", site_nav_html("board")).replace("__FOOTER__", site_footer_html()).replace("__MARKETING_CSS__", MARKETING_PAGE_CSS).replace("__LOGO_URL__", LOGO_URL).replace("__BOARD__", board_html)
 
 
+@app.route("/key-finder")
+def key_finder_page():
+    """Dedicated NFC Key Finder landing page; no Safety ID data exposed."""
+    return render_template("key_finder.html")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
