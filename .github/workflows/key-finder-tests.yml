@@ -35,4 +35,6 @@ jobs:
         env:
           KEY_FINDER_ACTIVATION_PEPPER: test-only-long-key-finder-pepper-not-for-production
           DATABASE_URL: postgresql://keyfinder_test:keyfinder_test_only@localhost:5432/keyfinder_test
-        run: python -m unittest discover -s tests -p 'test_key_finder_security.py' -v
+        run: |
+          python -m unittest discover -s tests -p 'test_key_finder_security.py' -v
+          python -m unittest discover -s tests -p 'test_key_finder_database.py' -v
