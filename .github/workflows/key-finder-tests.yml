@@ -1,0 +1,23 @@
+name: Key Finder security checks
+on:
+  pull_request:
+    paths:
+      - 'key_finder_backend.py'
+      - 'scripts/import_key_finder_batch.py'
+      - 'tests/test_key_finder_*.py'
+      - '.github/workflows/key-finder-tests.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Key Finder security tests
+        env:
+          KEY_FINDER_ACTIVATION_PEPPER: test-only-long-key-finder-pepper-not-for-production
+        run: python -m unittest discover -s tests -p 'test_key_finder_security.py' -v
