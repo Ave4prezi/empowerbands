@@ -25,11 +25,22 @@ class KeyFinderSecurityTests(unittest.TestCase):
             data={"serial": "KF-12345678", "csrf": "testcsrf"},
             headers={"Origin": "http://localhost"},
         )
-        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.status_code, 400)
 
     def test_serial_only_cannot_claim_even_without_login(self):
         response = self.client.post("/key-finder/claim", data={"serial": "KF-12345678"})
-        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.status_code, 403)
+
+    def test_wrong_code_is_not_accepted_without_database(self):
+        with self.client.session_transaction() as sess:
+            sess["kf_email"] = "verified@example.com"
+            sess["kf_csrf"] = "testcsrf"
+        with patch.dict(os.environ, {"KEY_FINDER_ACTIVATION_PEPPER": "x" * 48}):
+            response = self.client.post("/key-finder/claim",
+                data={"serial": "KF-12345678", "activation_code": "A" * 24, "csrf": "testcsrf"},
+                headers={"Origin": "http://localhost"})
+        # Database missing: fail closed, not successful activation.
+        self.assertNotEqual(response.status_code, 303)
 
     def test_recovery_url_rejects_malformed_token_without_database(self):
         response = self.client.get("/k/invalid!")
