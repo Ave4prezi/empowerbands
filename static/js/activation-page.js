@@ -1,7 +1,4 @@
-// Frontend-only activation page logic (no backend integration).
-// FUTURE BACKEND INTEGRATION:
-// - validateActivationCode(code): currently local validation; replace with API call later.
-// - activateDevice(payload): called on confirm; replace with API call later.
+// Activation form validation, review, and submission to /api/activate.
 
 (() => {
   'use strict';
@@ -35,6 +32,8 @@
   const profileTypeEl = qs('#profile-type');
   const emailEl = qs('#email');
   const phoneEl = qs('#phone');
+  const emergencyContactsEl = qs('#emergency-contacts');
+  const emergencyEmailsEl = qs('#emergency-emails');
   const pinEl = qs('#pin');
   const confirmOwnershipEl = qs('#confirm-ownership');
 
@@ -58,6 +57,8 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
     lastName: qs('#error-last-name'),
     email: qs('#error-email'),
     phone: qs('#error-phone'),
+    emergencyContacts: qs('#error-emergency-contacts'),
+    emergencyEmails: qs('#error-emergency-emails'),
     pin: qs('#error-pin'),
     confirm: qs('#error-confirm')
   };
@@ -123,6 +124,23 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
       setFieldError(errors.phone, 'Please enter a valid U.S. phone number.');
       ok = false;
     } else setFieldError(errors.phone, '');
+
+    const contacts = emergencyContactsEl.value.split(',').map(value => value.trim()).filter(Boolean);
+    const invalidContact = contacts.some(value => {
+      const digits = value.replace(/\D/g, '');
+      return !/^[+()0-9.\s-]+$/.test(value) ||
+        !(digits.length === 10 || (digits.length === 11 && digits.startsWith('1')));
+    });
+    if (contacts.length > 5 || invalidContact) {
+      setFieldError(errors.emergencyContacts, 'Enter up to 5 valid U.S. phone numbers, separated by commas.');
+      ok = false;
+    } else setFieldError(errors.emergencyContacts, '');
+
+    const emergencyEmails = emergencyEmailsEl.value.split(',').map(value => value.trim()).filter(Boolean);
+    if (emergencyEmails.length > 5 || emergencyEmails.some(value => value.length > 254 || !isValidEmail(value))) {
+      setFieldError(errors.emergencyEmails, 'Enter up to 5 valid email addresses, separated by commas.');
+      ok = false;
+    } else setFieldError(errors.emergencyEmails, '');
 
     // Private PIN
     if (!/^\d{4,8}$/.test(pinEl.value.trim())) {
@@ -232,6 +250,8 @@ if (pathParts.length >= 2 && pathParts[0] === 'activate') {
         <dt>Profile type</dt><dd>${escapeHtml(profileTypeEl.value)}</dd>
         <dt>Email</dt><dd>${escapeHtml(emailEl.value || 'Not provided')}</dd>
         <dt>Phone</dt><dd>${escapeHtml(phoneEl.value)}</dd>
+        <dt>Emergency contact phone number(s)</dt><dd>${escapeHtml(emergencyContactsEl.value.trim() || 'Not provided')}</dd>
+        <dt>Emergency contact email address(es)</dt><dd>${escapeHtml(emergencyEmailsEl.value.trim() || 'Not provided')}</dd>
       </dl>
     `;
     reviewSummary.innerHTML = summaryHtml;
@@ -268,6 +288,8 @@ confirmActivationBtn.addEventListener('click', async (ev) => {
     profileType: profileTypeEl.value,
     email: emailEl.value.trim(),
     phone: phoneEl.value.trim(),
+    emergencyContacts: emergencyContactsEl.value.trim(),
+    emergencyEmails: emergencyEmailsEl.value.trim(),
     pin: pinEl.value.trim()
   };
 

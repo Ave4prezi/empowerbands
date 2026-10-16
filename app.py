@@ -5613,6 +5613,27 @@ def api_activate():
         return jsonify({'error': 'Invalid profile type.'}), 400
     if not re.fullmatch(r'\d{4,8}', pin):
         return jsonify({'error': 'Create a 4–8 digit private PIN.'}), 400
+    emergency_values = {}
+    for key, limit in (('emergencyContacts', 300), ('emergencyEmails', 1300)):
+        raw = data.get(key, '')
+        if not isinstance(raw, str) or len(raw) > limit:
+            return jsonify({'error': 'Invalid emergency contact information.'}), 400
+        values = [value.strip() for value in raw.split(',') if value.strip()]
+        if len(values) > 5:
+            return jsonify({'error': 'Enter up to 5 emergency contact phone numbers or email addresses.'}), 400
+        emergency_values[key] = values
+    emergency_phones = []
+    for value in emergency_values['emergencyContacts']:
+        normalized = _normalize_us_phone(value)
+        if not re.fullmatch(r'[+()0-9.\s-]+', value) or not normalized:
+            return jsonify({'error': 'Enter valid emergency contact phone numbers, separated by commas.'}), 400
+        emergency_phones.append(normalized)
+    emergency_emails = emergency_values['emergencyEmails']
+    if any(len(value) > 254 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', value) for value in emergency_emails):
+        return jsonify({'error': 'Enter valid emergency contact email addresses, separated by commas.'}), 400
+    emergency_contacts = ', '.join(emergency_phones)
+    emergency_emails = ', '.join(value.lower() for value in emergency_emails)
+
     if not DATABASE_URL:
         return jsonify({'error': 'Database is not configured.'}), 500
 
@@ -5675,6 +5696,8 @@ def api_activate():
                         SET full_name = %s,
                             email = %s,
                             primary_phone = %s,
+                            emergency_contacts = %s,
+                            emergency_emails = %s,
                             age_group = %s,
                             pin_hash = %s,
                             updated_at = CURRENT_TIMESTAMP
@@ -5684,6 +5707,8 @@ def api_activate():
                             f'{first_name} {last_name}'.strip(),
                             email,
                             phone,
+                            emergency_contacts,
+                            emergency_emails,
                             profile_type,
                             generate_password_hash(pin),
                             band_id,
@@ -5697,17 +5722,21 @@ def api_activate():
                             full_name,
                             email,
                             primary_phone,
+                            emergency_contacts,
+                            emergency_emails,
                             age_group,
                             pin_hash,
                             updated_at
                         )
-        VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
         """,
         (
             band_id,
             f'{first_name} {last_name}'.strip(),
             email,
             phone,
+            emergency_contacts,
+            emergency_emails,
             profile_type,
             generate_password_hash(pin),
         ),
@@ -6571,4 +6600,3 @@ __FOOTER__
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
-
