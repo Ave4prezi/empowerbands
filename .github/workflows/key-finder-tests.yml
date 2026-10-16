@@ -1,0 +1,40 @@
+name: Key Finder security checks
+on:
+  pull_request:
+    paths:
+      - 'key_finder_backend.py'
+      - 'scripts/import_key_finder_batch.py'
+      - 'tests/test_key_finder_*.py'
+      - '.github/workflows/key-finder-tests.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: keyfinder_test
+          POSTGRES_PASSWORD: keyfinder_test_only
+          POSTGRES_DB: keyfinder_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U keyfinder_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Key Finder security tests
+        env:
+          KEY_FINDER_ACTIVATION_PEPPER: test-only-long-key-finder-pepper-not-for-production
+          DATABASE_URL: postgresql://keyfinder_test:keyfinder_test_only@localhost:5432/keyfinder_test
+        run: |
+          python -m unittest discover -s tests -p 'test_key_finder_security.py' -v
+          python -m unittest discover -s tests -p 'test_key_finder_database.py' -v

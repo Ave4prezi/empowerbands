@@ -25,6 +25,7 @@ import secrets
 from io import BytesIO
 from markupsafe import escape
 from activation_manager import register_activation_manager
+from key_finder_backend import key_finder_api, initialize_key_finders
 
 
 app = Flask(__name__)
@@ -86,6 +87,8 @@ def init_db():
 
 
 init_db()
+initialize_key_finders()
+app.register_blueprint(key_finder_api)
 
 file_name = "customers.csv"
 scan_log_file = "scan_log.csv"

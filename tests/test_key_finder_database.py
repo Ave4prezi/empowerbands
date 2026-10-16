@@ -1,0 +1,74 @@
+"""Database integration checks for single-use activation and failed attempts."""
+import concurrent.futures
+import hashlib
+import hmac
+import os
+import secrets
+import unittest
+
+import psycopg
+from flask import Flask
+
+from key_finder_backend import initialize_key_finders, key_finder_api
+
+
+class KeyFinderDatabaseTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if not os.environ.get("DATABASE_URL"):
+            raise unittest.SkipTest("Disposable test database unavailable")
+        initialize_key_finders()
+
+    def setUp(self):
+        self.serial = "KF-" + secrets.token_hex(6).upper()
+        self.code = secrets.token_hex(12).upper()
+        self.app = Flask(__name__)
+        self.app.secret_key = "integration-test-session"
+        self.app.register_blueprint(key_finder_api)
+        pepper = os.environ["KEY_FINDER_ACTIVATION_PEPPER"]
+        digest = hmac.new(pepper.encode(),
+            ("activation:" + self.serial + ":" + self.code).encode(),
+            hashlib.sha256).hexdigest()
+        with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+            conn.execute("""INSERT INTO key_finder_devices
+                (serial, activation_secret_hash, recovery_identifier)
+                VALUES (%s,%s,%s)""",
+                (self.serial, digest, secrets.token_hex(10).upper()))
+
+    def _claim(self, code, email):
+        with self.app.test_client() as client:
+            with client.session_transaction() as sess:
+                sess["kf_email"] = email
+                sess["kf_csrf"] = "testcsrf"
+            return client.post("/key-finder/claim",
+                data={"serial": self.serial, "activation_code": code, "csrf": "testcsrf"},
+                headers={"Origin": "http://localhost"},
+                environ_overrides={"REMOTE_ADDR": "192.0.2." + str(secrets.randbelow(200) + 1)}).status_code
+
+    def test_concurrent_claims_only_one_owner(self):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes = list(pool.map(lambda email: self._claim(self.code, email),
+                ["one@example.test", "two@example.test"]))
+        self.assertEqual(outcomes.count(303), 1, outcomes)
+        with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+            row = conn.execute("SELECT owner_email, activated_at FROM key_finder_devices WHERE serial=%s",
+                (self.serial,)).fetchone()
+        self.assertIn(row[0], ("one@example.test", "two@example.test"))
+        self.assertIsNotNone(row[1])
+
+    def test_bad_code_does_not_activate(self):
+        result = self._claim("A" * 24, "wrong@example.test")
+        self.assertEqual(result, 400)
+        with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+            row = conn.execute("SELECT activated_at FROM key_finder_devices WHERE serial=%s",
+                (self.serial,)).fetchone()
+        self.assertIsNone(row[0])
+
+    def test_five_failed_claims_are_throttled(self):
+        outcomes = [self._claim("B" * 24, "limit@example.test") for _ in range(6)]
+        self.assertEqual(outcomes[:5], [400] * 5)
+        self.assertEqual(outcomes[5], 429)
+
+
+if __name__ == "__main__":
+    unittest.main()
