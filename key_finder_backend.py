@@ -7,7 +7,7 @@ import os
 import secrets
 import hashlib
 import hmac
-import smtplib
+import urllib.error
 from email.message import EmailMessage
 from datetime import datetime, timedelta, timezone
 import re
@@ -158,22 +158,26 @@ def _csrf():
 
 
 def _email_code(email, code):
-    sender = os.environ.get("KEY_FINDER_SMTP_FROM")
-    host = os.environ.get("KEY_FINDER_SMTP_HOST")
-    user = os.environ.get("KEY_FINDER_SMTP_USER")
-    password = os.environ.get("KEY_FINDER_SMTP_PASSWORD")
-    if not sender or not host:
-        raise RuntimeError("Key Finder email not configured")
-    message = EmailMessage()
-    message["From"] = sender
-    message["To"] = email
-    message["Subject"] = "EmpowerBands Key Finder sign-in code"
-    message.set_content("Your one-time code is " + code + ". It expires in 10 minutes. Do not share it.")
-    with smtplib.SMTP(host, int(os.environ.get("KEY_FINDER_SMTP_PORT", "587")), timeout=10) as server:
-        server.starttls()
-        if user and password:
-            server.login(user, password)
-        server.send_message(message)
+    """Send one-time sign-in codes via Resend's HTTPS API."""
+    import json
+    import urllib.request
+    key = os.environ.get("RESEND_API_KEY")
+    sender = os.environ.get("KEY_FINDER_EMAIL_FROM", "EmpowerBands <support@empowerbands.org>")
+    if not key:
+        raise RuntimeError("Resend API key is not configured")
+    payload = json.dumps({
+        "from": sender,
+        "to": [email],
+        "subject": "EmpowerBands Key Finder sign-in code",
+        "text": "Your one-time code is " + code + ". It expires in 10 minutes. Do not share it."
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.resend.com/emails", data=payload,
+        headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},
+        method="POST")
+    with urllib.request.urlopen(req, timeout=10) as response:
+        if response.status not in (200, 201):
+            raise RuntimeError("Resend rejected the email")
 
 
 def _code_digest(email, code):
@@ -253,7 +257,7 @@ def key_finder_send_code():
                     return "Please wait before requesting another code", 429
             conn.commit()
         _email_code(email, code)
-    except (psycopg.Error, RuntimeError, OSError, smtplib.SMTPException):
+    except (psycopg.Error, RuntimeError, OSError, urllib.error.URLError):
         return "Unable to send code right now", 503
     return "Check your email for the six-digit code, then return to the account page."
 
