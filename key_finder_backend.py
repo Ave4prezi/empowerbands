@@ -208,39 +208,76 @@ def key_finder_account():
                     ORDER BY activated_at DESC""", (email,))
                 devices = cur.fetchall()
     return render_template_string("""
-        <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>Key Finder account | EmpowerBands</title>
-        <main style="font:1rem system-ui;max-width:38rem;margin:2rem auto;padding:1rem">
-        <h1>EmpowerBands Key Finder</h1><p><a href="/key-finder">Back to Key Finder</a></p>
-        {% if not email %}
-          <form method="post" action="/key-finder/send-code"><input type="hidden" name="csrf" value="{{ csrf }}">
-          <label>Email <input type="email" name="email" required maxlength="254"></label>
-          <button>Send sign-in code</button></form>
-          <form method="post" action="/key-finder/verify-code"><input type="hidden" name="csrf" value="{{ csrf }}">
-          <label>Email <input type="email" name="email" required maxlength="254"></label>
-          <label>Six-digit code <input name="code" pattern="[0-9]{6}" required></label>
-          <button>Verify and sign in</button></form>
-        {% else %}
-          <p>Signed in as {{ email }}</p>
-          <form method="post" action="/key-finder/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Sign out</button></form>
-          <h2>Activate a Key Finder</h2>
-          <form method="post" action="/key-finder/claim"><input type="hidden" name="csrf" value="{{ csrf }}">
-          <label>Activation card serial <input name="serial" required maxlength="27" autocomplete="off"></label><label>Hidden activation code <input name="activation_code" required maxlength="64" autocomplete="off"></label><button>Activate Key Finder</button></form>
-          <h2>My Key Finders</h2>
-          {% for d in devices %}
-            <section style="border:1px solid #ccc;padding:1rem;margin:1rem 0">
-              <strong>{{ d[1] or "Key Finder" }}</strong> — {{ d[0] }}
-              <form method="post" action="/key-finder/update"><input type="hidden" name="csrf" value="{{ csrf }}">
-              <input type="hidden" name="serial" value="{{ d[0] }}">
-              <label>Item label <input name="label" maxlength="80" value="{{ d[1] or '' }}"></label>
-              <label>Recovery email <input type="email" name="contact_email" maxlength="254" value="{{ d[4] or '' }}"></label>
-              <label><input type="checkbox" name="visible" {% if d[3] %}checked{% endif %}> Publicly display recovery email</label>
-              <label><input type="checkbox" name="lost" {% if d[2] %}checked{% endif %}> Report lost</label>
-              <button>Save changes</button></form>
-            </section>
-          {% else %}<p>No activated Key Finders yet.</p>{% endfor %}
-        {% endif %}
-        </main></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#081324">
+<title>My Key Finders | EmpowerBands</title>
+<style>
+:root{color-scheme:dark;--bg:#07111f;--panel:#111f31;--border:#2b3b51;--text:#f3f7fd;--muted:#acbdd2;--accent:#56d7d1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#173957 0%,transparent 43%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:var(--accent)}.shell{width:min(1100px,calc(100% - 36px));margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 0;border-bottom:1px solid var(--border)}
+.brand{font-weight:850;letter-spacing:.035em;color:white;text-decoration:none;font-size:1.12rem}.brand span{color:var(--accent)}.back{text-decoration:none;font-size:.9rem;color:var(--muted)}
+.hero{padding:56px 0 32px;max-width:740px}.eyebrow{text-transform:uppercase;letter-spacing:.18em;font-size:.76rem;font-weight:800;color:var(--accent)}
+h1{font-size:clamp(2.25rem,5vw,4rem);line-height:1.08;letter-spacing:-.045em;margin:12px 0 18px}h2{font-size:1.35rem;letter-spacing:-.025em;margin:0 0 8px}p{color:var(--muted);margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:18px 0 56px}.panel,.device{background:linear-gradient(145deg,rgba(24,43,65,.95),rgba(12,26,43,.96));border:1px solid var(--border);border-radius:20px;padding:26px;box-shadow:0 16px 40px #0002}
+.panel-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.step{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#173e4a;color:#8bf3e5;font-weight:800}
+label{display:block;color:#d5e1ef;font-weight:650;font-size:.9rem;margin:16px 0 6px}input:not([type=checkbox]){width:100%;background:#081827;color:white;border:1px solid #42566c;border-radius:11px;padding:13px 14px;font:inherit;outline:none}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #56d7d126}input::placeholder{color:#7d90a7}
+button{width:100%;background:var(--accent);color:#05232b;border:0;border-radius:11px;padding:13px 18px;font:inherit;font-weight:800;cursor:pointer;margin-top:20px}button:hover{background:#8cf0e7}button.secondary{width:auto;margin:0;background:transparent;color:#e3eef9;border:1px solid #546780;padding:9px 16px}
+small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 22px;border:1px solid #2d625f;background:#10312f;border-radius:14px;margin:8px 0 26px}.signed strong{color:white}
+.section-heading{margin:32px 0 18px}.device-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:64px}.device{padding:24px}.device-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.serial{font-size:.78rem;color:var(--muted);word-break:break-all}.pill{white-space:nowrap;border:1px solid #426b70;background:#153b43;border-radius:99px;padding:5px 10px;font-size:.73rem;font-weight:800;color:#a1efe7}.pill.lost{border-color:#936f43;background:#483321;color:#ffce91}
+.check{display:flex;align-items:flex-start;gap:11px;font-size:.89rem;font-weight:500;margin:18px 0;color:#dbe6f4}.check input{accent-color:var(--accent);margin-top:5px;width:17px;height:17px;flex:none}
+.empty{border:1px dashed #4a6077;border-radius:18px;text-align:center;padding:40px 22px;margin-bottom:60px}.empty strong{display:block;margin-bottom:8px}.empty p{margin:0}.footer{border-top:1px solid var(--border);padding:22px 0 35px;color:var(--muted);font-size:.8rem}
+@media(max-width:700px){.grid,.device-grid{grid-template-columns:1fr}.hero{padding-top:38px}.panel,.device{padding:20px}.top{padding:18px 0}}
+</style>
+</head>
+<body><div class="shell">
+<header class="top"><a class="brand" href="/key-finder">EMPOWER<span>BANDS</span></a><a class="back" href="/key-finder">← Back to Key Finder</a></header>
+<section class="hero"><div class="eyebrow">EmpowerBands • Smart recovery</div>
+<h1>{% if email %}Your essentials. One place.{% else %}Keep what matters close.{% endif %}</h1>
+<p>{% if email %}Activate, personalize and manage your Key Finders from your secure dashboard.{% else %}Sign in securely with a one-time email code to activate and manage your Key Finders. No password needed.{% endif %}</p></section>
+{% if not email %}
+<div class="grid">
+<section class="panel"><div class="panel-head"><span class="step">01</span><h2>Get your sign-in code</h2></div>
+<p>We'll email a six-digit code to verify it's you.</p>
+<form method="post" action="/key-finder/send-code"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="send-email">Email address</label><input id="send-email" type="email" name="email" autocomplete="email" placeholder="you@example.com" required maxlength="254">
+<button type="submit">Send verification code →</button></form>
+</section>
+<section class="panel"><div class="panel-head"><span class="step">02</span><h2>Verify and continue</h2></div>
+<p>Enter the code from your inbox. It expires after 10 minutes.</p>
+<form method="post" action="/key-finder/verify-code"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="verify-email">Email address</label><input id="verify-email" type="email" name="email" autocomplete="email" placeholder="Same email as above" required maxlength="254">
+<label for="verify-code">Six-digit code</label><input id="verify-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required>
+<button type="submit">Verify & sign in →</button></form>
+</section></div>
+{% else %}
+<div class="signed"><div><small>Securely signed in as</small><div><strong>{{ email }}</strong></div></div>
+<form method="post" action="/key-finder/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="secondary" type="submit">Sign out</button></form></div>
+<div class="grid" style="grid-template-columns:minmax(0,1fr)">
+<section class="panel"><div class="panel-head"><span class="step">+</span><h2>Activate a new Key Finder</h2></div>
+<p>Use the serial number and hidden activation code printed on your activation card.</p>
+<form method="post" action="/key-finder/claim"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label for="serial">Activation card serial</label><input id="serial" name="serial" required maxlength="27" autocomplete="off" placeholder="KF-XXXXXXXX">
+<label for="activation">Hidden activation code</label><input id="activation" name="activation_code" required maxlength="64" autocomplete="off" placeholder="Enter your 24-character code">
+<button type="submit">Activate Key Finder →</button></form></section></div>
+<div class="section-heading"><div class="eyebrow">Your collection</div><h2>My Key Finders</h2></div>
+{% if devices %}<div class="device-grid">{% for d in devices %}
+<section class="device"><div class="device-top"><div><h2>{{ d[1] or "My Key Finder" }}</h2><div class="serial">{{ d[0] }}</div></div><span class="pill {% if d[2] %}lost{% endif %}">{% if d[2] %}Reported lost{% else %}Active{% endif %}</span></div>
+<form method="post" action="/key-finder/update"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="serial" value="{{ d[0] }}">
+<label>Item name</label><input name="label" maxlength="80" value="{{ d[1] or '' }}" placeholder="e.g. House keys">
+<label>Recovery contact email</label><input type="email" name="contact_email" maxlength="254" value="{{ d[4] or '' }}" placeholder="Contact email">
+<label class="check"><input type="checkbox" name="visible" {% if d[3] %}checked{% endif %}><span>Show my recovery email on the public finder page</span></label>
+<label class="check"><input type="checkbox" name="lost" {% if d[2] %}checked{% endif %}><span>Mark this item as lost</span></label>
+<button type="submit">Save changes</button></form></section>
+{% endfor %}</div>{% else %}
+<div class="empty"><strong>No Key Finders activated yet</strong><p>Activate your first device above to see it here.</p></div>
+{% endif %}
+{% endif %}
+<footer class="footer">EmpowerBands · Protect What Matters Most</footer>
+</div></body></html>
     """, email=email, devices=devices, csrf=_csrf())
 
 
