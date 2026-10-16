@@ -8,6 +8,7 @@ import secrets
 import hashlib
 import hmac
 import urllib.error
+import time
 from email.message import EmailMessage
 from datetime import datetime, timedelta, timezone
 import re
@@ -45,6 +46,14 @@ def initialize_key_finders():
                 )
             """)
             cur.execute("ALTER TABLE key_finder_devices ADD COLUMN IF NOT EXISTS recovery_identifier TEXT")
+            cur.execute("ALTER TABLE key_finder_devices ADD COLUMN IF NOT EXISTS failed_claims INTEGER NOT NULL DEFAULT 0")
+            cur.execute("ALTER TABLE key_finder_devices ADD COLUMN IF NOT EXISTS claim_locked_until TIMESTAMPTZ")
+            cur.execute("""CREATE TABLE IF NOT EXISTS key_finder_claim_limits (
+                actor_hash TEXT PRIMARY KEY,
+                attempts INTEGER NOT NULL DEFAULT 0,
+                window_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                locked_until TIMESTAMPTZ
+            )""")
             cur.execute("""CREATE TABLE IF NOT EXISTS key_finder_email_challenges (
                 email TEXT PRIMARY KEY,
                 code_hash TEXT NOT NULL,
@@ -216,7 +225,7 @@ def key_finder_account():
           <form method="post" action="/key-finder/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Sign out</button></form>
           <h2>Activate a Key Finder</h2>
           <form method="post" action="/key-finder/claim"><input type="hidden" name="csrf" value="{{ csrf }}">
-          <label>Activation card serial <input name="serial" required maxlength="27"></label><button disabled title="Ownership verification is being completed">Activation coming soon</button></form>
+          <label>Activation card serial <input name="serial" required maxlength="27" autocomplete="off"></label><label>Hidden activation code <input name="activation_code" required maxlength="64" autocomplete="off"></label><button>Activate Key Finder</button></form>
           <h2>My Key Finders</h2>
           {% for d in devices %}
             <section style="border:1px solid #ccc;padding:1rem;margin:1rem 0">
@@ -295,14 +304,70 @@ def key_finder_logout():
     return redirect("/key-finder/account", code=303)
 
 
+def _claim_digest(value):
+    pepper = os.environ.get("KEY_FINDER_ACTIVATION_PEPPER", "")
+    if len(pepper) < 32:
+        raise RuntimeError("Key Finder activation security is not configured")
+    return hmac.new(pepper.encode(), value.encode(), hashlib.sha256).hexdigest()
+
+
 @key_finder_api.post("/key-finder/claim")
 def key_finder_claim():
-    """Fail closed until an independently verified claim mechanism is implemented.
-
-    Email verification establishes control of an inbox, NOT ownership of a
-    Key Finder. A printed serial alone must never transfer ownership.
-    """
-    return "Activation temporarily unavailable pending ownership verification", 503
+    """Verified-email owner + printed serial + separate one-time hidden code."""
+    if not _csrf_ok() or not session.get("kf_email"):
+        return "Sign in required", 403
+    serial = request.form.get("serial", "").strip().upper()
+    code = request.form.get("activation_code", "").strip().upper()
+    # Reject malformed input without revealing inventory membership.
+    if not SERIAL_RE.fullmatch(serial) or not re.fullmatch(r"[A-Z0-9]{24}", code):
+        return "Invalid activation details", 400
+    email = session["kf_email"]
+    # Hash the IP to avoid retaining raw IP addresses in the rate-limit table.
+    actor = _claim_digest("ip:" + (request.remote_addr or "unknown"))
+    account = _claim_digest("account:" + email)
+    serial_key = _claim_digest("serial:" + serial)
+    try:
+        with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+            with conn.cursor() as cur:
+                # Lock rate-limit rows in stable order to serialize concurrent attempts.
+                for key in sorted([actor, account, serial_key]):
+                    cur.execute("""INSERT INTO key_finder_claim_limits(actor_hash)
+                        VALUES (%s) ON CONFLICT DO NOTHING""", (key,))
+                    cur.execute("""SELECT attempts, window_start, locked_until
+                        FROM key_finder_claim_limits WHERE actor_hash=%s FOR UPDATE""", (key,))
+                    attempts, window_start, locked_until = cur.fetchone()
+                    now = datetime.now(timezone.utc)
+                    if locked_until and locked_until > now:
+                        return "Too many attempts. Try again later.", 429
+                    if window_start < now - timedelta(hours=1):
+                        attempts = 0
+                        cur.execute("""UPDATE key_finder_claim_limits SET attempts=0,
+                            window_start=NOW(), locked_until=NULL WHERE actor_hash=%s""", (key,))
+                    attempts += 1
+                    cur.execute("""UPDATE key_finder_claim_limits SET attempts=%s,
+                        locked_until=CASE WHEN %s >= 5 THEN NOW() + INTERVAL '1 hour'
+                        ELSE NULL END WHERE actor_hash=%s""", (attempts, attempts, key))
+                cur.execute("""SELECT activation_secret_hash, activated_at, claim_locked_until
+                    FROM key_finder_devices WHERE serial=%s FOR UPDATE""", (serial,))
+                device = cur.fetchone()
+                expected = _claim_digest("activation:" + serial + ":" + code)
+                valid = bool(device and device[1] is None and
+                    (device[2] is None or device[2] <= datetime.now(timezone.utc)) and
+                    hmac.compare_digest(device[0], expected))
+                if not valid:
+                    conn.commit()  # persist failed-attempt counters
+                    return "Invalid or already used activation details", 400
+                cur.execute("""UPDATE key_finder_devices
+                    SET owner_email=%s, activated_at=NOW(), activation_secret_hash=%s
+                    WHERE serial=%s AND activated_at IS NULL RETURNING serial""",
+                    (email, _claim_digest("used:" + serial + ":" + secrets.token_hex(16)), serial))
+                if not cur.fetchone():
+                    conn.commit()
+                    return "Invalid or already used activation details", 400
+            conn.commit()
+    except (psycopg.Error, RuntimeError, KeyError):
+        return "Activation service unavailable", 503
+    return redirect("/key-finder/account", code=303)
 
 
 @key_finder_api.post("/key-finder/update")
