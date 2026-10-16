@@ -216,7 +216,7 @@ def key_finder_account():
           <form method="post" action="/key-finder/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Sign out</button></form>
           <h2>Activate a Key Finder</h2>
           <form method="post" action="/key-finder/claim"><input type="hidden" name="csrf" value="{{ csrf }}">
-          <label>Activation card serial <input name="serial" required maxlength="27"></label><button>Activate</button></form>
+          <label>Activation card serial <input name="serial" required maxlength="27"></label><button disabled title="Ownership verification is being completed">Activation coming soon</button></form>
           <h2>My Key Finders</h2>
           {% for d in devices %}
             <section style="border:1px solid #ccc;padding:1rem;margin:1rem 0">
@@ -297,21 +297,12 @@ def key_finder_logout():
 
 @key_finder_api.post("/key-finder/claim")
 def key_finder_claim():
-    if not _csrf_ok() or not session.get("kf_email"):
-        return "Sign in required", 403
-    serial = request.form.get("serial", "").strip().upper()
-    if not SERIAL_RE.fullmatch(serial):
-        return "Invalid serial", 400
-    with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
-        with conn.cursor() as cur:
-            cur.execute("""UPDATE key_finder_devices SET owner_email=%s, activated_at=NOW()
-                WHERE serial=%s AND activated_at IS NULL RETURNING serial""",
-                (session["kf_email"], serial))
-            found = cur.fetchone()
-        conn.commit()
-    if not found:
-        return "Serial unavailable or already activated", 409
-    return redirect("/key-finder/account", code=303)
+    """Fail closed until an independently verified claim mechanism is implemented.
+
+    Email verification establishes control of an inbox, NOT ownership of a
+    Key Finder. A printed serial alone must never transfer ownership.
+    """
+    return "Activation temporarily unavailable pending ownership verification", 503
 
 
 @key_finder_api.post("/key-finder/update")
