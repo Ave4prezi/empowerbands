@@ -186,14 +186,22 @@ def _service_errors(view):
 @key_finder_api.after_request
 def private_responses(response):
     response.headers["Cache-Control"] = "no-store"
-    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Referrer-Policy"] = "same-origin"
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
     return response
 
 
 def _csrf_ok():
     origin = request.headers.get("Origin", "")
-    return bool(session.get("kf_csrf")) and bool(origin) and origin.rstrip("/") == request.host_url.rstrip("/") and request.form.get("csrf") == session.get("kf_csrf")
+    # Render terminates public HTTPS before forwarding to the application.
+    # Do not trust client-supplied forwarded host/proto headers for this check.
+    scheme = "https" if os.environ.get("RENDER") else request.scheme
+    expected_origin = scheme + "://" + request.host
+    token = session.get("kf_csrf", "")
+    submitted = request.form.get("csrf", "")
+    return (bool(token) and bool(submitted) and bool(origin)
+            and origin.rstrip("/") == expected_origin
+            and hmac.compare_digest(submitted, token))
 
 
 def _csrf():
