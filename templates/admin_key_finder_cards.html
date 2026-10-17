@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Key Finder Activation Cards | EmpowerBands</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eff5f9;color:#173048;font:16px/1.5 system-ui,sans-serif}header{max-width:950px;margin:25px auto;padding:20px}h1{line-height:1.15}a{color:#076786}button{padding:12px 18px;margin:5px 8px 5px 0;background:#086c91;border:0;border-radius:8px;color:white;font:inherit;font-weight:700;cursor:pointer}.note{border-left:4px solid #c59124;background:#fff2cc;padding:15px}.cards{display:grid;grid-template-columns:repeat(2,3.5in);gap:.18in;justify-content:center;padding:10px 0 40px}.card{width:3.5in;height:2.75in;padding:.18in;border:1px dashed #7b8c99;break-inside:avoid;background:white;overflow:hidden}.brand{font-size:21px;font-weight:850;color:#075978}.card h2{font-size:17px;margin:1px 0 8px}.code-label{font-size:11px;text-transform:uppercase;font-weight:750;margin:6px 0 1px}.serial{font:700 16px ui-monospace,monospace}.code{font:700 13px ui-monospace,monospace;letter-spacing:.015em}.bottom{display:flex;align-items:center;gap:12px;margin-top:10px}.bottom img{width:.74in;height:.74in}.instructions{font-size:11px;line-height:1.45}.url{font-size:9px;overflow-wrap:anywhere;margin-top:6px}.tagline{font-size:10px;margin-top:5px;color:#486177}
+@page{size:letter;margin:.4in}@media print{body{background:white}header{display:none}.cards{gap:.18in;padding:0}.cards{break-after:page}.cards:last-child{break-after:auto}.card{color:black;print-color-adjust:exact}}
+@media screen and (max-width:730px){.cards{grid-template-columns:3.5in}header{padding:18px}}
+</style></head><body><header>
+<a href="/admin/key-finders">← Key Finder Inventory</a><h1>{{ rows|length }} activation cards ready</h1>
+{% if skipped %}<p>{{ skipped }} already-activated Key Finder(s) were protected and excluded from printing.</p>{% endif %}
+{% if rows %}<p class="note"><strong>Download the private CSV before leaving.</strong> Codes cannot be recovered from the database. Save the CSV to reprint available cards later. Refreshing this result will not generate another batch.</p>
+<button id="download" type="button">Download private CSV</button><button type="button" onclick="window.print()">Print cards</button>
+<p>Print on US Letter at <strong>100% / Actual size</strong>, with browser headers and footers off. Six cards per sheet, each 3½ × 2¾ inches.</p>
+<p>Program each NFC tag with its <strong>nfc_recovery_url</strong> from the CSV. Pair it with the card from that same row. The QR on these cards opens activation; it is not the NFC recovery link.</p>{% else %}<p>No available cards to print. Existing activated devices have not been changed.</p>{% endif %}
+</header><main>{% for sheet in rows|batch(6) %}<section class="cards">{% for r in sheet %}<article class="card"><div class="brand">EmpowerBands</div><h2>Activate your Key Finder</h2>
+<div class="code-label">Serial number</div><div class="serial">{{ r.activation_card_serial }}</div>
+<div class="code-label">Private activation code</div><div class="code">{{ r.hidden_activation_code }}</div>
+<div class="bottom"><img src="data:image/png;base64,{{ qr_data }}" alt="Scan to open Key Finder activation"><div class="instructions"><strong>1. Scan this QR.</strong><br>2. Sign in with your email code.<br>3. Enter the serial and activation code.<br>4. Set your recovery contact.</div></div>
+<div class="url">{{ activate_url }}</div><div class="tagline">Keep this card private · Protect what matters most</div></article>{% endfor %}</section>{% endfor %}</main>
+<script>
+const csvText={{ csv_text|tojson }};
+const download=document.getElementById('download');
+if(download)download.addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([csvText],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='EmpowerBands_Key_Finder_PRIVATE_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+</script></body></html>

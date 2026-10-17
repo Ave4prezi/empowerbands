@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'key_finder_backend.py'
+      - 'key_finder_admin.py'
+      - 'templates/admin_key_finder*.html'
       - 'templates/key_finder.html'
       - 'app.py'
       - 'scripts/import_key_finder_batch.py'
