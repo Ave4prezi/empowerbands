@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'key_finder_backend.py'
+      - 'templates/key_finder.html'
+      - 'app.py'
       - 'scripts/import_key_finder_batch.py'
       - 'tests/test_key_finder_*.py'
       - '.github/workflows/key-finder-tests.yml'
@@ -36,5 +38,4 @@ jobs:
           KEY_FINDER_ACTIVATION_PEPPER: test-only-long-key-finder-pepper-not-for-production
           DATABASE_URL: postgresql://keyfinder_test:keyfinder_test_only@localhost:5432/keyfinder_test
         run: |
-          python -m unittest discover -s tests -p 'test_key_finder_security.py' -v
-          python -m unittest discover -s tests -p 'test_key_finder_database.py' -v
+          python -m unittest discover -s tests -p 'test_key_finder_*.py' -v
