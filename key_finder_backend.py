@@ -1,7 +1,6 @@
 """Isolated Key Finder schema and public lookup. No Safety ID table access.
 
-Activation is intentionally not exposed until card ownership verification and
-customer authentication are finalized.
+Activation requires verified email and a separate single-use printed secret.
 """
 import os
 import secrets
@@ -12,9 +11,9 @@ import time
 from email.message import EmailMessage
 from datetime import datetime, timedelta, timezone
 import re
-from flask import render_template_string
+from functools import wraps
 import psycopg
-from flask import Blueprint, jsonify, request, session, redirect, render_template_string
+from flask import Blueprint, jsonify, request, session, redirect, render_template_string, make_response
 
 key_finder_api = Blueprint("key_finder_api", __name__)
 SERIAL_RE = re.compile(r"^KF-[A-Z0-9]{8,24}$")
@@ -53,6 +52,11 @@ def initialize_key_finders():
                 attempts INTEGER NOT NULL DEFAULT 0,
                 window_start TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 locked_until TIMESTAMPTZ
+            )""")
+            cur.execute("""CREATE TABLE IF NOT EXISTS key_finder_email_send_limits (
+                actor_hash TEXT PRIMARY KEY,
+                attempts INTEGER NOT NULL DEFAULT 0,
+                window_start TIMESTAMPTZ NOT NULL DEFAULT NOW()
             )""")
             cur.execute("""CREATE TABLE IF NOT EXISTS key_finder_email_challenges (
                 email TEXT PRIMARY KEY,
@@ -129,6 +133,10 @@ def public_recovery_page(identifier):
     if record is None:
         return "Recovery link not found", 404
     active, lost, visible, email = record
+    return _recovery_page(active, lost, visible, email)
+
+
+def _recovery_page(active, lost, visible, email):
     return render_template_string("""
         <!doctype html><html lang="en"><meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -151,13 +159,41 @@ def public_recovery_page(identifier):
         </main></html>
     """, active=active, lost=lost, visible=visible, email=email)
 
+
+@key_finder_api.get("/key-finder/found")
+def found_item_lookup():
+    # Reuse exactly the public API's activated-only, opt-in disclosure rules.
+    response = make_response(public_key_finder(request.args.get("serial", "")))
+    if response.status_code != 200:
+        return response
+    public = response.get_json()
+    return _recovery_page(True, public["lost"], bool(public["contact_email"]), public["contact_email"])
+
 # Customer session is isolated from Safety ID data and never uses serial as a login credential.
-EMAIL_RE = re.compile(r"^[^\\s@]{1,64}@[^\\s@]{1,190}\\.[^\\s@]{2,}$")
+EMAIL_RE = re.compile(r"^[^\s@\\]{1,64}@[^\s@\\]{1,190}\.[^\s@\\]{2,}$")
+
+
+def _service_errors(view):
+    @wraps(view)
+    def guarded(*args, **kwargs):
+        try:
+            return view(*args, **kwargs)
+        except (psycopg.Error, RuntimeError, KeyError):
+            return "Key Finder service temporarily unavailable. Please try again later.", 503
+    return guarded
+
+
+@key_finder_api.after_request
+def private_responses(response):
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
 
 
 def _csrf_ok():
     origin = request.headers.get("Origin", "")
-    return bool(origin) and origin.rstrip("/") == request.host_url.rstrip("/") and request.form.get("csrf") == session.get("kf_csrf")
+    return bool(session.get("kf_csrf")) and bool(origin) and origin.rstrip("/") == request.host_url.rstrip("/") and request.form.get("csrf") == session.get("kf_csrf")
 
 
 def _csrf():
@@ -197,10 +233,11 @@ def _code_digest(email, code):
 
 
 @key_finder_api.get("/key-finder/account")
+@_service_errors
 def key_finder_account():
     email = session.get("kf_email")
     devices = []
-    if email and os.environ.get("DATABASE_URL"):
+    if email:
         with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
                 cur.execute("""SELECT serial, item_label, lost, contact_visible, public_contact_email
@@ -239,6 +276,7 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
 <h1>{% if email %}Your essentials. One place.{% else %}Keep what matters close.{% endif %}</h1>
 <p>{% if email %}Activate, personalize and manage your Key Finders from your secure dashboard.{% else %}Sign in securely with a one-time email code to activate and manage your Key Finders. No password needed.{% endif %}</p></section>
 {% if not email %}
+{% if code_sent %}<p role="status">Check your email for the six-digit code, then enter it below.</p>{% endif %}
 <div class="grid">
 <section class="panel"><div class="panel-head"><span class="step">01</span><h2>Get your sign-in code</h2></div>
 <p>We'll email a six-digit code to verify it's you.</p>
@@ -269,7 +307,7 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
 <form method="post" action="/key-finder/update"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="serial" value="{{ d[0] }}">
 <label>Item name</label><input name="label" maxlength="80" value="{{ d[1] or '' }}" placeholder="e.g. House keys">
 <label>Recovery contact email</label><input type="email" name="contact_email" maxlength="254" value="{{ d[4] or '' }}" placeholder="Contact email">
-<label class="check"><input type="checkbox" name="visible" {% if d[3] %}checked{% endif %}><span>Show my recovery email on the public finder page</span></label>
+<label class="check"><input type="checkbox" name="visible" {% if d[3] %}checked{% endif %}><span>Show my recovery email on the public finder page. If this is off, finders cannot contact me through this service.</span></label>
 <label class="check"><input type="checkbox" name="lost" {% if d[2] %}checked{% endif %}><span>Mark this item as lost</span></label>
 <button type="submit">Save changes</button></form></section>
 {% endfor %}</div>{% else %}
@@ -278,7 +316,7 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
 {% endif %}
 <footer class="footer">EmpowerBands · Protect What Matters Most</footer>
 </div></body></html>
-    """, email=email, devices=devices, csrf=_csrf())
+    """, email=email, devices=devices, csrf=_csrf(), code_sent=request.args.get("code_sent") == "1")
 
 
 @key_finder_api.post("/key-finder/send-code")
@@ -292,6 +330,19 @@ def key_finder_send_code():
     try:
         with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
+                budgets = [("email:" + email, 5),
+                           ("ip:" + (request.remote_addr or "unknown"), 20),
+                           ("global", 500)]
+                for actor, budget in sorted(budgets):
+                    cur.execute("""INSERT INTO key_finder_email_send_limits(actor_hash, attempts)
+                        VALUES (%s, 1) ON CONFLICT (actor_hash) DO UPDATE SET
+                        attempts = CASE WHEN key_finder_email_send_limits.window_start < NOW() - INTERVAL '1 hour'
+                            THEN 1 ELSE key_finder_email_send_limits.attempts + 1 END,
+                        window_start = CASE WHEN key_finder_email_send_limits.window_start < NOW() - INTERVAL '1 hour'
+                            THEN NOW() ELSE key_finder_email_send_limits.window_start END
+                        RETURNING attempts""", (_claim_digest("send:" + actor),))
+                    if cur.fetchone()[0] > budget:
+                        return "Too many code requests. Please try again later.", 429
                 cur.execute("""INSERT INTO key_finder_email_challenges(email, code_hash, expires_at)
                     VALUES (%s, %s, NOW() + INTERVAL '10 minutes')
                     ON CONFLICT (email) DO UPDATE SET
@@ -305,10 +356,11 @@ def key_finder_send_code():
         _email_code(email, code)
     except (psycopg.Error, RuntimeError, OSError, urllib.error.URLError):
         return "Unable to send code right now", 503
-    return "Check your email for the six-digit code, then return to the account page."
+    return redirect("/key-finder/account?code_sent=1", code=303)
 
 
 @key_finder_api.post("/key-finder/verify-code")
+@_service_errors
 def key_finder_verify_code():
     if not _csrf_ok():
         return "Invalid request", 403
@@ -359,11 +411,11 @@ def key_finder_claim():
     if not SERIAL_RE.fullmatch(serial) or not re.fullmatch(r"[A-Z0-9]{24}", code):
         return "Invalid activation details", 400
     email = session["kf_email"]
-    # Hash the IP to avoid retaining raw IP addresses in the rate-limit table.
-    actor = _claim_digest("ip:" + (request.remote_addr or "unknown"))
-    account = _claim_digest("account:" + email)
-    serial_key = _claim_digest("serial:" + serial)
     try:
+        # Hash the IP to avoid retaining raw IP addresses in the rate-limit table.
+        actor = _claim_digest("ip:" + (request.remote_addr or "unknown"))
+        account = _claim_digest("account:" + email)
+        serial_key = _claim_digest("serial:" + serial)
         with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
                 # Lock rate-limit rows in stable order to serialize concurrent attempts.
@@ -384,11 +436,11 @@ def key_finder_claim():
                     cur.execute("""UPDATE key_finder_claim_limits SET attempts=%s,
                         locked_until=CASE WHEN %s >= 5 THEN NOW() + INTERVAL '1 hour'
                         ELSE NULL END WHERE actor_hash=%s""", (attempts, attempts, key))
-                cur.execute("""SELECT activation_secret_hash, activated_at, claim_locked_until
+                cur.execute("""SELECT activation_secret_hash, activated_at, claim_locked_until, recovery_identifier
                     FROM key_finder_devices WHERE serial=%s FOR UPDATE""", (serial,))
                 device = cur.fetchone()
                 expected = _claim_digest("activation:" + serial + ":" + code)
-                valid = bool(device and device[1] is None and
+                valid = bool(device and RECOVERY_RE.fullmatch(device[3] or "") and device[1] is None and
                     (device[2] is None or device[2] <= datetime.now(timezone.utc)) and
                     hmac.compare_digest(device[0], expected))
                 if not valid:
@@ -408,6 +460,7 @@ def key_finder_claim():
 
 
 @key_finder_api.post("/key-finder/update")
+@_service_errors
 def key_finder_update():
     if not _csrf_ok() or not session.get("kf_email"):
         return "Sign in required", 403
