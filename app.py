@@ -26,6 +26,7 @@ from io import BytesIO
 from markupsafe import escape
 from activation_manager import register_activation_manager
 from key_finder_backend import key_finder_api, initialize_key_finders
+from key_finder_admin import key_finder_admin, initialize_key_finder_admin
 
 
 app = Flask(__name__)
@@ -89,6 +90,8 @@ def init_db():
 init_db()
 initialize_key_finders()
 app.register_blueprint(key_finder_api)
+initialize_key_finder_admin()
+app.register_blueprint(key_finder_admin)
 
 file_name = "customers.csv"
 scan_log_file = "scan_log.csv"
@@ -2761,6 +2764,8 @@ body{{
         <a class="add-btn" href="/admin/spotlight">
             💚 Community Impact Spotlight
 </a>
+
+        <a class="add-btn" href="/admin/key-finders">🔑 Key Finder Inventory</a>
 
         <a class="add-btn" href="/admin/activation-codes">
             🔐 Activation Codes
