@@ -97,6 +97,51 @@ class KeyFinderFlowTests(unittest.TestCase):
         fresh = self.app.test_client()
         self.assertEqual(fresh.post('/key-finder/logout', headers={'Origin': 'http://localhost'}).status_code, 403)
 
+
+    def test_same_origin_policy_preserves_form_origin_without_external_referrers(self):
+        response = self.client.get('/key-finder/account')
+        self.assertEqual(response.headers['Referrer-Policy'], 'same-origin')
+        self.assertEqual(response.headers['Cache-Control'], 'no-store')
+
+    def test_render_https_forms_work_behind_http_proxy(self):
+        # Browser sees HTTPS, while Render's upstream connection can be HTTP.
+        with patch.dict(os.environ, {'RENDER': 'true'}):
+            client = self.app.test_client()
+            client.get('/key-finder/account', base_url='http://www.empowerbands.org')
+            with client.session_transaction(base_url='http://www.empowerbands.org') as sess:
+                token = sess['kf_csrf']
+            db, _ = self.db([(1,), (1,), (1,), ('owner@example.com',)])
+            with patch.object(k.psycopg, 'connect', db), patch.object(k, '_email_code') as send:
+                response = client.post('/key-finder/send-code',
+                    base_url='http://www.empowerbands.org',
+                    headers={'Origin': 'https://www.empowerbands.org'},
+                    data={'csrf': token, 'email': 'owner@example.com'})
+            self.assertEqual(response.status_code, 303)
+            send.assert_called_once()
+
+    def test_render_rejects_null_missing_foreign_and_insecure_origins(self):
+        with patch.dict(os.environ, {'RENDER': 'true'}):
+            client = self.app.test_client()
+            client.get('/key-finder/account', base_url='http://www.empowerbands.org')
+            with client.session_transaction(base_url='http://www.empowerbands.org') as sess:
+                token = sess['kf_csrf']
+            with patch.object(k.psycopg, 'connect') as db, patch.object(k, '_email_code') as send:
+                for origin in [None, 'null', 'https://other.example', 'http://www.empowerbands.org',
+                               'https://www.empowerbands.org.evil.example']:
+                    with self.subTest(origin=origin):
+                        response = client.post('/key-finder/send-code',
+                            base_url='http://www.empowerbands.org',
+                            headers={'Origin': origin} if origin else {},
+                            data={'csrf': token, 'email': 'owner@example.com'})
+                        self.assertEqual(response.status_code, 403)
+                response = client.post('/key-finder/send-code',
+                    base_url='http://www.empowerbands.org',
+                    headers={'Origin': 'https://www.empowerbands.org'},
+                    data={'csrf': 'wrong-token', 'email': 'owner@example.com'})
+                self.assertEqual(response.status_code, 403)
+                db.assert_not_called()
+                send.assert_not_called()
+
     def test_unavailable_services_return_503(self):
         self.sign_in()
         with patch.object(k.psycopg, 'connect', side_effect=psycopg.OperationalError('offline')):
