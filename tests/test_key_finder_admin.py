@@ -81,6 +81,21 @@ class AdminRouteTests(unittest.TestCase):
         for raw in [csv_bytes([row,row]),b'x,y\n1,2\n',b'x'*65537,csv_bytes([row[:2]+['https://evil.test','B'*24]])]:
             with self.assertRaises(ValueError):parse_batch(raw)
 
+    def test_missing_activation_configuration_fails_before_database_write(self):
+        self.login()
+        raw=','.join(FIELDS)+'\nKF-12345678,'+'A'*20+','+RECOVERY_BASE+'A'*20+','+'B'*24+'\n'
+        with patch.dict(os.environ, {'KEY_FINDER_ACTIVATION_PEPPER':''}), patch('key_finder_admin.psycopg.connect') as db:
+            response=self.client.post('/admin/key-finders/import',data={'csrf':'csrf-test','request_id':'request-test','batch_csv':(io.BytesIO(raw.encode()),'private.csv')})
+        self.assertEqual(response.status_code,503)
+        db.assert_not_called()
+
+    def test_refreshing_result_url_returns_to_inventory(self):
+        self.login()
+        for path in ['/admin/key-finders/import','/admin/key-finders/generate']:
+            response=self.client.get(path)
+            self.assertEqual(response.status_code,302)
+            self.assertEqual(response.headers['Location'],'/admin/key-finders')
+
     def test_import_conflict_does_not_change_existing_records(self):
         self.login(); db=MagicMock(); conn=db.return_value.__enter__.return_value
         conn.execute.return_value.fetchone.return_value=('request-test',)

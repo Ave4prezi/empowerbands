@@ -2,6 +2,7 @@
 import base64
 import csv
 import io
+import logging
 import os
 import re
 import secrets
@@ -18,9 +19,22 @@ key_finder_admin = Blueprint('key_finder_admin', __name__)
 FIELDS = ['activation_card_serial', 'nfc_recovery_identifier', 'nfc_recovery_url', 'hidden_activation_code']
 RECOVERY_BASE = 'https://empowerbands.org/k/'
 ACTIVATE_URL = 'https://www.empowerbands.org/key-finder/account'
+logger = logging.getLogger(__name__)
+
+
+def _activation_pepper():
+    pepper = os.environ.get('KEY_FINDER_ACTIVATION_PEPPER', '')
+    if len(pepper) < 32:
+        raise RuntimeError('Key Finder activation security is not configured')
+    return pepper
 
 
 def initialize_key_finder_admin():
+    logger.warning(
+        'Key Finder configuration: activation_pepper=%s; email_delivery=%s',
+        'ready' if len(os.environ.get('KEY_FINDER_ACTIVATION_PEPPER', '')) >= 32 else 'missing-or-short',
+        'ready' if os.environ.get('RESEND_API_KEY') else 'missing',
+    )
     if not os.environ.get('DATABASE_URL'):
         return
     with psycopg.connect(os.environ['DATABASE_URL']) as conn:
@@ -36,7 +50,10 @@ def admin_required(view):
             return redirect('/admin')
         try:
             return view(*args, **kwargs)
-        except (psycopg.Error, RuntimeError, KeyError):
+        except (psycopg.Error, RuntimeError, KeyError) as error:
+            # Do not log SQL parameters, uploaded codes, connection strings or secret values.
+            logger.error('Key Finder admin failed: operation=%s type=%s sqlstate=%s',
+                         view.__name__, type(error).__name__, getattr(error, 'sqlstate', None))
             return 'Key Finder inventory is temporarily unavailable. Please try again later.', 503
     return guarded
 
@@ -172,10 +189,11 @@ def import_batch():
         abort(400, 'Choose your private activation CSV.')
     try:
         rows = parse_batch(upload.read(65537))
+        pepper = _activation_pepper()
         with psycopg.connect(os.environ['DATABASE_URL']) as conn:
             _reserve_request(conn, request_id)
             import_rows(conn, [(r[FIELDS[0]], r[FIELDS[1]], r[FIELDS[3]]) for r in rows],
-                        os.environ['KEY_FINDER_ACTIVATION_PEPPER'])
+                        pepper)
             # Lock inventory through commit so an activation cannot race card selection.
             available = {r[0] for r in conn.execute('''SELECT serial FROM key_finder_devices
                 WHERE serial = ANY(%s) AND activated_at IS NULL FOR UPDATE''',
@@ -186,3 +204,10 @@ def import_batch():
         abort(400, 'This CSV could not be verified. No records changed. Check the private file and current activation pepper; existing codes will not be overwritten.')
     session.pop('kf_admin_request', None)
     return page
+
+
+@key_finder_admin.get('/admin/key-finders/import')
+@key_finder_admin.get('/admin/key-finders/generate')
+@admin_required
+def return_to_inventory():
+    return redirect('/admin/key-finders')
