@@ -108,7 +108,7 @@ class KeyFinderFlowTests(unittest.TestCase):
         with patch.dict(os.environ, {'RENDER': 'true'}):
             client = self.app.test_client()
             client.get('/key-finder/account', base_url='http://www.empowerbands.org')
-            with client.session_transaction() as sess:
+            with client.session_transaction(base_url='http://www.empowerbands.org') as sess:
                 token = sess['kf_csrf']
             db, _ = self.db([(1,), (1,), (1,), ('owner@example.com',)])
             with patch.object(k.psycopg, 'connect', db), patch.object(k, '_email_code') as send:
@@ -123,7 +123,7 @@ class KeyFinderFlowTests(unittest.TestCase):
         with patch.dict(os.environ, {'RENDER': 'true'}):
             client = self.app.test_client()
             client.get('/key-finder/account', base_url='http://www.empowerbands.org')
-            with client.session_transaction() as sess:
+            with client.session_transaction(base_url='http://www.empowerbands.org') as sess:
                 token = sess['kf_csrf']
             with patch.object(k.psycopg, 'connect') as db, patch.object(k, '_email_code') as send:
                 for origin in [None, 'null', 'https://other.example', 'http://www.empowerbands.org',
