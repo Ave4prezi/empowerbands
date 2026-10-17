@@ -1,5 +1,8 @@
 """Route regressions without network calls; PostgreSQL behavior is tested separately."""
 import os
+import io
+import urllib.error
+import urllib.request
 import unittest
 from unittest.mock import MagicMock, patch
 from flask import Flask
@@ -141,6 +144,46 @@ class KeyFinderFlowTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 403)
                 db.assert_not_called()
                 send.assert_not_called()
+
+
+    def test_email_api_identifies_application_and_keeps_secrets_out_of_errors(self):
+        with patch.dict(os.environ, {'RESEND_API_KEY': 'test-only-api-key',
+                                     'KEY_FINDER_EMAIL_FROM': 'EmpowerBands <support@example.com>'}):
+            response = MagicMock()
+            response.__enter__.return_value.status = 200
+            with patch('urllib.request.urlopen', return_value=response) as send:
+                k._email_code('owner@example.com', '123456')
+            request = send.call_args.args[0]
+            self.assertEqual(request.get_header('User-agent'), 'EmpowerBands/1.0')
+            self.assertEqual(request.full_url, 'https://api.resend.com/emails')
+            self.assertEqual(send.call_args.kwargs['timeout'], 10)
+
+    def test_failed_email_has_safe_notice_and_return_link(self):
+        db, _ = self.db([(1,), (1,), (1,), ('owner@example.com',)])
+        error = urllib.error.HTTPError('https://api.resend.com/emails', 403,
+                                      'secret-provider-detail', {}, io.BytesIO(b'private body'))
+        with patch.object(k.psycopg, 'connect', db), patch.object(k, '_email_code', side_effect=error):
+            with self.assertLogs(k.logger, level='ERROR') as logs:
+                response = self.post('send-code', email='owner@example.com')
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.headers['Retry-After'], '60')
+        html = response.get_data(as_text=True)
+        self.assertIn('We could not send', html)
+        self.assertIn('Return to sign-in', html)
+        self.assertNotIn('secret-provider-detail', html)
+        self.assertNotIn('owner@example.com', ' '.join(logs.output))
+        self.assertNotIn('private body', ' '.join(logs.output))
+        self.assertIn('http_status=403', ' '.join(logs.output))
+
+    def test_cooldown_does_not_claim_delivery(self):
+        db, _ = self.db([(1,), (1,), (1,), None])
+        with patch.object(k.psycopg, 'connect', db), patch.object(k, '_email_code') as send:
+            response = self.post('send-code', email='owner@example.com')
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response.headers['Retry-After'], '60')
+        self.assertIn('does not confirm email delivery', response.get_data(as_text=True))
+        self.assertIn('Return to sign-in', response.get_data(as_text=True))
+        send.assert_not_called()
 
     def test_unavailable_services_return_503(self):
         self.sign_in()
