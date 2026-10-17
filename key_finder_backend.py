@@ -3,6 +3,7 @@
 Activation requires verified email and a separate single-use printed secret.
 """
 import os
+import logging
 import secrets
 import hashlib
 import hmac
@@ -16,6 +17,7 @@ import psycopg
 from flask import Blueprint, jsonify, request, session, redirect, render_template_string, make_response
 
 key_finder_api = Blueprint("key_finder_api", __name__)
+logger = logging.getLogger(__name__)
 SERIAL_RE = re.compile(r"^KF-[A-Z0-9]{8,24}$")
 
 
@@ -226,7 +228,8 @@ def _email_code(email, code):
     }).encode()
     req = urllib.request.Request(
         "https://api.resend.com/emails", data=payload,
-        headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"},
+        headers={"Authorization": "Bearer " + key, "Content-Type": "application/json",
+                 "User-Agent": "EmpowerBands/1.0"},
         method="POST")
     with urllib.request.urlopen(req, timeout=10) as response:
         if response.status not in (200, 201):
@@ -327,6 +330,22 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
     """, email=email, devices=devices, csrf=_csrf(), code_sent=request.args.get("code_sent") == "1")
 
 
+def _sign_in_notice(message, status, retry_after=None):
+    response = make_response(render_template_string("""
+        <!doctype html><html lang="en"><head><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Key Finder sign-in | EmpowerBands</title>
+        <style>body{margin:0;background:#07111f;color:#f3f7fd;font:18px/1.6 system-ui}
+        main{max-width:36rem;margin:10vh auto;padding:28px}
+        a{display:inline-block;color:#56d7d1;margin-top:18px}</style></head>
+        <body><main><h1>Key Finder sign-in</h1><p role="alert">{{ message }}</p>
+        <a href="/key-finder/account">Return to sign-in</a></main></body></html>
+    """, message=message), status)
+    if retry_after is not None:
+        response.headers["Retry-After"] = str(retry_after)
+    return response
+
+
 @key_finder_api.post("/key-finder/send-code")
 def key_finder_send_code():
     if not _csrf_ok():
@@ -350,7 +369,7 @@ def key_finder_send_code():
                             THEN NOW() ELSE key_finder_email_send_limits.window_start END
                         RETURNING attempts""", (_claim_digest("send:" + actor),))
                     if cur.fetchone()[0] > budget:
-                        return "Too many code requests. Please try again later.", 429
+                        return _sign_in_notice("Too many code requests. Please try again in an hour.", 429, 3600)
                 cur.execute("""INSERT INTO key_finder_email_challenges(email, code_hash, expires_at)
                     VALUES (%s, %s, NOW() + INTERVAL '10 minutes')
                     ON CONFLICT (email) DO UPDATE SET
@@ -359,11 +378,14 @@ def key_finder_send_code():
                     WHERE key_finder_email_challenges.last_sent_at < NOW() - INTERVAL '60 seconds'
                     RETURNING email""", (email, _code_digest(email, code)))
                 if not cur.fetchone():
-                    return "Please wait before requesting another code", 429
+                    return _sign_in_notice("Please wait 60 seconds before requesting another code. A recent request does not confirm email delivery. If no code arrived, return to sign-in and try once after the wait.", 429, 60)
             conn.commit()
         _email_code(email, code)
-    except (psycopg.Error, RuntimeError, OSError, urllib.error.URLError):
-        return "Unable to send code right now", 503
+    except (psycopg.Error, RuntimeError, OSError, urllib.error.URLError) as error:
+        # Log classifications only; never addresses, codes, keys or provider bodies.
+        logger.error("Key Finder email failed: type=%s http_status=%s",
+                     type(error).__name__, getattr(error, "code", None))
+        return _sign_in_notice("We could not send your sign-in email. Wait 60 seconds, then return to sign-in and try once. If this continues, contact support@empowerbands.org.", 503, 60)
     return redirect("/key-finder/account?code_sent=1", code=303)
 
 
