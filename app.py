@@ -400,7 +400,7 @@ def site_footer_html():
     </div>
     <div>
         <a href="/traveling-band-movement">Traveling Band Movement</a> |
-        <a href="/merch">Shop</a>
+        <a href="/merch">Shop</a> |
         <a href="/guardian-bear">Guardian Bear</a> |
         <a href="/board-members">Board Members</a> |
         <a href="/blessing-boxes">Blessing Boxes</a> |
@@ -1872,6 +1872,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <a href="#how">How It Works</a>
         <a href="/sponsor">Sponsor</a>
         <a href="/merch">Shop</a>
+        <a href="/guardian-bear">Guardian Bear</a>
         <a href="/impact-club">Impact Club</a>
         <a href="/resources">Resources</a>
     </nav>
