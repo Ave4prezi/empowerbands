@@ -346,6 +346,7 @@ def site_nav_html(active=""):
     {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
     {link("/merch", "Shop", "merch")}
     {link("/guardian-bear", "Guardian Bear", "guardian")}
+    {link("/pet-finder", "Pet Finder", "pet")}
     {link("/board-members", "Board", "board")}
     {link("/blessing-boxes", "Blessing Boxes", "blessing")}
     {link("/resources", "Support & Resources", "resources")}
@@ -1395,7 +1396,7 @@ MERCH_PRODUCTS = [
         "description": "Everything you need to start your own traveling band journey — a handmade bracelet, a story card, and instructions for passing it forward.",
         "price": "$18",
         "emoji": "🌍",
-        "link": "/traveling-band-movement",
+        "link": "mailto:support@empowerbands.org?subject=Order:%20Traveling%20Band%20Starter%20Pack",
         "featured": True,
     },
     {
@@ -1873,6 +1874,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <a href="/sponsor">Sponsor</a>
         <a href="/merch">Shop</a>
         <a href="/guardian-bear">Guardian Bear</a>
+        <a href="/pet-finder">Pet Finder</a>
         <a href="/impact-club">Impact Club</a>
         <a href="/resources">Resources</a>
     </nav>
@@ -6094,7 +6096,7 @@ def _merch_card(p):
     <p class="product-desc">{p['description']}</p>
     <div class="product-footer">
         <span class="product-price">{p['price']}</span>
-        <a class="btn-cyan btn-sm" href="{p['link']}" aria-label="Purchase {p['name']}">Add to Cart</a>
+        <a class="btn-cyan btn-sm" href="{p['link']}" aria-label="Email to Order {p['name']}">Email to Order</a>
     </div>
 </div>"""
 
@@ -6469,7 +6471,7 @@ def merch():
         <p class="product-desc" style="margin-bottom:16px;">{f['description']}</p>
         <div class="product-footer" style="justify-content:flex-start;gap:20px;">
             <span class="product-price">{f['price']}</span>
-            <a class="btn-cyan" href="{f['link']}">Add to Cart</a>
+            <a class="btn-cyan" href="{f['link']}">Email to Order</a>
         </div>
     </div>
 </div>"""
@@ -6520,9 +6522,9 @@ __NAV__
     <p>
         EmpowerBands Worldwide is a nonprofit-driven mission. Proceeds from merchandise
         support the Traveling Band Movement, safety-band programs for families and
-        schools, and community outreach like Blessing Boxes. Checkout links here are
-        placeholders while we connect a secure payment processor — orders currently
-        route to our support inbox so we can confirm every purchase by hand.
+        schools, and community outreach like Blessing Boxes. Select Email to Order to
+        request an item through our support inbox. Our team will confirm availability,
+        your total, and payment instructions before you pay.
     </p>
 </section>
 
@@ -6615,6 +6617,12 @@ __FOOTER__
 </body>
 </html>
 """.replace("__NAV__", site_nav_html("board")).replace("__FOOTER__", site_footer_html()).replace("__MARKETING_CSS__", MARKETING_PAGE_CSS).replace("__LOGO_URL__", LOGO_URL).replace("__BOARD__", board_html)
+
+
+@app.route("/pet-finder")
+def pet_finder_page():
+    """Public product information; no private pet or owner information."""
+    return render_template("pet_finder.html")
 
 
 @app.route("/guardian-bear")
