@@ -24,12 +24,14 @@ import re
 import secrets
 from io import BytesIO
 from markupsafe import escape
+from paypal_checkout import checkout
 from activation_manager import register_activation_manager
 from key_finder_backend import key_finder_api, initialize_key_finders
 from key_finder_admin import key_finder_admin, initialize_key_finder_admin
 
 
 app = Flask(__name__)
+app.register_blueprint(checkout)
 configured_secret_key = os.environ.get("SECRET_KEY")
 if not configured_secret_key and os.environ.get("DATABASE_URL"):
     raise RuntimeError("SECRET_KEY must be configured when DATABASE_URL is enabled.")
@@ -1477,9 +1479,7 @@ BOARD_MEMBERS = [
 # HOME PAGE
 # ===============================
 
-@app.route("/order")
-def order_safety_id():
-    return render_template("order.html")
+# /order is registered by the PayPal checkout blueprint.
 
 
 @app.route("/demo")
