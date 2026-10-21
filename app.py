@@ -23,6 +23,7 @@ import hmac
 import re
 import secrets
 from io import BytesIO
+from functools import wraps
 from markupsafe import escape
 from activation_manager import register_activation_manager
 from key_finder_backend import key_finder_api, initialize_key_finders
@@ -81,6 +82,25 @@ def init_db():
                     claimed BOOLEAN NOT NULL DEFAULT FALSE,
                     claimed_at TIMESTAMP,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS profile_verification_challenges (
+                    band_id TEXT PRIMARY KEY,
+                    challenge_id TEXT NOT NULL UNIQUE,
+                    code_hash TEXT NOT NULL,
+                    expires_at TIMESTAMPTZ NOT NULL,
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS safety_pin_attempts (
+                    actor_hash TEXT PRIMARY KEY,
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    window_start TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
             """)
 
@@ -2156,7 +2176,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 # /traveling-band-movement, /merch, and /board-members can never be
 # swallowed by this handler. The blocked_routes list below is
 # defense-in-depth in case this function is ever reused elsewhere.
-@app.route("/<band_id>")
+@app.route("/<band_id>", methods=["GET", "POST"])
 def band_profile_shortcut(band_id):
 
     blocked_routes = [
@@ -2543,10 +2563,10 @@ def dashboard():
     
     for customer in customers:
 
-        band_id = customer.get("band_id", "")
-        name = customer.get("name", "")
-        email = customer.get("email", "")
-        phone = customer.get("phone", "")
+        band_id = str(escape(customer.get("band_id", "")))
+        name = str(escape(customer.get("name", "")))
+        email = str(escape(customer.get("email", "")))
+        phone = str(escape(customer.get("phone", "")))
 
         customer_cards += f"""
 
@@ -3310,6 +3330,7 @@ def edit_profile(band_id):
         db_row[8] or "", db_row[9] or "", "", db_row[10] or "",
         db_row[11] or "", db_row[12] or "", db_row[13] or "",
     ]
+    found_row = [str(escape(value)) for value in found_row]
 
     return f"""
 <!DOCTYPE html>
@@ -3492,7 +3513,7 @@ def delete_profile(band_id):
 # BAND PROFILE
 # ===============================
 
-@app.route("/customer/<band_id>")
+@app.route("/customer/<band_id>", methods=["GET", "POST"])
 def profile(band_id):
     band_id = band_id.strip().upper()
     confirm_alert = request.args.get("confirm_alert") == "yes"
@@ -3601,7 +3622,34 @@ p{color:#cbd5e1;}
                 visitor_ip
             )
 
-            entered_pin = request.args.get("pin")
+            entered_pin = request.form.get("pin") if request.method == 'POST' else None
+            pin_valid = False
+            pin_notice = ''
+            if entered_pin:
+                if not re.fullmatch(r'[0-9]{4,8}', entered_pin):
+                    return 'PIN must be 4–8 digits. Return to the profile to try again.', 400
+                actor = hmac.new(app.secret_key.encode(),
+                    (band_id + ':' + (request.remote_addr or 'unknown')).encode(), hashlib.sha256).hexdigest()
+                try:
+                    with psycopg.connect(DATABASE_URL) as conn:
+                        attempts = conn.execute("""INSERT INTO safety_pin_attempts(actor_hash, attempts)
+                            VALUES (%s, 1) ON CONFLICT (actor_hash) DO UPDATE SET
+                            attempts=CASE WHEN safety_pin_attempts.window_start < NOW()-INTERVAL '15 minutes'
+                                THEN 1 ELSE safety_pin_attempts.attempts+1 END,
+                            window_start=CASE WHEN safety_pin_attempts.window_start < NOW()-INTERVAL '15 minutes'
+                                THEN NOW() ELSE safety_pin_attempts.window_start END
+                            RETURNING attempts""", (actor,)).fetchone()[0]
+                        if attempts <= 5:
+                            pin_valid = bool(pin and check_password_hash(pin, entered_pin))
+                            if pin_valid:
+                                conn.execute('DELETE FROM safety_pin_attempts WHERE actor_hash=%s', (actor,))
+                except psycopg.Error:
+                    return 'Private information is temporarily unavailable. Please try again later.', 503
+                if attempts > 5:
+                    return 'Too many PIN attempts. Wait 15 minutes or contact support@empowerbands.org.', 429
+                if not pin_valid:
+                    pin_notice = '<p role="alert">Incorrect PIN. Try again or contact support@empowerbands.org for help.</p>'
+
             if alert_mode:
                     success = send_full_alert(name, emergency_phones, emergency_emails, band_id)
 
@@ -3664,7 +3712,12 @@ p{color:#cbd5e1;}
                     </html>
                     """
 
-            if pin and entered_pin and check_password_hash(pin, entered_pin):
+            name, email, phone, emergency_phones, age_group, condition, instructions, medical_notes, address, race, gender, photo_url = (
+                str(escape(value or "")) for value in
+                (name, email, phone, emergency_phones, age_group, condition, instructions, medical_notes, address, race, gender, photo_url)
+            )
+
+            if pin_valid:
               return f"""
 <!DOCTYPE html>
 <html>
@@ -4179,7 +4232,8 @@ Protected — enter PIN to view
 
 <div class="pin-box">
 
-<form method="GET" action="/{band_id}">
+{pin_notice}
+<form method="POST" action="/{band_id}">
 
 <input
 type="password"
@@ -4238,27 +4292,33 @@ def sponsor():
     """One-time sponsored Safety ID information and checkout handoff."""
     return render_template("sponsor.html")
 
+def _safety_notification_record(band_id):
+    if not DATABASE_URL:
+        raise psycopg.OperationalError("Database is not configured")
+    with psycopg.connect(DATABASE_URL) as conn:
+        return conn.execute("""SELECT full_name, emergency_contacts, emergency_emails
+            FROM members WHERE UPPER(band_id)=UPPER(%s)""", (band_id,)).fetchone()
+
+
 @app.route("/im_safe/<band_id>")
 def im_safe(band_id):
     band_id = band_id.strip().upper()
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        for row in reader:
-            if len(row) >= 9 and row[0].strip().upper() == band_id:
-                name = row[1]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-                send_safe_notification(name, emergency_phones, emergency_emails, band_id)
-                return f"""
-                <h1>✅ Marked as Safe</h1>
-                <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
-                <p><a href="/{band_id}">Go Back</a></p>
-                """
-    return """
-    <h1>Band Not Found</h1>
-    <p><a href="/">Home</a></p>
+    if not re.fullmatch(r'[A-Z0-9-]{2,64}', band_id):
+        return 'Invalid Safety ID.', 400
+    try:
+        record = _safety_notification_record(band_id)
+    except psycopg.Error:
+        return 'Notification service is temporarily unavailable. Please try again or contact support@empowerbands.org.', 503
+    if not record:
+        return 'Safety ID not found.', 404
+    if not send_safe_notification(*record, band_id):
+        return 'We could not notify your contacts. Contact them directly and try again later.', 502
+    return f"""
+        <h1>✅ Marked as Safe</h1>
+        <p>Your emergency contacts have been notified that this was a false alarm or the situation is resolved.</p>
+        <p><a href="/{band_id}">Go Back</a></p>
     """
+
 
 @app.route("/qr/<band_id>")
 def qr_code(band_id):
@@ -4515,29 +4575,26 @@ def pro():
 
 @app.route("/alert_with_location")
 def alert_with_location():
-
     band_id = request.args.get("band_id", "").strip().upper()
-    lat = request.args.get("lat")
-    lon = request.args.get("lon")
-
+    if not re.fullmatch(r'[A-Z0-9-]{2,64}', band_id):
+        return 'Invalid Safety ID.', 400
+    try:
+        lat = float(request.args.get('lat', ''))
+        lon = float(request.args.get('lon', ''))
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            raise ValueError
+    except ValueError:
+        return 'Invalid location. Return to the profile to send an alert without location.', 400
+    try:
+        record = _safety_notification_record(band_id)
+    except psycopg.Error:
+        return 'Notification service is temporarily unavailable. Please try again or contact support@empowerbands.org.', 503
+    if not record:
+        return 'Safety ID not found.', 404
     maps_link = f"https://maps.google.com/?q={lat},{lon}"
-
-    with open(file_name, "r", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-
-        for row in reader:
-            if row[0].strip().upper() == band_id:
-
-                name = row[1]
-                email = row[2]
-                phone = row[3]
-                emergency_phones = row[4] if len(row) > 4 else ""
-                emergency_emails = row[5] if len(row) > 5 else ""
-
-                send_full_alert(name, emergency_phones, emergency_emails, band_id, maps_link)
-
-                return f"""
+    if not send_full_alert(*record, band_id, maps_link):
+        return 'We could not notify your contacts. Contact them directly and try again later.', 502
+    return f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -4612,8 +4669,6 @@ def alert_with_location():
 </body>
 </html>
 """
-
-    return "<h1>Band not found</h1>"
 
 
 # ===============================
@@ -5610,6 +5665,10 @@ def api_activate():
     if not isinstance(data, dict):
         return jsonify({'error': 'Invalid activation request.'}), 400
 
+    if any(key in data and not isinstance(data[key], str) for key in
+           ('bandId', 'activationCode', 'email', 'pin', 'firstName', 'lastName', 'phone', 'profileType')):
+        return jsonify({'error': 'Activation fields must be text.'}), 400
+
     band_id = (data.get('bandId') or '').strip().upper()
     activation_code = (data.get('activationCode') or '').strip().upper()
     email = (data.get('email') or '').strip().lower()
@@ -5790,6 +5849,15 @@ def api_activate():
 
 
 
+@app.after_request
+def private_safety_responses(response):
+    if (request.endpoint in {'profile', 'band_profile_shortcut', 'profile_self_service',
+                             'profile_request_code', 'profile_verify_code', 'manage_profile', 'api_activate'}):
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['Referrer-Policy'] = 'no-referrer'
+    return response
+
+
 @app.route('/manage-profile')
 def manage_profile():
     return render_template('manage_profile.html')
@@ -5804,28 +5872,51 @@ def _normalize_us_phone(phone):
     return None
 
 
+def _profile_service_errors(view):
+    @wraps(view)
+    def guarded(*args, **kwargs):
+        try:
+            return view(*args, **kwargs)
+        except psycopg.Error:
+            app.logger.error("Profile database operation unavailable")
+            return jsonify({'error': 'Profile service is temporarily unavailable. Please try again or contact support@empowerbands.org.'}), 503
+    return guarded
+
+
+def _profile_code_digest(challenge_id, code):
+    return hmac.new(app.secret_key.encode(), (challenge_id + ':' + code).encode(), hashlib.sha256).hexdigest()
+
+
 @app.route('/api/profile/request-code', methods=['POST'])
+@_profile_service_errors
 def profile_request_code():
-    data = request.get_json(silent=True) or {}
-    band_id = (data.get('bandId') or '').strip().upper()
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or not isinstance(data.get('bandId'), str):
+        return jsonify({'error': 'Enter a valid Safety ID.'}), 400
+    band_id = data['bandId'].strip().upper()
     if not re.fullmatch(r'[A-Z0-9-]{2,64}', band_id) or not DATABASE_URL:
         return jsonify({'error': 'Enter a valid Safety ID.'}), 400
     with psycopg.connect(DATABASE_URL) as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT primary_phone FROM members WHERE UPPER(band_id)=UPPER(%s)", (band_id,))
-            row = cur.fetchone()
+        row = conn.execute("SELECT primary_phone FROM members WHERE UPPER(band_id)=UPPER(%s)", (band_id,)).fetchone()
     if not row or not row[0]:
         return jsonify({'error': 'We could not send a verification code for that Safety ID. Contact EmpowerBands support for help.'}), 400
     phone = _normalize_us_phone(row[0])
     if not phone or not (TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER):
         return jsonify({'error': 'Text verification is temporarily unavailable. Contact EmpowerBands support for help.'}), 503
     code = f"{secrets.randbelow(1000000):06d}"
-    session['profile_verify'] = {
-        'band_id': band_id,
-        'code_hash': generate_password_hash(code),
-        'expires': int(time.time()) + 600,
-        'attempts': 0,
-    }
+    challenge_id = secrets.token_urlsafe(32)
+    with psycopg.connect(DATABASE_URL) as conn:
+        reserved = conn.execute("""INSERT INTO profile_verification_challenges
+            (band_id, challenge_id, code_hash, expires_at)
+            VALUES (%s, %s, %s, NOW() + INTERVAL '10 minutes')
+            ON CONFLICT (band_id) DO UPDATE SET challenge_id=EXCLUDED.challenge_id,
+            code_hash=EXCLUDED.code_hash, expires_at=EXCLUDED.expires_at, attempts=0, sent_at=NOW()
+            WHERE profile_verification_challenges.sent_at < NOW() - INTERVAL '60 seconds'
+            RETURNING band_id""", (band_id, challenge_id, _profile_code_digest(challenge_id, code))).fetchone()
+    if not reserved:
+        response = jsonify({'error': 'Please wait 60 seconds before requesting another verification text.'})
+        response.headers['Retry-After'] = '60'
+        return response, 429
     try:
         Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN).messages.create(
             body=f"Your EmpowerBands verification code is {code}. It expires in 10 minutes.",
@@ -5833,29 +5924,41 @@ def profile_request_code():
             to=phone,
         )
     except Exception:
-        app.logger.exception("Profile verification SMS failed")
+        app.logger.error("Profile verification SMS failed")
+        with psycopg.connect(DATABASE_URL) as conn:
+            conn.execute("DELETE FROM profile_verification_challenges WHERE challenge_id=%s", (challenge_id,))
         session.pop('profile_verify', None)
-        return jsonify({'error': 'We could not send the verification text. Please try again.'}), 502
+        return jsonify({'error': 'We could not send the verification text. Please try again or contact support@empowerbands.org.'}), 502
+    # Only an opaque identifier enters the signed browser cookie. Codes, hashes,
+    # attempt counters and expiry remain server-side and cannot be replayed.
+    session['profile_verify'] = challenge_id
     return jsonify({'ok': True, 'message': 'Verification code sent to the phone on this Safety ID.'})
 
 
 @app.route('/api/profile/verify-code', methods=['POST'])
+@_profile_service_errors
 def profile_verify_code():
-    data = request.get_json(silent=True) or {}
-    band_id = (data.get('bandId') or '').strip().upper()
-    code = (data.get('code') or '').strip()
-    state = session.get('profile_verify') or {}
-    if state.get('band_id') != band_id or int(state.get('expires', 0)) < int(time.time()):
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or any(not isinstance(data.get(key), str) for key in ('bandId', 'code')):
+        return jsonify({'error': 'Enter a valid Safety ID and six-digit verification code.'}), 400
+    band_id = data['bandId'].strip().upper()
+    code = data['code'].strip()
+    if not re.fullmatch(r'[A-Z0-9-]{2,64}', band_id) or not re.fullmatch(r'[0-9]{6}', code):
+        return jsonify({'error': 'Enter a valid Safety ID and six-digit verification code.'}), 400
+    challenge_id = session.get('profile_verify')
+    if not isinstance(challenge_id, str):
         session.pop('profile_verify', None)
         return jsonify({'error': 'That verification session expired. Request a new code.'}), 403
-    attempts = int(state.get('attempts', 0)) + 1
-    state['attempts'] = attempts
-    session['profile_verify'] = state
-    if attempts > 5:
-        session.pop('profile_verify', None)
-        return jsonify({'error': 'Too many attempts. Request a new code.'}), 429
-    if not check_password_hash(state.get('code_hash', ''), code):
-        return jsonify({'error': 'Verification code is incorrect.'}), 403
+    with psycopg.connect(DATABASE_URL) as conn:
+        record = conn.execute("""UPDATE profile_verification_challenges SET attempts=attempts+1
+            WHERE band_id=%s AND challenge_id=%s AND expires_at > NOW() AND attempts < 5
+            RETURNING code_hash""", (band_id, challenge_id)).fetchone()
+        if not record:
+            session.pop('profile_verify', None)
+            return jsonify({'error': 'Verification expired or too many attempts. Request a new code.'}), 403
+        if not hmac.compare_digest(record[0], _profile_code_digest(challenge_id, code)):
+            return jsonify({'error': 'Verification code is incorrect.'}), 403
+        conn.execute("DELETE FROM profile_verification_challenges WHERE challenge_id=%s", (challenge_id,))
     session['profile_edit_band_id'] = band_id
     session['profile_edit_expires'] = int(time.time()) + 1800
     session.pop('profile_verify', None)
@@ -5863,6 +5966,7 @@ def profile_verify_code():
 
 
 @app.route('/api/profile/me', methods=['GET', 'PUT'])
+@_profile_service_errors
 def profile_self_service():
     band_id = session.get('profile_edit_band_id')
     if not band_id or int(session.get('profile_edit_expires', 0)) < int(time.time()):
@@ -5882,7 +5986,9 @@ def profile_self_service():
         keys = ['bandId','fullName','email','phone','emergencyContacts','emergencyEmails','ageGroup',
                 'condition','instructions','medicalNotes','address','race','gender','photoUrl']
         return jsonify(dict(zip(keys, [v or '' for v in row])))
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict) or any(not isinstance(value, str) for value in data.values()):
+        return jsonify({'error': 'Profile fields must be text.'}), 400
     photo_url = (data.get('photoUrl') or '').strip()
     if photo_url and not (photo_url.startswith('data:image/jpeg;base64,') or photo_url.startswith('data:image/png;base64,') or photo_url.startswith('data:image/webp;base64,') or re.fullmatch(r'https://[^\s]+', photo_url)):
         return jsonify({'error': 'Profile photo must be a valid image.'}), 400
@@ -5895,10 +6001,20 @@ def profile_self_service():
     email = (data.get('email') or '').strip().lower()
     if email and not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email):
         return jsonify({'error': 'Enter a valid email address or leave it blank.'}), 400
+    emergency_phones = [value.strip() for value in data.get('emergencyContacts', '').split(',') if value.strip()]
+    emergency_emails = [value.strip() for value in data.get('emergencyEmails', '').split(',') if value.strip()]
+    if (len(emergency_phones) > 5 or len(emergency_emails) > 5 or
+            any(not re.fullmatch(r'[+()0-9.\s-]+', value) or not _normalize_us_phone(value) for value in emergency_phones) or
+            any(len(value) > 254 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', value) for value in emergency_emails)):
+        return jsonify({'error': 'Enter up to 5 valid emergency phone numbers and email addresses.'}), 400
+    emergency_contacts = ', '.join(_normalize_us_phone(value) for value in emergency_phones)
+    emergency_emails = ', '.join(value.lower() for value in emergency_emails)
     pin = (data.get('pin') or '').strip()
+    if pin and not re.fullmatch(r'\d{4,8}', pin):
+        return jsonify({'error': 'PIN must be 4–8 digits.'}), 400
     fields = (
-        full_name, email, phone, (data.get('emergencyContacts') or '').strip(),
-        (data.get('emergencyEmails') or '').strip(), (data.get('ageGroup') or '').strip(),
+        full_name, email, phone, emergency_contacts,
+        emergency_emails, (data.get('ageGroup') or '').strip(),
         (data.get('condition') or '').strip(), (data.get('instructions') or '').strip(),
         (data.get('medicalNotes') or '').strip(), (data.get('address') or '').strip(),
         (data.get('race') or '').strip(), (data.get('gender') or '').strip(), photo_url,
@@ -5910,8 +6026,6 @@ def profile_self_service():
                 private_medical_notes=%s,address=%s,race=%s,gender=%s,photo_url=%s,updated_at=CURRENT_TIMESTAMP
                 WHERE UPPER(band_id)=UPPER(%s)""", fields + (band_id,))
             if pin:
-                if not re.fullmatch(r'\d{4,8}', pin):
-                    return jsonify({'error': 'PIN must be 4–8 digits.'}), 400
                 cur.execute("UPDATE members SET pin_hash=%s WHERE UPPER(band_id)=UPPER(%s)",
                             (generate_password_hash(pin), band_id))
         conn.commit()

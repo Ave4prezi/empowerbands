@@ -94,7 +94,9 @@ class MemoryRepository:
         row["code_rotated_at"] = datetime.now(timezone.utc)
         return row["activation_code"]
 
-    def records_for_print(self, band_id="", batch_id=""):
+    def records_for_print(self, band_id="", batch_id="", band_ids=None):
+        if band_ids:
+            return [r for r in self.rows if r["band_id"] in band_ids]
         return [r for r in self.rows if r["band_id"] == band_id or r["batch_id"] == batch_id]
 
 
