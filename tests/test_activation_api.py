@@ -49,7 +49,9 @@ class ActivationApiTests(unittest.TestCase):
         self.client = app_module.app.test_client()
         self.state = {"codes": {}, "members": {}}
         app_module.app.config.update(TESTING=True)
-        app_module.DATABASE_URL = "test-database"
+        database_patch = patch.object(app_module, "DATABASE_URL", "test-database")
+        database_patch.start()
+        self.addCleanup(database_patch.stop)
         self.connect_patch = patch.object(app_module.psycopg, "connect", side_effect=lambda *_a, **_k: FakeConnection(self.state))
         self.connect_patch.start()
 
@@ -59,7 +61,7 @@ class ActivationApiTests(unittest.TestCase):
     @staticmethod
     def payload(band_id="EB019", code="ABCD2345"):
         return {"bandId": band_id, "activationCode": code, "firstName": "Test", "lastName": "Person",
-                "email": "test@example.com", "phone": "555-123-4567", "profileType": "adult"}
+                "email": "test@example.com", "phone": "202-555-0100", "profileType": "adult", "pin": "7391"}
 
     def test_successful_activation_and_reuse_block(self):
         self.state["codes"]["EB019"] = {"code": "ABCD2345", "claimed": False}

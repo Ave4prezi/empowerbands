@@ -1,4 +1,4 @@
-name: Key Finder security checks
+name: Activation readiness checks
 on:
   pull_request:
     paths:
@@ -8,7 +8,13 @@ on:
       - 'templates/key_finder.html'
       - 'app.py'
       - 'scripts/import_key_finder_batch.py'
-      - 'tests/test_key_finder_*.py'
+      - 'tests/test_*.py'
+      - 'activation_manager.py'
+      - 'migrations/*.sql'
+      - 'templates/activate.html'
+      - 'templates/manage_profile.html'
+      - 'static/js/activation-page.js'
+      - 'schema_postgres.sql'
       - '.github/workflows/key-finder-tests.yml'
   workflow_dispatch:
 jobs:
@@ -35,9 +41,10 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run Key Finder security tests
+      - name: Run activation unit and PostgreSQL integration tests
         env:
+          SECRET_KEY: test-only-ci-session-key-not-for-production
           KEY_FINDER_ACTIVATION_PEPPER: test-only-long-key-finder-pepper-not-for-production
           DATABASE_URL: postgresql://keyfinder_test:keyfinder_test_only@localhost:5432/keyfinder_test
         run: |
-          python -m unittest discover -s tests -p 'test_key_finder_*.py' -v
+          python -m unittest discover -s tests -v
