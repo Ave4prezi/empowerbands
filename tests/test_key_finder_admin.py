@@ -62,6 +62,21 @@ class AdminRouteTests(unittest.TestCase):
             self.assertEqual(self.client.post('/admin/key-finders/generate',data={'count':1,'csrf':'csrf-test','request_id':'request-test'}).status_code,409)
         self.assertFalse(any('INSERT INTO key_finder_devices' in c.args[0] for c in db.return_value.__enter__.return_value.execute.call_args_list))
 
+    def test_pet_cards_use_shared_secure_inventory_and_reject_unknown_label(self):
+        self.login()
+        with patch('key_finder_admin.psycopg.connect') as db:
+            invalid = self.client.post('/admin/key-finders/generate', data={
+                'count': '1', 'csrf': 'csrf-test', 'request_id': 'request-test', 'product': 'other'})
+            self.assertEqual(invalid.status_code, 400)
+            db.assert_not_called()
+            db.return_value.__enter__.return_value.execute.return_value.fetchone.return_value = ('request-test',)
+            response = self.client.post('/admin/key-finders/generate', data={
+                'count': '1', 'csrf': 'csrf-test', 'request_id': 'request-test', 'product': 'pet-finder'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Activate your Pet Finder', response.data)
+        self.assertIn(b'/key-finder/account', response.data)
+        self.assertIn(b'no-store', response.headers['Cache-Control'].encode())
+
     def test_generation_stores_hashes_not_codes(self):
         conn=MagicMock(); rows=generate_inventory(conn,4)
         self.assertEqual(len({r[FIELDS[0]] for r in rows}),4)
