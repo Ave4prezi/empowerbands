@@ -2802,6 +2802,7 @@ body{{
 </a>
 
         <a class="add-btn" href="/admin/key-finders">🔑 Key Finder Inventory</a>
+        <a class="add-btn" href="/admin/key-finders?product=pet-finder">🐾 Pet Finder Cards</a>
 
         <a class="add-btn" href="/admin/activation-codes">
             🔐 Activation Codes
