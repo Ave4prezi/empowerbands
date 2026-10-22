@@ -18,7 +18,7 @@ from flask import Blueprint, jsonify, request, session, redirect, render_templat
 
 key_finder_api = Blueprint("key_finder_api", __name__)
 logger = logging.getLogger(__name__)
-SERIAL_RE = re.compile(r"^KF-[A-Z0-9]{8,24}$")
+SERIAL_RE = re.compile(r"^(?:KF|PF)-[A-Z0-9]{8,24}$")
 
 
 def initialize_key_finders():
@@ -40,13 +40,24 @@ def initialize_key_finders():
                     lost BOOLEAN NOT NULL DEFAULT FALSE,
                     activated_at TIMESTAMPTZ,
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                    CONSTRAINT key_finder_serial_format CHECK (serial ~ '^KF-[A-Z0-9]{8,24}$'),
+                    CONSTRAINT key_finder_serial_format CHECK (serial ~ '^(KF|PF)-[A-Z0-9]{8,24}$'),
                     CONSTRAINT key_finder_contact_opt_in CHECK (
                         NOT contact_visible OR public_contact_email IS NOT NULL
                     )
                 )
             """)
             cur.execute("ALTER TABLE key_finder_devices ADD COLUMN IF NOT EXISTS recovery_identifier TEXT")
+            # Widen the original KF-only constraint without changing any serial or code.
+            cur.execute("""DO $$ BEGIN
+                IF EXISTS (SELECT 1 FROM pg_constraint
+                    WHERE conrelid = 'key_finder_devices'::regclass
+                    AND conname = 'key_finder_serial_format'
+                    AND pg_get_constraintdef(oid) NOT LIKE '%PF%') THEN
+                    ALTER TABLE key_finder_devices DROP CONSTRAINT key_finder_serial_format;
+                    ALTER TABLE key_finder_devices ADD CONSTRAINT key_finder_serial_format
+                        CHECK (serial ~ '^(KF|PF)-[A-Z0-9]{8,24}$');
+                END IF;
+            END $$""")
             cur.execute("ALTER TABLE key_finder_devices ADD COLUMN IF NOT EXISTS failed_claims INTEGER NOT NULL DEFAULT 0")
             cur.execute("ALTER TABLE key_finder_devices ADD COLUMN IF NOT EXISTS claim_locked_until TIMESTAMPTZ")
             cur.execute("""CREATE TABLE IF NOT EXISTS key_finder_claim_limits (
@@ -309,7 +320,7 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
 <section class="panel"><div class="panel-head"><span class="step">+</span><h2>Activate a new Key Finder</h2></div>
 <p>Use the serial number and hidden activation code printed on your activation card.</p>
 <form method="post" action="/key-finder/claim"><input type="hidden" name="csrf" value="{{ csrf }}">
-<label for="serial">Activation card serial</label><input id="serial" name="serial" required maxlength="27" autocomplete="off" placeholder="KF-XXXXXXXX">
+<label for="serial">Activation card serial</label><input id="serial" name="serial" required maxlength="27" autocomplete="off" placeholder="KF-XXXXXXXX or PF-XXXXXXXX">
 <label for="activation">Hidden activation code</label><input id="activation" name="activation_code" required maxlength="64" autocomplete="off" placeholder="Enter your 24-character code">
 <button type="submit">Activate Key Finder →</button></form></section></div>
 <div class="section-heading"><div class="eyebrow">Your collection</div><h2>My Key Finders</h2></div>

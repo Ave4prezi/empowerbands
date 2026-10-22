@@ -69,7 +69,9 @@ class KeyFinderDatabaseTests(unittest.TestCase):
         self.assertIsNone(row[0])
 
     def test_five_failed_claims_are_throttled(self):
-        outcomes = [self._claim("B" * 24, "limit@example.test") for _ in range(6)]
+        # KF and PF cases must not share the account-level throttle budget.
+        email = 'limit-' + self.serial.lower() + '@example.test'
+        outcomes = [self._claim("B" * 24, email) for _ in range(6)]
         self.assertEqual(outcomes[:5], [400] * 5)
         self.assertEqual(outcomes[5], 429)
 
@@ -137,6 +139,19 @@ class KeyFinderDatabaseTests(unittest.TestCase):
             import_rows(conn, rows, new, old)
         with patch.dict(os.environ, {"KEY_FINDER_ACTIVATION_PEPPER": new}):
             self.assertEqual(self._claim(self.code, "rotated@example.test"), 303)
+
+
+class PetFinderDatabaseTests(KeyFinderDatabaseTests):
+    def setUp(self):
+        super().setUp()
+        previous = self.serial
+        self.serial = 'PF-' + previous[3:]
+        pepper = os.environ['KEY_FINDER_ACTIVATION_PEPPER']
+        digest = hmac.new(pepper.encode(),
+            ('activation:' + self.serial + ':' + self.code).encode(), hashlib.sha256).hexdigest()
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            conn.execute('UPDATE key_finder_devices SET serial=%s, activation_secret_hash=%s WHERE serial=%s',
+                         (self.serial, digest, previous))
 
 
 if __name__ == "__main__":

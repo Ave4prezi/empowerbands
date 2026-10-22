@@ -83,6 +83,9 @@ class AdminRouteTests(unittest.TestCase):
                 'count': '1', 'csrf': 'csrf-test', 'request_id': 'request-test', 'product': 'pet-finder'})
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Activate your Pet Finder', response.data)
+        inserts = [c for c in db.return_value.__enter__.return_value.execute.call_args_list
+                   if 'INSERT INTO key_finder_devices' in c.args[0]]
+        self.assertTrue(inserts[0].args[1][0].startswith('PF-'))
         self.assertIn(b'/key-finder/account', response.data)
         self.assertIn(b'no-store', response.headers['Cache-Control'].encode())
 
@@ -95,6 +98,24 @@ class AdminRouteTests(unittest.TestCase):
             expected=hmac.new(b'p'*48,f'activation:{serial}:{code}'.encode(),hashlib.sha256).hexdigest()
             self.assertEqual(digest,expected); self.assertNotIn(code,repr(call))
             self.assertEqual(row[FIELDS[2]],RECOVERY_BASE+token)
+
+    def test_pet_batch_can_be_parsed_for_reprint_with_valid_hashes(self):
+        import csv
+        from key_finder_backend import SERIAL_RE
+        from scripts.import_key_finder_batch import SERIAL_RE as IMPORT_SERIAL_RE
+        conn = MagicMock()
+        rows = generate_inventory(conn, 2, 'pet-finder')
+        out = io.StringIO()
+        writer = csv.DictWriter(out, fieldnames=FIELDS)
+        writer.writeheader(); writer.writerows(rows)
+        self.assertEqual(parse_batch(out.getvalue().encode()), rows)
+        for row, call in zip(rows, conn.execute.call_args_list):
+            serial = row[FIELDS[0]]
+            self.assertTrue(serial.startswith('PF-'))
+            self.assertTrue(SERIAL_RE.fullmatch(serial))
+            self.assertTrue(IMPORT_SERIAL_RE.fullmatch(serial))
+            expected = hmac.new(b'p'*48, f'activation:{serial}:{row[FIELDS[3]]}'.encode(), hashlib.sha256).hexdigest()
+            self.assertEqual(call.args[1][2], expected)
 
     def test_upload_validation(self):
         import csv
