@@ -4,17 +4,20 @@
 *{box-sizing:border-box}body{margin:0;background:#f3f7fb;color:#173048;font:16px/1.55 system-ui,sans-serif}main{max-width:1000px;margin:auto;padding:28px 18px 60px}a{color:#09688c}h1{line-height:1.15;margin-bottom:12px}.lead{max-width:760px}.steps{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0}section{background:white;border:1px solid #d3e1ea;border-radius:16px;padding:24px}h2{margin-top:0}label{display:block;font-weight:700;margin:12px 0 6px}input{max-width:100%;padding:12px;border:1px solid #9bb4c6;border-radius:8px;font:inherit}input[type=number]{width:110px}button{display:block;margin-top:18px;padding:13px 19px;background:#086c91;color:white;border:0;border-radius:9px;font:inherit;font-weight:750;cursor:pointer}button:disabled{opacity:.65}.note{padding:16px;border-left:4px solid #ce9117;background:#fff5db}.stats{font-weight:750;color:#0b647c}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:12px;text-align:left;border-bottom:1px solid #dce7ee;overflow-wrap:anywhere}th{background:#eaf1f6}.table-wrap{overflow:auto}small{display:block;color:#466071}input:focus,button:focus,a:focus{outline:3px solid #e8ad2b;outline-offset:3px}@media(max-width:650px){.steps{grid-template-columns:1fr}section{padding:18px}}
 </style></head><body><main>
 <a href="/dashboard">← Back to admin</a>
-<h1>Key Finder Inventory</h1>
+<h1>Key Finder &amp; Pet Finder Cards</h1>
+<p>Choose the name to print on your activation cards. Both use the same secure finder activation and recovery system. Existing serial numbers and activation codes stay paired.</p>
 <p class="lead">Create matching serial numbers, activation codes and NFC links in one step. They are saved to the Key Finder database automatically. Then download the private CSV and print your cards.</p>
 <p class="stats">{{ counts[0] }} total · {{ counts[0] - counts[1] }} available · {{ counts[1] }} activated</p>
 <div class="steps">
 <section><h2>Use your existing batch</h2><p>Already have a private activation CSV? Import it here first. Matching records are verified; activated Key Finders are protected.</p>
 <form method="post" action="/admin/key-finders/import" enctype="multipart/form-data"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="request_id" value="{{ request_id }}">
+<label for="import-product">Card label</label><select id="import-product" name="product"><option value="key-finder">Key Finder</option><option value="pet-finder" {% if product == 'pet-finder' %}selected{% endif %}>Pet Finder</option></select>
 <label for="batch">Private activation CSV</label><input type="file" id="batch" name="batch_csv" accept=".csv,text/csv" required><small>Choose the file containing hidden_activation_code. Maximum 100 records / 64 KB.</small>
 <button type="submit">Import existing batch & print</button></form></section>
 <section><h2>Create a new batch</h2><p>For new, unprogrammed tags. Each row gets a secure serial, hidden activation code and separate recovery link.</p>
 <form method="post" action="/admin/key-finders/generate"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="request_id" value="{{ request_id }}">
-<label for="count">How many Key Finders?</label><input id="count" name="count" type="number" min="1" max="100" value="25" required>
+<label for="generate-product">Card label</label><select id="generate-product" name="product"><option value="key-finder">Key Finder</option><option value="pet-finder" {% if product == 'pet-finder' %}selected{% endif %}>Pet Finder</option></select>
+<label for="count">How many cards?</label><input id="count" name="count" type="number" min="1" max="100" value="25" required>
 <button type="submit">Generate & print cards</button></form></section>
 </div>
 <p class="note"><strong>Keep the CSV private.</strong> Download it on the next screen. Hidden activation codes are shown only on that result screen and cannot be retrieved from the database. You can re-import the saved CSV to print available cards again. Do not generate new codes for tags already programmed from an existing batch.</p>

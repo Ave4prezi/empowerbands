@@ -135,7 +135,13 @@ def parse_batch(raw):
     return rows
 
 
-def _cards(rows, skipped=0):
+def _card_product(value):
+    if value not in ('key-finder', 'pet-finder'):
+        abort(400, 'Choose Key Finder or Pet Finder cards.')
+    return 'Pet Finder' if value == 'pet-finder' else 'Key Finder'
+
+
+def _cards(rows, skipped=0, product_name='Key Finder'):
     output = io.StringIO(newline='')
     writer = csv.DictWriter(output, fieldnames=FIELDS)
     writer.writeheader()
@@ -143,26 +149,29 @@ def _cards(rows, skipped=0):
     qr = io.BytesIO()
     qrcode.make(ACTIVATE_URL).save(qr, format='PNG')
     return render_template('admin_key_finder_cards.html', rows=rows, skipped=skipped,
-        csv_text=output.getvalue(), activate_url=ACTIVATE_URL,
+        csv_text=output.getvalue(), activate_url=ACTIVATE_URL, product_name=product_name,
         qr_data=base64.b64encode(qr.getvalue()).decode())
 
 
 @key_finder_admin.get('/admin/key-finders')
 @admin_required
 def inventory():
+    product = request.args.get('product', 'key-finder')
+    _card_product(product)
     with psycopg.connect(os.environ['DATABASE_URL']) as conn:
         counts = conn.execute('''SELECT COUNT(*), COUNT(*) FILTER (WHERE activated_at IS NOT NULL)
             FROM key_finder_devices''').fetchone()
         devices = conn.execute('''SELECT serial, recovery_identifier, activated_at IS NOT NULL
             FROM key_finder_devices ORDER BY created_at DESC, serial LIMIT 500''').fetchall()
     return render_template('admin_key_finders.html', counts=counts, devices=devices,
-        recovery_base=RECOVERY_BASE, **_form_tokens())
+        recovery_base=RECOVERY_BASE, product=product, **_form_tokens())
 
 
 @key_finder_admin.post('/admin/key-finders/generate')
 @admin_required
 def generate():
     request_id = _require_form()
+    product_name = _card_product(request.form.get('product', 'key-finder'))
     try:
         count = int(request.form.get('count', ''))
     except ValueError:
@@ -172,7 +181,7 @@ def generate():
     with psycopg.connect(os.environ['DATABASE_URL']) as conn:
         _reserve_request(conn, request_id)
         rows = generate_inventory(conn, count)
-        page = _cards(rows)  # Render successfully before committing inventory.
+        page = _cards(rows, product_name=product_name)  # Render before committing inventory.
     session.pop('kf_admin_request', None)
     return page
 
@@ -184,6 +193,7 @@ def import_batch():
     if request.content_length is None or request.content_length > 131072:
         abort(413, 'Choose a CSV smaller than 64 KB.')
     request_id = _require_form()
+    product_name = _card_product(request.form.get('product', 'key-finder'))
     upload = request.files.get('batch_csv')
     if upload is None:
         abort(400, 'Choose your private activation CSV.')
@@ -199,7 +209,7 @@ def import_batch():
                 WHERE serial = ANY(%s) AND activated_at IS NULL FOR UPDATE''',
                 ([r[FIELDS[0]] for r in rows],)).fetchall()}
             printable = [r for r in rows if r[FIELDS[0]] in available]
-            page = _cards(printable, len(rows) - len(printable))
+            page = _cards(printable, len(rows) - len(printable), product_name=product_name)
     except (ValueError, UnicodeError):
         abort(400, 'This CSV could not be verified. No records changed. Check the private file and current activation pepper; existing codes will not be overwritten.')
     session.pop('kf_admin_request', None)
