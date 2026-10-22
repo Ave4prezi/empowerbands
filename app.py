@@ -2228,6 +2228,7 @@ def admin():
             return "Administrator login is not configured.", 503
 
         if hmac.compare_digest(submitted_password, ADMIN_PASSWORD):
+            card_product = session.get('finder_cards_after_login')
             session.clear()
             session["logged_in"] = True
             # Store latest commit SHA at login time so we can detect new changes
@@ -2243,6 +2244,8 @@ def admin():
                 session["last_seen_sha"] = _cc[0]["sha"] if _cc else ""
             except:
                 session["last_seen_sha"] = ""
+            if card_product in ('key-finder', 'pet-finder'):
+                return redirect('/admin/key-finders?product=' + card_product)
             return redirect("/dashboard")
 
         return """

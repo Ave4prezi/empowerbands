@@ -47,6 +47,10 @@ def admin_required(view):
     @wraps(view)
     def guarded(*args, **kwargs):
         if not session.get('logged_in'):
+            # Preserve only known card destinations through administrator sign-in.
+            session['finder_cards_after_login'] = (
+                'pet-finder' if request.values.get('product') == 'pet-finder' else 'key-finder'
+            )
             return redirect('/admin')
         try:
             return view(*args, **kwargs)
