@@ -69,7 +69,9 @@ class KeyFinderDatabaseTests(unittest.TestCase):
         self.assertIsNone(row[0])
 
     def test_five_failed_claims_are_throttled(self):
-        outcomes = [self._claim("B" * 24, "limit@example.test") for _ in range(6)]
+        # KF and PF cases must not share the account-level throttle budget.
+        email = 'limit-' + self.serial.lower() + '@example.test'
+        outcomes = [self._claim("B" * 24, email) for _ in range(6)]
         self.assertEqual(outcomes[:5], [400] * 5)
         self.assertEqual(outcomes[5], 429)
 
