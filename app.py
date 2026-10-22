@@ -5237,6 +5237,51 @@ def blessing_boxes():
 
     <br><br>
 
+    <a href="https://www.google.com/maps/search/?api=1&amp;query=KC+Chevron+115+Shields+Rd+Huntsville+AL+35811"
+       target="_blank" rel="noopener noreferrer"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 KC Chevron — 115 Shields Rd, Huntsville, AL 35811
+    </a>
+
+    <br><br>
+
+    <a href="https://www.google.com/maps/search/?api=1&amp;query=Chevron+904+6th+Ave+NE+Decatur+AL+35601"
+       target="_blank" rel="noopener noreferrer"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 Chevron — 904 6th Ave NE, Decatur, AL 35601
+    </a>
+
+    <br><br>
+
+    <a href="https://www.google.com/maps/search/?api=1&amp;query=Texaco+819+6th+Ave+NE+Decatur+AL+35601"
+       target="_blank" rel="noopener noreferrer"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 Texaco — 819 6th Ave NE, Decatur, AL 35601
+    </a>
+
+    <br><br>
+
+    <a href="https://www.google.com/maps/search/?api=1&amp;query=Chevron+2021+Westmeade+St+SW+Decatur+AL+35601"
+       target="_blank" rel="noopener noreferrer"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 Chevron — 2021 Westmeade St SW, Decatur, AL 35601
+    </a>
+
+    <br><br>
+
+    <a href="https://www.google.com/maps/search/?api=1&amp;query=Mobil+1801+Main+St+E+Hartselle+AL+35640"
+       target="_blank" rel="noopener noreferrer"
+       class="location-badge"
+       style="text-decoration:none;">
+        📦 Mobil — 1801 Main St E, Hartselle, AL 35640
+    </a>
+
+    <br><br>
+
     <p style="font-size:14px;color:#94a3b8;">
         📌 <em>Tap any location above to get directions.</em>
     </p>
