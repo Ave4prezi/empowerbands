@@ -42,6 +42,15 @@ class AdminRouteTests(unittest.TestCase):
                 self.assertEqual(self.client.post('/admin/key-finders/generate',data={'count':count,'csrf':'csrf-test','request_id':'request-test'}).status_code,400)
             db.assert_not_called()
 
+    def test_pet_card_login_preserves_only_known_destination(self):
+        response = self.client.get('/admin/key-finders?product=pet-finder')
+        self.assertEqual(response.location, '/admin')
+        with self.client.session_transaction() as sess:
+            self.assertEqual(sess['finder_cards_after_login'], 'pet-finder')
+        self.client.get('/admin/key-finders?product=https://example.com')
+        with self.client.session_transaction() as sess:
+            self.assertEqual(sess['finder_cards_after_login'], 'key-finder')
+
     def test_generation_returns_matching_cards_and_private_csv_only_once(self):
         self.login(); db = MagicMock(); conn=db.return_value.__enter__.return_value
         conn.execute.return_value.fetchone.return_value=('request-test',)
