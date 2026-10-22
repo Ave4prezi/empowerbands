@@ -100,10 +100,12 @@ def _reserve_request(conn, request_id):
         abort(409, 'This request was already processed. Return to inventory; do not submit it again.')
 
 
-def generate_inventory(conn, count):
+def generate_inventory(conn, count, product='key-finder'):
+    _card_product(product)
+    prefix = 'PF-' if product == 'pet-finder' else 'KF-'
     rows = []
     for _ in range(count):
-        serial = 'KF-' + secrets.token_hex(6).upper()
+        serial = prefix + secrets.token_hex(6).upper()
         token = secrets.token_hex(10).upper()
         code = secrets.token_hex(12).upper()
         conn.execute('''INSERT INTO key_finder_devices
@@ -184,7 +186,7 @@ def generate():
         abort(400, 'Choose a quantity from 1 to 100.')
     with psycopg.connect(os.environ['DATABASE_URL']) as conn:
         _reserve_request(conn, request_id)
-        rows = generate_inventory(conn, count)
+        rows = generate_inventory(conn, count, request.form.get('product', 'key-finder'))
         page = _cards(rows, product_name=product_name)  # Render before committing inventory.
     session.pop('kf_admin_request', None)
     return page

@@ -139,5 +139,18 @@ class KeyFinderDatabaseTests(unittest.TestCase):
             self.assertEqual(self._claim(self.code, "rotated@example.test"), 303)
 
 
+class PetFinderDatabaseTests(KeyFinderDatabaseTests):
+    def setUp(self):
+        super().setUp()
+        previous = self.serial
+        self.serial = 'PF-' + previous[3:]
+        pepper = os.environ['KEY_FINDER_ACTIVATION_PEPPER']
+        digest = hmac.new(pepper.encode(),
+            ('activation:' + self.serial + ':' + self.code).encode(), hashlib.sha256).hexdigest()
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            conn.execute('UPDATE key_finder_devices SET serial=%s, activation_secret_hash=%s WHERE serial=%s',
+                         (self.serial, digest, previous))
+
+
 if __name__ == "__main__":
     unittest.main()

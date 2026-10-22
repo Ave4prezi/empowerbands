@@ -15,7 +15,7 @@ import re
 
 import psycopg
 
-SERIAL_RE = re.compile(r"^KF-[A-Z0-9]{8,24}$")
+SERIAL_RE = re.compile(r"^(?:KF|PF)-[A-Z0-9]{8,24}$")
 RECOVERY_RE = re.compile(r"^[A-Z0-9]{20}$")
 EXPECTED_HOST = "https://empowerbands.org/k/"
 
