@@ -365,7 +365,7 @@ def site_nav_html(active=""):
     {link("/impact-club", "💙 Impact Club", "impact")}
     {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
     {link("/merch", "Shop", "merch")}
-    {link("/guardian-bear", "Guardian Bear", "guardian")}
+    {link("/safety-bear", "Safety Bear", "guardian")}
     {link("/pet-finder", "Pet Finder", "pet")}
     {link("/board-members", "Board", "board")}
     {link("/blessing-boxes", "Blessing Boxes", "blessing")}
@@ -422,7 +422,7 @@ def site_footer_html():
     <div>
         <a href="/traveling-band-movement">Traveling Band Movement</a> |
         <a href="/merch">Shop</a> |
-        <a href="/guardian-bear">Guardian Bear</a> |
+        <a href="/safety-bear">EmpowerBands Safety Bear</a> |
         <a href="/board-members">Board Members</a> |
         <a href="/blessing-boxes">Blessing Boxes</a> |
         <a href="/resources">Support & Resources</a> |
@@ -1893,7 +1893,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <a href="#how">How It Works</a>
         <a href="/sponsor">Sponsor</a>
         <a href="/merch">Shop</a>
-        <a href="/guardian-bear">Guardian Bear</a>
+        <a href="/safety-bear">EmpowerBands Safety Bear</a>
         <a href="/pet-finder">Pet Finder</a>
         <a href="/impact-club">Impact Club</a>
         <a href="/resources">Resources</a>
@@ -1925,8 +1925,8 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 
 <section class="section" aria-labelledby="guardian-bear-title">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:28px;align-items:center;background:#faf5ef;color:#302638;border-radius:22px;padding:clamp(20px,4vw,40px);">
-        <figure style="margin:0;"><a href="/guardian-bear"><img src="/static/images/guardian-bear-concept.webp" alt="Guardian Bear proposed packaging with a gray teddy and NFC tap marker" loading="lazy" width="1312" height="1199" style="display:block;width:100%;height:auto;border-radius:14px;"></a><figcaption style="font-size:12px;color:#6d6270;margin-top:10px;">AI-generated packaging preview · Actual packaging may vary.</figcaption></figure>
-        <div><p style="color:#6b4275;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">Meet Guardian Bear</p><h2 id="guardian-bear-title" style="color:#302638;text-align:left;">A little comfort. A meaningful connection.</h2><p style="color:#6d6270;line-height:1.8;">A soft companion with an embedded NFC Safety ID. Discover how a compatible phone tap connects to a Safety Profile, see April’s actual package photos, and ask about bringing a bear home.</p><a class="btn" style="background:#6b4275;color:white;" href="/guardian-bear">Explore Guardian Bear →</a></div>
+        <figure style="margin:0;"><a href="/safety-bear"><img src="/static/images/guardian-bear-enhanced.webp" alt="Gray EmpowerBands Safety Bear in its gift package" loading="lazy" width="900" height="1200" style="display:block;width:100%;height:auto;border-radius:14px;"></a><figcaption style="font-size:12px;color:#6d6270;margin-top:10px;">AI-enhanced product photo · Colors and packaging may vary.</figcaption></figure>
+        <div><p style="color:#6b4275;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">Meet EmpowerBands Safety Bear</p><h2 id="guardian-bear-title" style="color:#302638;text-align:left;">A little comfort. A meaningful connection.</h2><p style="color:#6d6270;line-height:1.8;">A soft companion with an embedded NFC Safety ID. Discover how a compatible phone tap connects to a Safety Profile, see the packaged bear, and ask about bringing a bear home.</p><a class="btn" style="background:#6b4275;color:white;" href="/safety-bear">Explore EmpowerBands Safety Bear →</a></div>
     </div>
 </section>
 
@@ -2196,6 +2196,7 @@ def band_profile_shortcut(band_id):
     "merch",
     "board-members",
     "guardian-bear",
+    "safety-bear",
     "impact-club",
     "activate",          # ← critical
     "register",
@@ -6790,6 +6791,12 @@ def pet_finder_page():
 
 @app.route("/guardian-bear")
 def guardian_bear_page():
+    """Keep existing product links working after the Safety Bear rename."""
+    return redirect("/safety-bear", code=301)
+
+
+@app.route("/safety-bear")
+def safety_bear_page():
     """Public product information; activation uses the existing Safety ID tools."""
     return render_template("guardian_bear.html")
 
