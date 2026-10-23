@@ -137,7 +137,7 @@ def public_recovery_page(identifier):
             with conn.cursor() as cur:
                 cur.execute("""
                     SELECT activated_at IS NOT NULL, lost, contact_visible,
-                           public_contact_email
+                           public_contact_email, serial
                     FROM key_finder_devices WHERE recovery_identifier = %s
                 """, (identifier,))
                 record = cur.fetchone()
@@ -145,32 +145,35 @@ def public_recovery_page(identifier):
         return "Recovery service temporarily unavailable", 503
     if record is None:
         return "Recovery link not found", 404
-    active, lost, visible, email = record
-    return _recovery_page(active, lost, visible, email)
+    active, lost, visible, email, serial = record
+    product_name = "Pet Finder" if serial.startswith("PF-") else "Key Finder"
+    return _recovery_page(active, lost, visible, email, product_name)
 
 
-def _recovery_page(active, lost, visible, email):
+def _recovery_page(active, lost, visible, email, product_name="Key Finder"):
     return render_template_string("""
         <!doctype html><html lang="en"><meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>EmpowerBands Key Finder Recovery</title>
+        <title>EmpowerBands {{ product_name }} Recovery</title>
         <main style="max-width:38rem;margin:5rem auto;padding:1.5rem;font:1.1rem system-ui">
-        <h1>EmpowerBands Key Finder</h1>
+        <h1>EmpowerBands {{ product_name }}</h1>
         {% if not active %}
-          <p>This Key Finder has not been activated yet.</p>
+          <p>{% if product_name == "Pet Finder" %}Pet Finder not activated.{% else %}This Key Finder has not been activated yet.{% endif %}</p>
         {% elif lost %}
           <p>This item has been reported lost.</p>
         {% else %}
-          <p>You've scanned an EmpowerBands Key Finder.</p>
+          <p>You've scanned an EmpowerBands {{ product_name }}.</p>
         {% endif %}
         {% if active and visible and email %}
           <p>Owner-approved recovery email: <a href="mailto:{{ email|e }}">{{ email|e }}</a></p>
         {% else %}
           <p>No owner contact details are publicly available.</p>
         {% endif %}
-        <p><a href="/key-finder">About EmpowerBands Key Finder</a></p>
+        <p><a href="{{ product_url }}">About EmpowerBands {{ product_name }}</a></p>
         </main></html>
-    """, active=active, lost=lost, visible=visible, email=email)
+    """, active=active, lost=lost, visible=visible, email=email,
+       product_name=product_name,
+       product_url="/pet-finder" if product_name == "Pet Finder" else "/key-finder")
 
 
 @key_finder_api.get("/key-finder/found")
@@ -180,7 +183,8 @@ def found_item_lookup():
     if response.status_code != 200:
         return response
     public = response.get_json()
-    return _recovery_page(True, public["lost"], bool(public["contact_email"]), public["contact_email"])
+    product_name = "Pet Finder" if request.args.get("serial", "").strip().upper().startswith("PF-") else "Key Finder"
+    return _recovery_page(True, public["lost"], bool(public["contact_email"]), public["contact_email"], product_name)
 
 # Customer session is isolated from Safety ID data and never uses serial as a login credential.
 EMAIL_RE = re.compile(r"^[^\s@\\]{1,64}@[^\s@\\]{1,190}\.[^\s@\\]{2,}$")
