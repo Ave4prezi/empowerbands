@@ -86,7 +86,8 @@ class KeyFinderFlowTests(unittest.TestCase):
             for visible in (False, True):
                 for path in ['/k/ABCDEFGH123456789012', '/key-finder/found?serial=KF-12345678', '/api/key-finder/public/KF-12345678']:
                     with self.subTest(active=active, visible=visible, path=path):
-                        db, _ = self.db([(active, True, visible, 'contact@example.com')])
+                        db, _ = self.db([(active, True, visible, 'contact@example.com', 'KF-12345678')]
+                            if path.startswith('/k/') else [(active, True, visible, 'contact@example.com')])
                         with patch.object(k.psycopg, 'connect', db):
                             response = self.client.get(path)
                         self.assertEqual('contact@example.com' in response.get_data(as_text=True), active and visible)
