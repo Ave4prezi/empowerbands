@@ -422,7 +422,7 @@ def site_footer_html():
     <div>
         <a href="/traveling-band-movement">Traveling Band Movement</a> |
         <a href="/merch">Shop</a> |
-        <a href="/safety-bear">EmpowerBands Safety Bear</a> |
+        <a href="/safety-bear">Safety Bear</a> |
         <a href="/board-members">Board Members</a> |
         <a href="/blessing-boxes">Blessing Boxes</a> |
         <a href="/resources">Support & Resources</a> |
@@ -1841,6 +1841,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 .nav a{{font-size:14px;white-space:nowrap;}}
 .top-buttons{{gap:10px;flex-wrap:wrap;}}
 .top-buttons .btn{{padding:11px 15px;font-size:13px;box-shadow:none;}}
+.header .nav a{{min-width:0;white-space:normal;overflow-wrap:anywhere;}}
 .header-brand{{display:block;flex:0 0 210px;}}
 .header-brand img{{display:block;width:210px;height:70px;object-fit:contain;}}
 .hero{{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;padding:36px 6% 44px;align-items:center;}}
@@ -1893,7 +1894,7 @@ html,body{{max-width:100%;overflow-x:hidden;}}
         <a href="#how">How It Works</a>
         <a href="/sponsor">Sponsor</a>
         <a href="/merch">Shop</a>
-        <a href="/safety-bear">EmpowerBands Safety Bear</a>
+        <a href="/safety-bear">Safety Bear</a>
         <a href="/pet-finder">Pet Finder</a>
         <a href="/impact-club">Impact Club</a>
         <a href="/resources">Resources</a>
@@ -1925,8 +1926,8 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 
 <section class="section" aria-labelledby="guardian-bear-title">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:28px;align-items:center;background:#faf5ef;color:#302638;border-radius:22px;padding:clamp(20px,4vw,40px);">
-        <figure style="margin:0;"><a href="/safety-bear"><img src="/static/images/guardian-bear-enhanced.webp" alt="Gray EmpowerBands Safety Bear in its gift package" loading="lazy" width="900" height="1200" style="display:block;width:100%;height:auto;border-radius:14px;"></a><figcaption style="font-size:12px;color:#6d6270;margin-top:10px;">AI-enhanced product photo · Colors and packaging may vary.</figcaption></figure>
-        <div><p style="color:#6b4275;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">Meet EmpowerBands Safety Bear</p><h2 id="guardian-bear-title" style="color:#302638;text-align:left;">A little comfort. A meaningful connection.</h2><p style="color:#6d6270;line-height:1.8;">A soft companion with an embedded NFC Safety ID. Discover how a compatible phone tap connects to a Safety Profile, see the packaged bear, and ask about bringing a bear home.</p><a class="btn" style="background:#6b4275;color:white;" href="/safety-bear">Explore EmpowerBands Safety Bear →</a></div>
+        <figure style="margin:0;"><a href="/safety-bear"><img src="/static/images/safety-bear-packaging.webp" alt="Safety Bear packaging design with gray, purple, and tan bears" loading="lazy" width="1229" height="1536" style="display:block;width:100%;height:auto;border-radius:14px;"></a><figcaption style="font-size:12px;color:#6d6270;margin-top:10px;">Safety Bear packaging design · Colors and final packaging may vary.</figcaption></figure>
+        <div><p style="color:#6b4275;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">Meet Safety Bear</p><h2 id="guardian-bear-title" style="color:#302638;text-align:left;">A little comfort. A meaningful connection.</h2><p style="color:#6d6270;line-height:1.8;">A soft companion with an embedded NFC Safety ID. Discover how a compatible phone tap connects to a Safety Profile, see the packaged bear, and ask about bringing a bear home.</p><a class="btn" style="background:#6b4275;color:white;" href="/safety-bear">Explore Safety Bear →</a></div>
     </div>
 </section>
 
