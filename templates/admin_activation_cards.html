@@ -48,7 +48,7 @@
   </style>
 </head>
 <body>
-  <div class="toolbar"><a href="{{ url_for('activation_manager.activation_codes_index') }}">Back</a><button onclick="window.print()">Print / Preview {{ cards|length }} card{{ '' if cards|length == 1 else 's' }}</button></div>
+  <div class="toolbar"><a href="{{ url_for('activation_manager.activation_codes_index') }}">Back</a><button onclick="window.print()">Print / Preview {{ cards|length }} card{{ '' if cards|length == 1 else 's' }}</button><a href="{{ url_for('activation_manager.activation_codes_print', design='safety-bear', band_ids=cards|map(attribute='band_id')|list) }}">Safety Bear style</a></div>
   <main class="sheet">
   {% for card in cards %}
     <article class="card">

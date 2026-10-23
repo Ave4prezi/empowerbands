@@ -109,6 +109,7 @@
       </form>
       {% if request.args.get('batch') %}
         <a class="button secondary" style="margin-top:10px" href="{{ url_for('activation_manager.activation_codes_print', batch=request.args.get('batch')) }}">Print newly generated batch</a>
+        <a class="button secondary" style="margin-top:10px" href="{{ url_for('activation_manager.activation_codes_print', batch=request.args.get('batch'), design='safety-bear') }}">Print batch as Safety Bear cards</a>
       {% endif %}
     </div>
   </section>
@@ -127,6 +128,7 @@
   <div class="inventory-head">
     <h2>Inventory ({{ records|length }})</h2>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <label for="card-design">Card design</label><select id="card-design" style="width:auto"><option value="standard">Standard Safety ID</option><option value="safety-bear">Safety Bear · front + back</option></select>
       <button id="print-selected" type="button" style="width:auto;min-height:40px">Print Selected Cards</button>
       <a class="button secondary" href="{{ url_for('activation_manager.activation_codes_export', q=query, status=status, store=store) }}">Download CSV</a>
     </div>
@@ -149,6 +151,7 @@
           {% if not row.claimed %}
           <div class="row-actions">
             <a class="print-link" href="{{ url_for('activation_manager.activation_codes_print', band_id=row.band_id) }}">Print card</a>
+            <a class="print-link" href="{{ url_for('activation_manager.activation_codes_print', band_id=row.band_id, design='safety-bear') }}">Print Safety Bear card</a>
             <form method="post" action="{{ url_for('activation_manager.activation_codes_assign') }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="band_id" value="{{ row.band_id }}">
               <label>Store assignment</label><input name="assigned_to" maxlength="160" value="{{ row.assigned_to or '' }}" placeholder="Store or organization">
@@ -184,6 +187,7 @@
       return;
     }
     const params = new URLSearchParams();
+    params.set("design", document.getElementById("card-design").value);
     selected.forEach(function (id) { params.append('band_ids', id); });
     window.location.href = "{{ url_for('activation_manager.activation_codes_print') }}?" + params.toString();
   });

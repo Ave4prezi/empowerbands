@@ -542,11 +542,12 @@ def register_activation_manager(
                 "manage_profile_url": manage_profile_url,
                 "manage_profile_qr_data": manage_profile_qr_data,
             })
-        return render_template(
-            "admin_activation_cards.html",
-            cards=cards,
-            logo_url=logo_url,
+        template = (
+            "admin_safety_bear_cards.html"
+            if request.args.get("design") == "safety-bear"
+            else "admin_activation_cards.html"
         )
+        return render_template(template, cards=cards, logo_url=logo_url)
 
     app.register_blueprint(blueprint)
     app.jinja_env.globals["activation_manager_csrf_token"] = csrf_token
