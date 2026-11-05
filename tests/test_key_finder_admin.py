@@ -226,8 +226,41 @@ class AdminDatabaseTests(unittest.TestCase):
 
     def tearDown(self):
         with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            conn.execute('DELETE FROM key_finder_preprogramming WHERE serial=ANY(%s)',(self.serials,))
             conn.execute('DELETE FROM key_finder_devices WHERE serial=ANY(%s)',(self.serials,))
             conn.execute('DELETE FROM key_finder_admin_requests WHERE request_id=ANY(%s)',(self.request_ids,))
+
+    def test_preprogram_persists_only_staging_data_and_blocks_activated_devices(self):
+        # Run on disposable CI PostgreSQL only, never a live inventory database.
+        fields = self.tokens()
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            row = generate_inventory(conn, 1, 'pet-finder')[0]
+            serial = row[FIELDS[0]]
+            self.serials = [serial]
+            before = conn.execute('''SELECT serial, recovery_identifier, activation_secret_hash,
+                owner_email, activated_at FROM key_finder_devices WHERE serial=%s''',
+                (serial,)).fetchone()
+        response = self.client.post('/admin/key-finders/preprogram', data={
+            'csrf': fields['csrf'], 'serial': serial, 'admin_label': 'Pet demo',
+            'admin_notes': 'NFC linked to supplied recovery URL'})
+        self.assertEqual(response.status_code, 303)
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            after = conn.execute('''SELECT serial, recovery_identifier, activation_secret_hash,
+                owner_email, activated_at FROM key_finder_devices WHERE serial=%s''',
+                (serial,)).fetchone()
+            staged = conn.execute('''SELECT admin_label, admin_notes
+                FROM key_finder_preprogramming WHERE serial=%s''', (serial,)).fetchone()
+            self.assertEqual(before, after)
+            self.assertEqual(staged, ('Pet demo', 'NFC linked to supplied recovery URL'))
+            conn.execute('''UPDATE key_finder_devices SET activated_at=NOW(),
+                owner_email=%s WHERE serial=%s''', ('owner@example.test', serial))
+        blocked = self.client.post('/admin/key-finders/preprogram', data={
+            'csrf': fields['csrf'], 'serial': serial, 'admin_label': 'Take over'})
+        self.assertEqual(blocked.status_code, 409)
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            saved = conn.execute('''SELECT admin_label FROM key_finder_preprogramming
+                WHERE serial=%s''', (serial,)).fetchone()
+            self.assertEqual(saved, ('Pet demo',))
 
     def test_generated_inventory_can_be_claimed_and_replay_is_blocked(self):
         import json,re
