@@ -151,6 +151,60 @@ class AdminRouteTests(unittest.TestCase):
         self.assertIs(db.return_value.__exit__.call_args.args[0],ValueError)
 
 
+    def test_preprogram_requires_admin_and_csrf_without_database_writes(self):
+        with patch('key_finder_admin.psycopg.connect') as db:
+            response = self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'csrf-test', 'admin_label': 'Prepared'})
+            self.assertEqual(response.status_code, 302)
+            self.login()
+            self.assertEqual(self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'wrong'}).status_code, 403)
+            self.assertEqual(self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'bad', 'csrf': 'csrf-test'}).status_code, 400)
+            db.assert_not_called()
+
+    def test_serial_search_returns_single_inventory_record_without_writes(self):
+        self.login()
+        with patch('key_finder_admin.psycopg.connect') as db:
+            conn = db.return_value.__enter__.return_value
+            conn.execute.return_value.fetchone.side_effect = [(281, 3),
+                ('PF-12345678', 'A' * 20, False, 'Pet collar', 'Ready')]
+            conn.execute.return_value.fetchall.return_value = []
+            response = self.client.get('/admin/key-finders?serial=PF-12345678')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Pet collar', response.data)
+        self.assertIn(b'PF-12345678', response.data)
+        self.assertFalse(any('UPDATE ' in c.args[0] or 'INSERT ' in c.args[0]
+                             for c in conn.execute.call_args_list))
+
+    def test_preprogram_refuses_activated_device_without_writes(self):
+        self.login()
+        with patch('key_finder_admin.psycopg.connect') as db:
+            conn = db.return_value.__enter__.return_value
+            from datetime import datetime, timezone
+            conn.execute.return_value.fetchone.return_value = (datetime.now(timezone.utc),)
+            response = self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'csrf-test', 'admin_label': 'Change'})
+        self.assertEqual(response.status_code, 409)
+        self.assertFalse(any('INSERT INTO key_finder_preprogramming' in c.args[0]
+                             for c in conn.execute.call_args_list))
+
+    def test_preprogram_only_writes_staging_table(self):
+        self.login()
+        with patch('key_finder_admin.psycopg.connect') as db:
+            conn = db.return_value.__enter__.return_value
+            conn.execute.return_value.fetchone.return_value = (None,)
+            response = self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'csrf-test',
+                'admin_label': 'Demo set', 'admin_notes': 'Tag programmed'})
+        self.assertEqual(response.status_code, 303)
+        statements = [c.args[0] for c in conn.execute.call_args_list]
+        self.assertEqual(len(statements), 2)
+        self.assertIn('FOR UPDATE', statements[0])
+        self.assertIn('INSERT INTO key_finder_preprogramming', statements[1])
+        self.assertNotIn('UPDATE key_finder_devices', ' '.join(statements))
+
+
 class AdminDatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -172,8 +226,41 @@ class AdminDatabaseTests(unittest.TestCase):
 
     def tearDown(self):
         with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            conn.execute('DELETE FROM key_finder_preprogramming WHERE serial=ANY(%s)',(self.serials,))
             conn.execute('DELETE FROM key_finder_devices WHERE serial=ANY(%s)',(self.serials,))
             conn.execute('DELETE FROM key_finder_admin_requests WHERE request_id=ANY(%s)',(self.request_ids,))
+
+    def test_preprogram_persists_only_staging_data_and_blocks_activated_devices(self):
+        # Run on disposable CI PostgreSQL only, never a live inventory database.
+        fields = self.tokens()
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            row = generate_inventory(conn, 1, 'pet-finder')[0]
+            serial = row[FIELDS[0]]
+            self.serials = [serial]
+            before = conn.execute('''SELECT serial, recovery_identifier, activation_secret_hash,
+                owner_email, activated_at FROM key_finder_devices WHERE serial=%s''',
+                (serial,)).fetchone()
+        response = self.client.post('/admin/key-finders/preprogram', data={
+            'csrf': fields['csrf'], 'serial': serial, 'admin_label': 'Pet demo',
+            'admin_notes': 'NFC linked to supplied recovery URL'})
+        self.assertEqual(response.status_code, 303)
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            after = conn.execute('''SELECT serial, recovery_identifier, activation_secret_hash,
+                owner_email, activated_at FROM key_finder_devices WHERE serial=%s''',
+                (serial,)).fetchone()
+            staged = conn.execute('''SELECT admin_label, admin_notes
+                FROM key_finder_preprogramming WHERE serial=%s''', (serial,)).fetchone()
+            self.assertEqual(before, after)
+            self.assertEqual(staged, ('Pet demo', 'NFC linked to supplied recovery URL'))
+            conn.execute('''UPDATE key_finder_devices SET activated_at=NOW(),
+                owner_email=%s WHERE serial=%s''', ('owner@example.test', serial))
+        blocked = self.client.post('/admin/key-finders/preprogram', data={
+            'csrf': fields['csrf'], 'serial': serial, 'admin_label': 'Take over'})
+        self.assertEqual(blocked.status_code, 409)
+        with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+            saved = conn.execute('''SELECT admin_label FROM key_finder_preprogramming
+                WHERE serial=%s''', (serial,)).fetchone()
+            self.assertEqual(saved, ('Pet demo',))
 
     def test_generated_inventory_can_be_claimed_and_replay_is_blocked(self):
         import json,re
