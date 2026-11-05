@@ -21,6 +21,35 @@
 <button type="submit">Generate & print cards</button></form></section>
 </div>
 <p class="note"><strong>Keep the CSV private.</strong> Download it on the next screen. Hidden activation codes are shown only on that result screen and cannot be retrieved from the database. You can re-import the saved CSV to print available cards again. Do not generate new codes for tags already programmed from an existing batch.</p>
+<section id="finder-lookup"><h2>Search &amp; preprogram a device</h2>
+<p>Enter an existing Key Finder or Pet Finder serial. This is an administrator-only staging area; saving notes does not activate the device or change its NFC recovery link.</p>
+<form method="get" action="/admin/key-finders">
+<label for="lookup-serial">Activation card serial number</label>
+<input id="lookup-serial" name="serial" value="{{ search_serial }}" placeholder="KF-0189C1125193" maxlength="27" autocomplete="off" required>
+<button type="submit">Search inventory</button></form>
+{% if search_serial %}
+{% if match %}
+<h3>{{ 'Pet Finder' if match[0].startswith('PF-') else 'Key Finder' }} · {{ match[0] }}</h3>
+<p><strong>Status:</strong> {{ 'Activated — protected' if match[2] else 'Available for preprogramming' }}</p>
+<p><strong>NFC recovery link:</strong>
+{% if match[1] %}<a href="{{ recovery_base }}{{ match[1] }}" target="_blank" rel="noopener noreferrer">{{ recovery_base }}{{ match[1] }}</a>
+{% else %}Missing — verify the original private activation CSV first{% endif %}</p>
+{% if match[2] %}<p class="note">This device has been claimed. Preprogramming is locked; its owner manages public recovery information in their account.</p>
+{% else %}
+{% if saved %}<p role="status"><strong>Preprogramming details saved.</strong> Device remains unactivated.</p>{% endif %}
+<form method="post" action="/admin/key-finders/preprogram">
+<input type="hidden" name="csrf" value="{{ csrf }}">
+<input type="hidden" name="serial" value="{{ match[0] }}">
+<label for="admin-label">Internal item label</label>
+<input id="admin-label" name="admin_label" maxlength="80" value="{{ match[3] }}" placeholder="Example: Pet collar / set 12">
+<label for="admin-notes">Internal preparation notes (not public)</label>
+<textarea id="admin-notes" name="admin_notes" maxlength="500" rows="3" style="display:block;width:100%;max-width:620px;padding:12px;border:1px solid #9bb4c6;border-radius:8px;font:inherit">{{ match[4] }}</textarea>
+<small>Do not enter customer medical details, passwords, activation codes, or sensitive owner information here. Program the physical NFC tag with the recovery link above, not the hidden activation code.</small>
+<button type="submit">Save preprogramming details</button></form>
+{% endif %}
+{% else %}<p role="status">No device found with that serial number. Existing inventory was not changed.</p>{% endif %}
+{% endif %}
+</section>
 <section><h2>Your inventory</h2><p>Use the recovery link from the same CSV row when programming each NFC tag. Keep each matching tag and activation card together. Hidden codes are never written to the tag.</p>
 {% if devices %}<div class="table-wrap"><table><thead><tr><th>Activation serial</th><th>Status</th><th>NFC recovery link</th></tr></thead><tbody>{% for d in devices %}<tr><td>{{ d[0] }}</td><td>{{ 'Activated — protected' if d[2] else 'Available' }}</td><td>{% if d[1] %}<a href="{{ recovery_base }}{{ d[1] }}" target="_blank" rel="noopener noreferrer">{{ recovery_base }}{{ d[1] }}</a>{% else %}Missing — import verified private CSV{% endif %}</td></tr>{% endfor %}</tbody></table></div><small>Showing the latest 500 records.</small>{% else %}<p>No Key Finders are registered yet. Import your existing CSV or generate your first batch above.</p>{% endif %}
 </section>
