@@ -41,6 +41,13 @@ def initialize_key_finder_admin():
         conn.execute('''CREATE TABLE IF NOT EXISTS key_finder_admin_requests (
             request_id TEXT PRIMARY KEY, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )''')
+        # Separate admin staging table: never update activation codes or device ownership.
+        conn.execute('''CREATE TABLE IF NOT EXISTS key_finder_preprogramming (
+            serial TEXT PRIMARY KEY REFERENCES key_finder_devices(serial),
+            admin_label TEXT NOT NULL DEFAULT '',
+            admin_notes TEXT NOT NULL DEFAULT '',
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )''')
 
 
 def admin_required(view):
@@ -164,13 +171,57 @@ def _cards(rows, skipped=0, product_name='Key Finder'):
 def inventory():
     product = request.args.get('product', 'key-finder')
     _card_product(product)
+    search_serial = request.args.get('serial', '').strip().upper()
+    if search_serial and not SERIAL_RE.fullmatch(search_serial):
+        abort(400, 'Enter a valid KF- or PF- activation serial number.')
     with psycopg.connect(os.environ['DATABASE_URL']) as conn:
         counts = conn.execute('''SELECT COUNT(*), COUNT(*) FILTER (WHERE activated_at IS NOT NULL)
             FROM key_finder_devices''').fetchone()
         devices = conn.execute('''SELECT serial, recovery_identifier, activated_at IS NOT NULL
             FROM key_finder_devices ORDER BY created_at DESC, serial LIMIT 500''').fetchall()
+        match = None
+        if search_serial:
+            match = conn.execute('''SELECT d.serial, d.recovery_identifier,
+                d.activated_at IS NOT NULL, COALESCE(p.admin_label, ''),
+                COALESCE(p.admin_notes, '')
+                FROM key_finder_devices d
+                LEFT JOIN key_finder_preprogramming p ON p.serial = d.serial
+                WHERE d.serial = %s''', (search_serial,)).fetchone()
     return render_template('admin_key_finders.html', counts=counts, devices=devices,
-        recovery_base=RECOVERY_BASE, product=product, **_form_tokens())
+        recovery_base=RECOVERY_BASE, product=product, search_serial=search_serial,
+        match=match, saved=request.args.get('saved') == '1', **_form_tokens())
+
+
+@key_finder_admin.post('/admin/key-finders/preprogram')
+@admin_required
+def preprogram():
+    # This action must never activate, claim, or modify recovery identifiers/codes.
+    submitted = request.form.get('csrf', '')
+    expected = session.get('kf_admin_csrf', '')
+    if not submitted or not expected or not secrets.compare_digest(submitted, expected):
+        abort(403, 'Invalid or expired form.')
+    serial = request.form.get('serial', '').strip().upper()
+    if not SERIAL_RE.fullmatch(serial):
+        abort(400, 'Invalid device serial.')
+    label = request.form.get('admin_label', '').strip()
+    notes = request.form.get('admin_notes', '').strip()
+    if len(label) > 80 or len(notes) > 500:
+        abort(400, 'Label or notes are too long.')
+    with psycopg.connect(os.environ['DATABASE_URL']) as conn:
+        # Lock the device until the staging save commits, preventing a claim race.
+        device = conn.execute('''SELECT activated_at FROM key_finder_devices
+            WHERE serial = %s FOR UPDATE''', (serial,)).fetchone()
+        if not device:
+            abort(404, 'Device not found.')
+        if device[0] is not None:
+            abort(409, 'Activated devices cannot be preprogrammed.')
+        conn.execute('''INSERT INTO key_finder_preprogramming
+            (serial, admin_label, admin_notes) VALUES (%s, %s, %s)
+            ON CONFLICT (serial) DO UPDATE SET
+            admin_label = EXCLUDED.admin_label,
+            admin_notes = EXCLUDED.admin_notes, updated_at = NOW()''',
+            (serial, label, notes))
+    return redirect('/admin/key-finders?serial=' + serial + '&saved=1', code=303)
 
 
 @key_finder_admin.post('/admin/key-finders/generate')
