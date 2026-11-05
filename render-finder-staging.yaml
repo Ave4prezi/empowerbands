@@ -1,0 +1,31 @@
+# Temporary, isolated finder staging. Never point at production DATABASE_URL.
+# This file lives on an infrastructure-only branch, not the live main branch.
+services:
+  - type: web
+    name: empowerbands-finder-staging-2026
+    runtime: python
+    repo: https://github.com/Ave4prezi/empowerbands
+    branch: infra/empowerbands-finder-staging-2026
+    region: virginia
+    plan: free
+    autoDeployTrigger: off
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: empowerbands-finder-staging-db-2026
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: KEY_FINDER_ACTIVATION_PEPPER
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+
+databases:
+  - name: empowerbands-finder-staging-db-2026
+    databaseName: empowerbands_finder_staging
+    plan: free
+    region: virginia
+    ipAllowList: []
