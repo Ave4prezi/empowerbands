@@ -151,6 +151,60 @@ class AdminRouteTests(unittest.TestCase):
         self.assertIs(db.return_value.__exit__.call_args.args[0],ValueError)
 
 
+    def test_preprogram_requires_admin_and_csrf_without_database_writes(self):
+        with patch('key_finder_admin.psycopg.connect') as db:
+            response = self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'csrf-test', 'admin_label': 'Prepared'})
+            self.assertEqual(response.status_code, 302)
+            self.login()
+            self.assertEqual(self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'wrong'}).status_code, 403)
+            self.assertEqual(self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'bad', 'csrf': 'csrf-test'}).status_code, 400)
+            db.assert_not_called()
+
+    def test_serial_search_returns_single_inventory_record_without_writes(self):
+        self.login()
+        with patch('key_finder_admin.psycopg.connect') as db:
+            conn = db.return_value.__enter__.return_value
+            conn.execute.return_value.fetchone.side_effect = [(281, 3),
+                ('PF-12345678', 'A' * 20, False, 'Pet collar', 'Ready')]
+            conn.execute.return_value.fetchall.return_value = []
+            response = self.client.get('/admin/key-finders?serial=PF-12345678')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Pet collar', response.data)
+        self.assertIn(b'PF-12345678', response.data)
+        self.assertFalse(any('UPDATE ' in c.args[0] or 'INSERT ' in c.args[0]
+                             for c in conn.execute.call_args_list))
+
+    def test_preprogram_refuses_activated_device_without_writes(self):
+        self.login()
+        with patch('key_finder_admin.psycopg.connect') as db:
+            conn = db.return_value.__enter__.return_value
+            from datetime import datetime, timezone
+            conn.execute.return_value.fetchone.return_value = (datetime.now(timezone.utc),)
+            response = self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'csrf-test', 'admin_label': 'Change'})
+        self.assertEqual(response.status_code, 409)
+        self.assertFalse(any('INSERT INTO key_finder_preprogramming' in c.args[0]
+                             for c in conn.execute.call_args_list))
+
+    def test_preprogram_only_writes_staging_table(self):
+        self.login()
+        with patch('key_finder_admin.psycopg.connect') as db:
+            conn = db.return_value.__enter__.return_value
+            conn.execute.return_value.fetchone.return_value = (None,)
+            response = self.client.post('/admin/key-finders/preprogram', data={
+                'serial': 'KF-12345678', 'csrf': 'csrf-test',
+                'admin_label': 'Demo set', 'admin_notes': 'Tag programmed'})
+        self.assertEqual(response.status_code, 303)
+        statements = [c.args[0] for c in conn.execute.call_args_list]
+        self.assertEqual(len(statements), 2)
+        self.assertIn('FOR UPDATE', statements[0])
+        self.assertIn('INSERT INTO key_finder_preprogramming', statements[1])
+        self.assertNotIn('UPDATE key_finder_devices', ' '.join(statements))
+
+
 class AdminDatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
