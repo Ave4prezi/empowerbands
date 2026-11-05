@@ -365,6 +365,7 @@ def site_nav_html(active=""):
     {link("/impact-club", "💙 Impact Club", "impact")}
     {link("/traveling-band-movement", "Traveling Band Movement", "travel")}
     {link("/merch", "Shop", "merch")}
+    {link("/#product-locations", "Find Our Products", "locations")}
     {link("/safety-bear", "Safety Bear", "guardian")}
     {link("/pet-finder", "Pet Finder", "pet")}
     {link("/board-members", "Board", "board")}
@@ -404,6 +405,38 @@ def site_nav_html(active=""):
     .site-header{{flex-direction:column;align-items:flex-start;}}
     .site-nav{{gap:14px;}}
 }}
+</style>
+"""
+
+
+def product_locations_html():
+    """Retail stockists, separate from the community Blessing Box program."""
+    return """
+<section id="product-locations" class="retail-locations" aria-labelledby="product-locations-title">
+    <h2 id="product-locations-title">🛍️ Where to Find Our Products</h2>
+    <p>Shop our products inside these local stores. Product selection and availability may vary by location.</p>
+    <p>Products sold by Future Safety Innovations LLC.</p>
+    <ul class="retail-location-list">
+        <li><a href="https://www.google.com/maps/search/Cowboys+1605+Main+St+E+Hartselle+AL+35640" target="_blank" rel="noopener noreferrer">Cowboys — 1605 Main St E, Hartselle, AL</a></li>
+        <li><a href="https://www.google.com/maps/search/Anna%27s+Thrift+Store+1806+11th+St+SE+Decatur+AL+35601" target="_blank" rel="noopener noreferrer">Anna’s Thrift Store — 1806 11th St SE, Decatur, AL 35601</a></li>
+        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=KC+Chevron+115+Shields+Rd+Huntsville+AL+35811" target="_blank" rel="noopener noreferrer">KC Chevron — 115 Shields Rd, Huntsville, AL 35811</a></li>
+        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Chevron+904+6th+Ave+NE+Decatur+AL+35601" target="_blank" rel="noopener noreferrer">Chevron — 904 6th Ave NE, Decatur, AL 35601</a></li>
+        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Texaco+819+6th+Ave+NE+Decatur+AL+35601" target="_blank" rel="noopener noreferrer">Texaco — 819 6th Ave NE, Decatur, AL 35601</a></li>
+        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Chevron+2021+Westmeade+St+SW+Decatur+AL+35601" target="_blank" rel="noopener noreferrer">Chevron — 2021 Westmeade St SW, Decatur, AL 35601</a></li>
+        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Mobil+1801+Main+St+E+Hartselle+AL+35640" target="_blank" rel="noopener noreferrer">Mobil — 1801 Main St E, Hartselle, AL 35640</a></li>
+    </ul>
+    <p class="retail-directions">Tap any store above to get directions.</p>
+</section>
+<style>
+.retail-locations{box-sizing:border-box;margin:24px 0;padding:28px;background:rgba(255,255,255,0.07);border:1px solid rgba(103,232,249,0.3);border-radius:20px;}
+.retail-locations h2{color:#67e8f9;font-size:24px;margin:0 0 14px;}
+.retail-locations p{color:#cbd5e1;font-size:15px;line-height:1.7;margin:0 0 12px;}
+.retail-location-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px;list-style:none;padding:0!important;margin:20px 0!important;}
+.retail-location-list li{margin:0;min-width:0;}
+.retail-location-list a{box-sizing:border-box;display:block;height:100%;padding:15px 16px;background:rgba(14,165,233,0.18);border:1px solid rgba(103,232,249,0.3);border-radius:12px;color:#e0f2fe;text-decoration:none;line-height:1.6;overflow-wrap:anywhere;}
+.retail-location-list a:hover,.retail-location-list a:focus-visible{background:rgba(14,165,233,0.3);outline:2px solid #67e8f9;outline-offset:3px;}
+.retail-locations .retail-directions{color:#94a3b8;font-size:14px;margin:0;}
+@media(max-width:560px){.retail-locations{padding:22px 18px;}.retail-locations h2{font-size:22px;}}
 </style>
 """
 
@@ -1978,6 +2011,10 @@ html,body{{max-width:100%;overflow-x:hidden;}}
 <li><span class="step-number">3</span><h3>Tap or scan</h3><p>Use a compatible NFC phone or the QR code to open the profile. Keep contact details current.</p></li>
 </ol><div class="setup-actions"><a class="btn" href="/activate">Activate my Safety ID</a><a class="btn dark" href="/manage-profile">Manage my profile</a></div>
 </section>
+
+<div class="section">
+    {product_locations_html()}
+</div>
 
 <section id="about" class="section">
     <h2>About Us</h2>
@@ -5205,97 +5242,26 @@ def blessing_boxes():
         </figure>
     </section>
 
-    <!-- WHERE ARE THE BOXES -->
-<div class="card" style="margin-top:20px;">
-    <h2>📍 Where to Find a Box</h2>
-    <p>We currently have Blessing Boxes set up at:</p>
-
+    <!-- BLESSING BOX LOCATIONS -->
+<div class="card" id="blessing-box-locations" style="margin-top:20px;">
+    <h2>📍 Where to Find a Blessing Box</h2>
+    <p>Free community essentials are available at these two Blessing Box locations:</p>
     <br>
-
-    <a href="https://www.google.com/maps/search/The+Spotted+Ladybug+Hartselle+AL"
-       target="_blank"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 The Spotted Ladybug — Downtown Hartselle, AL
-    </a>
-
+    <a href="https://www.google.com/maps/search/The+Spotted+Ladybug+Hartselle+AL" target="_blank" rel="noopener noreferrer"
+       class="location-badge" style="text-decoration:none;">📦 The Spotted Ladybug — Downtown Hartselle, AL</a>
     <br><br>
 
-    <a href="https://www.google.com/maps/search/Cowboys+1605+Main+St+E+Hartselle+AL+35640"
-       target="_blank"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 Cowboys — 1605 Main St E, Hartselle, AL
-    </a>
-
+    <a href="https://www.google.com/maps/search/Cowboys+1605+Main+St+E+Hartselle+AL+35640" target="_blank" rel="noopener noreferrer"
+       class="location-badge" style="text-decoration:none;">📦 Cowboys — 1605 Main St E, Hartselle, AL</a>
     <br><br>
-
-    <a href="https://www.google.com/maps/search/Anna%27s+Thrift+Store+1806+11th+St+SE+Decatur+AL+35601"
-       target="_blank"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 Anna’s Thrift Store — 1806 11th St SE, Decatur, AL 35601
-    </a>
-
-    <br><br>
-
-    <a href="https://www.google.com/maps/search/?api=1&amp;query=KC+Chevron+115+Shields+Rd+Huntsville+AL+35811"
-       target="_blank" rel="noopener noreferrer"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 KC Chevron — 115 Shields Rd, Huntsville, AL 35811
-    </a>
-
-    <br><br>
-
-    <a href="https://www.google.com/maps/search/?api=1&amp;query=Chevron+904+6th+Ave+NE+Decatur+AL+35601"
-       target="_blank" rel="noopener noreferrer"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 Chevron — 904 6th Ave NE, Decatur, AL 35601
-    </a>
-
-    <br><br>
-
-    <a href="https://www.google.com/maps/search/?api=1&amp;query=Texaco+819+6th+Ave+NE+Decatur+AL+35601"
-       target="_blank" rel="noopener noreferrer"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 Texaco — 819 6th Ave NE, Decatur, AL 35601
-    </a>
-
-    <br><br>
-
-    <a href="https://www.google.com/maps/search/?api=1&amp;query=Chevron+2021+Westmeade+St+SW+Decatur+AL+35601"
-       target="_blank" rel="noopener noreferrer"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 Chevron — 2021 Westmeade St SW, Decatur, AL 35601
-    </a>
-
-    <br><br>
-
-    <a href="https://www.google.com/maps/search/?api=1&amp;query=Mobil+1801+Main+St+E+Hartselle+AL+35640"
-       target="_blank" rel="noopener noreferrer"
-       class="location-badge"
-       style="text-decoration:none;">
-        📦 Mobil — 1801 Main St E, Hartselle, AL 35640
-    </a>
-
-    <br><br>
-
-    <p style="font-size:14px;color:#94a3b8;">
-        📌 <em>Tap any location above to get directions.</em>
-    </p>
-
+    <p style="font-size:14px;color:#94a3b8;"><em>Tap a location above to get directions.</em></p>
     <br>
-
-    <p>
-        We are actively looking to partner with additional local businesses to host
+    <p>We are actively looking to partner with additional local businesses to host
         Blessing Boxes throughout the community. If you own or manage a business and
-        would like to host a box, see the partnership section below.
-    </p>
+        would like to host a box, see the partnership section below.</p>
 </div>
+
+    {product_locations_html()}
 
     <!-- WHAT'S NEEDED -->
     <div class="card">
