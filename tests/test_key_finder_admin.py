@@ -86,7 +86,7 @@ class AdminRouteTests(unittest.TestCase):
         inserts = [c for c in db.return_value.__enter__.return_value.execute.call_args_list
                    if 'INSERT INTO key_finder_devices' in c.args[0]]
         self.assertTrue(inserts[0].args[1][0].startswith('PF-'))
-        self.assertIn(b'/key-finder/account', response.data)
+        self.assertIn(b'/pet-finder/account', response.data)
         self.assertIn(b'no-store', response.headers['Cache-Control'].encode())
 
     def test_generation_stores_hashes_not_codes(self):

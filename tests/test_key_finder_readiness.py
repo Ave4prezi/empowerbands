@@ -171,6 +171,42 @@ class KeyFinderReadinessTests(unittest.TestCase):
         self.assertNotIn(self.serial.encode(),intruder.get('/key-finder/account').data)
         self.assertNotIn(self.email.encode(),intruder.get('/k/'+self.token).data)
 
+
+    def test_pet_finder_can_verify_claim_and_manage_its_own_tag(self):
+        self.client.get('/pet-finder/account')
+        code = self.send()
+        with self.client.session_transaction() as sess:
+            self.assertEqual(sess['kf_account_kind'], 'pet')
+        verified = self.post('verify-code', email=self.email, code=code)
+        self.assertEqual(verified.status_code, 303)
+        self.assertEqual(verified.location, '/pet-finder/account')
+        with psycopg.connect(self.url) as conn:
+            pet = generate_inventory(conn, 1, 'pet-finder')[0]
+        serial, token, _, activation_code = [pet[field] for field in FIELDS]
+        page = self.client.get('/pet-finder/account')
+        self.assertIn(b'Activate a new Pet Finder', page.data)
+        self.assertIn(b'PF-XXXXXXXX', page.data)
+        self.assertNotIn(self.serial.encode(), page.data)
+        claimed = self.post('claim', serial=serial, activation_code=activation_code)
+        self.assertEqual(claimed.status_code, 303)
+        self.assertEqual(claimed.location, '/pet-finder/account')
+        updated = self.post('update', serial=serial, label='Luna',
+                            contact_email=self.email, visible='on', lost='on')
+        self.assertEqual(updated.status_code, 303)
+        self.assertEqual(updated.location, '/pet-finder/account')
+        page = self.client.get('/pet-finder/account')
+        self.assertIn(b'Luna', page.data)
+        self.assertIn(b'Pet name', page.data)
+        self.assertIn(serial.encode(), page.data)
+        self.assertNotIn(self.serial.encode(), page.data)
+        self.assertIn(self.email.encode(), self.client.get('/k/' + token).data)
+        public = self.client.get('/api/key-finder/public/' + serial).get_json()
+        self.assertEqual(public['product_type'], 'pet_finder')
+        self.assertEqual(public['contact_email'], self.email)
+        self.assertIn(b'Pet Finder', self.client.get('/k/' + token).data)
+        key_dashboard = self.client.get('/key-finder/account')
+        self.assertNotIn(serial.encode(), key_dashboard.data)
+
     def test_email_code_cannot_verify_another_address(self):
         code = self.send()
         self.assertEqual(self.post('verify-code', email='other@example.test', code=code).status_code,400)

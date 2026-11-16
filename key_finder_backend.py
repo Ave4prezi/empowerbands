@@ -113,7 +113,7 @@ def public_key_finder(serial):
     if not row or not row[0]:
         return jsonify(error="Key Finder not found."), 404
     return jsonify(
-        product_type="key_finder",
+        product_type="pet_finder" if serial.startswith("PF-") else "key_finder",
         lost=bool(row[1]),
         contact_email=row[3] if row[2] else None,
         message="Contact the owner only using the information they chose to share."
@@ -238,7 +238,7 @@ def _email_code(email, code):
     payload = json.dumps({
         "from": sender,
         "to": [email],
-        "subject": "EmpowerBands Key Finder sign-in code",
+        "subject": "EmpowerBands Finder sign-in code",
         "text": "Your one-time code is " + code + ". It expires in 10 minutes. Do not share it."
     }).encode()
     req = urllib.request.Request(
@@ -259,16 +259,21 @@ def _code_digest(email, code):
 
 
 @key_finder_api.get("/key-finder/account")
+@key_finder_api.get("/pet-finder/account")
 @_service_errors
 def key_finder_account():
+    is_pet = request.path == "/pet-finder/account"
+    session["kf_account_kind"] = "pet" if is_pet else "key"
+    product_name = "Pet Finder" if is_pet else "Key Finder"
+    product_url = "/pet-finder" if is_pet else "/key-finder"
     email = session.get("kf_email")
     devices = []
     if email:
         with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
             with conn.cursor() as cur:
                 cur.execute("""SELECT serial, item_label, lost, contact_visible, public_contact_email
-                    FROM key_finder_devices WHERE owner_email = %s AND activated_at IS NOT NULL
-                    ORDER BY activated_at DESC""", (email,))
+                    FROM key_finder_devices WHERE owner_email = %s AND serial LIKE %s AND activated_at IS NOT NULL
+                    ORDER BY activated_at DESC""", (email, "PF-%" if is_pet else "KF-%"))
                 devices = cur.fetchall()
     return render_template_string("""
 <!doctype html>
@@ -276,7 +281,7 @@ def key_finder_account():
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#081324">
-<title>My Key Finders | EmpowerBands</title>
+<title>My {{ product_name }}s | EmpowerBands</title>
 <style>
 :root{color-scheme:dark;--bg:#07111f;--panel:#111f31;--border:#2b3b51;--text:#f3f7fd;--muted:#acbdd2;--accent:#56d7d1}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#173957 0%,transparent 43%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
@@ -297,10 +302,10 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
 </style>
 </head>
 <body><div class="shell">
-<header class="top"><a class="brand" href="/key-finder">EMPOWER<span>BANDS</span></a><a class="back" href="/key-finder">← Back to Key Finder</a></header>
+<header class="top"><a class="brand" href="{{ product_url }}">EMPOWER<span>BANDS</span></a><a class="back" href="{{ product_url }}">← Back to {{ product_name }}</a></header>
 <section class="hero"><div class="eyebrow">EmpowerBands • Smart recovery</div>
 <h1>{% if email %}Your essentials. One place.{% else %}Keep what matters close.{% endif %}</h1>
-<p>{% if email %}Activate, personalize and manage your Key Finders from your secure dashboard.{% else %}Sign in securely with a one-time email code to activate and manage your Key Finders. No password needed.{% endif %}</p></section>
+<p>{% if email %}Activate and manage your {{ product_name }} tags from your secure dashboard.{% else %}Sign in securely with a one-time email code to activate and manage your {{ product_name }} tags. No password needed.{% endif %}</p>{% if not is_pet %}<p>Have a Pet Finder activation card? <a href="/pet-finder/account">Activate your Pet Finder here</a>.</p>{% endif %}</section>
 {% if not email %}
 {% if code_sent %}<p role="status">Check your email for the six-digit code, then enter it below.</p>{% endif %}
 <div class="grid">
@@ -321,41 +326,47 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
 <div class="signed"><div><small>Securely signed in as</small><div><strong>{{ email }}</strong></div></div>
 <form method="post" action="/key-finder/logout"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="secondary" type="submit">Sign out</button></form></div>
 <div class="grid" style="grid-template-columns:minmax(0,1fr)">
-<section class="panel"><div class="panel-head"><span class="step">+</span><h2>Activate a new Key Finder</h2></div>
+<section class="panel"><div class="panel-head"><span class="step">+</span><h2>Activate a new {{ product_name }}</h2></div>
 <p>Use the serial number and hidden activation code printed on your activation card.</p>
 <form method="post" action="/key-finder/claim"><input type="hidden" name="csrf" value="{{ csrf }}">
-<label for="serial">Activation card serial</label><input id="serial" name="serial" required maxlength="27" autocomplete="off" placeholder="KF-XXXXXXXX or PF-XXXXXXXX">
+<label for="serial">Activation card serial</label><input id="serial" name="serial" required maxlength="27" autocomplete="off" placeholder="{{ 'PF-XXXXXXXX' if is_pet else 'KF-XXXXXXXX' }}">
 <label for="activation">Hidden activation code</label><input id="activation" name="activation_code" required maxlength="64" autocomplete="off" placeholder="Enter your 24-character code">
-<button type="submit">Activate Key Finder →</button></form></section></div>
-<div class="section-heading"><div class="eyebrow">Your collection</div><h2>My Key Finders</h2></div>
+<button type="submit">Activate {{ product_name }} →</button></form></section></div>
+<div class="section-heading"><div class="eyebrow">Your collection</div><h2>My {{ product_name }}s</h2></div>
 {% if devices %}<div class="device-grid">{% for d in devices %}
-<section class="device"><div class="device-top"><div><h2>{{ d[1] or "My Key Finder" }}</h2><div class="serial">{{ d[0] }}</div></div><span class="pill {% if d[2] %}lost{% endif %}">{% if d[2] %}Reported lost{% else %}Active{% endif %}</span></div>
+<section class="device"><div class="device-top"><div><h2>{{ d[1] or ("My Pet" if is_pet else "My Key Finder") }}</h2><div class="serial">{{ d[0] }}</div></div><span class="pill {% if d[2] %}lost{% endif %}">{% if d[2] %}Reported lost{% else %}Active{% endif %}</span></div>
 <form method="post" action="/key-finder/update"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="serial" value="{{ d[0] }}">
-<label>Item name</label><input name="label" maxlength="80" value="{{ d[1] or '' }}" placeholder="e.g. House keys">
+<label>{{ "Pet name" if is_pet else "Item name" }}</label><input name="label" maxlength="80" value="{{ d[1] or '' }}" placeholder="{{ 'e.g. Luna' if is_pet else 'e.g. House keys' }}">
 <label>Recovery contact email</label><input type="email" name="contact_email" maxlength="254" value="{{ d[4] or '' }}" placeholder="Contact email">
 <label class="check"><input type="checkbox" name="visible" {% if d[3] %}checked{% endif %}><span>Show my recovery email on the public finder page. If this is off, finders cannot contact me through this service.</span></label>
-<label class="check"><input type="checkbox" name="lost" {% if d[2] %}checked{% endif %}><span>Mark this item as lost</span></label>
+<label class="check"><input type="checkbox" name="lost" {% if d[2] %}checked{% endif %}><span>{{ "Mark my pet as missing" if is_pet else "Mark this item as lost" }}</span></label>
 <button type="submit">Save changes</button></form></section>
 {% endfor %}</div>{% else %}
-<div class="empty"><strong>No Key Finders activated yet</strong><p>Activate your first device above to see it here.</p></div>
+<div class="empty"><strong>No {{ product_name }} tags activated yet</strong><p>Activate your first device above to see it here.</p></div>
 {% endif %}
 {% endif %}
 <footer class="footer">EmpowerBands · Protect What Matters Most</footer>
 </div></body></html>
-    """, email=email, devices=devices, csrf=_csrf(), code_sent=request.args.get("code_sent") == "1")
+    """, email=email, devices=devices, csrf=_csrf(), code_sent=request.args.get("code_sent") == "1",
+        product_name=product_name, product_url=product_url, is_pet=is_pet)
+
+
+def _account_path():
+    return "/pet-finder/account" if session.get("kf_account_kind") == "pet" else "/key-finder/account"
 
 
 def _sign_in_notice(message, status, retry_after=None):
     response = make_response(render_template_string("""
         <!doctype html><html lang="en"><head><meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>Key Finder sign-in | EmpowerBands</title>
+        <title>{{ product_name }} sign-in | EmpowerBands</title>
         <style>body{margin:0;background:#07111f;color:#f3f7fd;font:18px/1.6 system-ui}
         main{max-width:36rem;margin:10vh auto;padding:28px}
         a{display:inline-block;color:#56d7d1;margin-top:18px}</style></head>
-        <body><main><h1>Key Finder sign-in</h1><p role="alert">{{ message }}</p>
-        <a href="/key-finder/account">Return to sign-in</a></main></body></html>
-    """, message=message), status)
+        <body><main><h1>{{ product_name }} sign-in</h1><p role="alert">{{ message }}</p>
+        <a href="{{ account_path }}">Return to sign-in</a></main></body></html>
+    """, message=message, product_name="Pet Finder" if _account_path() == "/pet-finder/account" else "Key Finder",
+        account_path=_account_path()), status)
     if retry_after is not None:
         response.headers["Retry-After"] = str(retry_after)
     return response
@@ -401,7 +412,7 @@ def key_finder_send_code():
         logger.error("Key Finder email failed: type=%s http_status=%s",
                      type(error).__name__, getattr(error, "code", None))
         return _sign_in_notice("We could not send your sign-in email. Wait 60 seconds, then return to sign-in and try once. If this continues, contact support@empowerbands.org.", 503, 60)
-    return redirect("/key-finder/account?code_sent=1", code=303)
+    return redirect(_account_path() + "?code_sent=1", code=303)
 
 
 @key_finder_api.post("/key-finder/verify-code")
@@ -422,10 +433,12 @@ def key_finder_verify_code():
             if record and hmac.compare_digest(record[0], _code_digest(email, code)):
                 cur.execute("DELETE FROM key_finder_email_challenges WHERE email=%s", (email,))
                 conn.commit()
+                account_kind = session.get("kf_account_kind", "key")
                 session.clear()
+                session["kf_account_kind"] = account_kind
                 session["kf_email"] = email
                 session["kf_csrf"] = secrets.token_urlsafe(32)
-                return redirect("/key-finder/account", code=303)
+                return redirect(_account_path(), code=303)
         conn.commit()
     return "Invalid or expired code", 400
 
@@ -434,8 +447,9 @@ def key_finder_verify_code():
 def key_finder_logout():
     if not _csrf_ok():
         return "Invalid request", 403
+    account_path = _account_path()
     session.clear()
-    return redirect("/key-finder/account", code=303)
+    return redirect(account_path, code=303)
 
 
 def _claim_digest(value):
@@ -501,7 +515,7 @@ def key_finder_claim():
             conn.commit()
     except (psycopg.Error, RuntimeError, KeyError):
         return "Activation service unavailable", 503
-    return redirect("/key-finder/account", code=303)
+    return redirect("/pet-finder/account" if serial.startswith("PF-") else "/key-finder/account", code=303)
 
 
 @key_finder_api.post("/key-finder/update")
@@ -527,4 +541,4 @@ def key_finder_update():
         conn.commit()
     if not updated:
         return "Key Finder not found", 404
-    return redirect("/key-finder/account", code=303)
+    return redirect("/pet-finder/account" if serial.startswith("PF-") else "/key-finder/account", code=303)

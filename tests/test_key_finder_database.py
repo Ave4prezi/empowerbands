@@ -84,7 +84,7 @@ class KeyFinderDatabaseTests(unittest.TestCase):
                 csrf = sess.get("kf_csrf", "")
             return client.post("/key-finder/" + route, data=dict(data, csrf=csrf),
                 headers={"Origin": "http://localhost"})
-        client.get("/key-finder/account")
+        client.get("/pet-finder/account" if self.serial.startswith("PF-") else "/key-finder/account")
         with patch("key_finder_backend._email_code") as send:
             self.assertEqual(post("send-code", email=email).status_code, 303)
             code = send.call_args.args[1]
@@ -93,7 +93,7 @@ class KeyFinderDatabaseTests(unittest.TestCase):
         self.assertEqual(post("claim", serial=self.serial, activation_code=self.code).status_code, 303)
         self.assertEqual(post("update", serial=self.serial, label="House keys", contact_email=email,
                               visible="on", lost="on").status_code, 303)
-        self.assertIn(b"House keys", client.get("/key-finder/account").data)
+        self.assertIn(b"House keys", client.get("/pet-finder/account" if self.serial.startswith("PF-") else "/key-finder/account").data)
         for path in ["/k/" + self.recovery, "/key-finder/found?serial=" + self.serial]:
             response = client.get(path)
             self.assertIn(email.encode(), response.data)
