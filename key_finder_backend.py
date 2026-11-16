@@ -305,7 +305,7 @@ small,.hint{color:var(--muted);font-size:.85rem}.signed{display:flex;justify-con
 <header class="top"><a class="brand" href="{{ product_url }}">EMPOWER<span>BANDS</span></a><a class="back" href="{{ product_url }}">← Back to {{ product_name }}</a></header>
 <section class="hero"><div class="eyebrow">EmpowerBands • Smart recovery</div>
 <h1>{% if email %}Your essentials. One place.{% else %}Keep what matters close.{% endif %}</h1>
-<p>{% if email %}Activate and manage your {{ product_name }} tags from your secure dashboard.{% else %}Sign in securely with a one-time email code to activate and manage your {{ product_name }} tags. No password needed.{% endif %}</p></section>
+<p>{% if email %}Activate and manage your {{ product_name }} tags from your secure dashboard.{% else %}Sign in securely with a one-time email code to activate and manage your {{ product_name }} tags. No password needed.{% endif %}</p>{% if not is_pet %}<p>Have a Pet Finder activation card? <a href="/pet-finder/account">Activate your Pet Finder here</a>.</p>{% endif %}</section>
 {% if not email %}
 {% if code_sent %}<p role="status">Check your email for the six-digit code, then enter it below.</p>{% endif %}
 <div class="grid">
