@@ -19,6 +19,7 @@ key_finder_admin = Blueprint('key_finder_admin', __name__)
 FIELDS = ['activation_card_serial', 'nfc_recovery_identifier', 'nfc_recovery_url', 'hidden_activation_code']
 RECOVERY_BASE = 'https://empowerbands.org/k/'
 ACTIVATE_URL = 'https://www.empowerbands.org/key-finder/account'
+PET_ACTIVATE_URL = 'https://www.empowerbands.org/pet-finder/account'
 logger = logging.getLogger(__name__)
 
 
@@ -160,9 +161,10 @@ def _cards(rows, skipped=0, product_name='Key Finder'):
     writer.writeheader()
     writer.writerows(rows)
     qr = io.BytesIO()
-    qrcode.make(ACTIVATE_URL).save(qr, format='PNG')
+    activation_url = PET_ACTIVATE_URL if product_name == 'Pet Finder' else ACTIVATE_URL
+    qrcode.make(activation_url).save(qr, format='PNG')
     return render_template('admin_key_finder_cards.html', rows=rows, skipped=skipped,
-        csv_text=output.getvalue(), activate_url=ACTIVATE_URL, product_name=product_name,
+        csv_text=output.getvalue(), activate_url=activation_url, product_name=product_name,
         qr_data=base64.b64encode(qr.getvalue()).decode())
 
 
